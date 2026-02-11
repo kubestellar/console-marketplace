@@ -8,27 +8,27 @@
   },
   "cards": [
     {
-      "card_type": "security-issues-card",
+      "card_type": "security_issues",
       "config": {},
       "position": { "x": 0, "y": 0, "w": 12, "h": 4 }
     },
     {
-      "card_type": "rbac-card",
+      "card_type": "namespace_rbac",
       "config": {},
       "position": { "x": 0, "y": 4, "w": 6, "h": 4 }
     },
     {
-      "card_type": "network-policies-card",
+      "card_type": "network_overview",
       "config": {},
       "position": { "x": 6, "y": 4, "w": 6, "h": 4 }
     },
     {
-      "card_type": "secrets-card",
+      "card_type": "opa_policies",
       "config": {},
       "position": { "x": 0, "y": 8, "w": 6, "h": 4 }
     },
     {
-      "card_type": "warning-events-card",
+      "card_type": "warning_events",
       "config": {},
       "position": { "x": 6, "y": 8, "w": 6, "h": 4 }
     }

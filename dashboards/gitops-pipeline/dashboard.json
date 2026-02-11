@@ -8,27 +8,27 @@
   },
   "cards": [
     {
-      "card_type": "helm-releases-card",
+      "card_type": "helm_release_status",
       "config": {},
       "position": { "x": 0, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "card_type": "gitops-drift-card",
+      "card_type": "gitops_drift",
       "config": {},
       "position": { "x": 6, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "card_type": "deployments-card",
+      "card_type": "deployment_status",
       "config": {},
       "position": { "x": 0, "y": 4, "w": 6, "h": 4 }
     },
     {
-      "card_type": "deployment-issues-card",
+      "card_type": "deployment_issues",
       "config": {},
       "position": { "x": 6, "y": 4, "w": 6, "h": 4 }
     },
     {
-      "card_type": "events-card",
+      "card_type": "event_stream",
       "config": {},
       "position": { "x": 0, "y": 8, "w": 12, "h": 4 }
     }

@@ -8,32 +8,32 @@
   },
   "cards": [
     {
-      "card_type": "clusters-card",
+      "card_type": "cluster_health",
       "config": {},
       "position": { "x": 0, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "card_type": "nodes-card",
+      "card_type": "compute_overview",
       "config": {},
       "position": { "x": 6, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "card_type": "pods-card",
+      "card_type": "top_pods",
       "config": {},
       "position": { "x": 0, "y": 4, "w": 6, "h": 4 }
     },
     {
-      "card_type": "deployments-card",
+      "card_type": "deployment_status",
       "config": {},
       "position": { "x": 6, "y": 4, "w": 6, "h": 4 }
     },
     {
-      "card_type": "events-card",
+      "card_type": "event_stream",
       "config": {},
       "position": { "x": 0, "y": 8, "w": 6, "h": 4 }
     },
     {
-      "card_type": "pod-issues-card",
+      "card_type": "pod_issues",
       "config": {},
       "position": { "x": 6, "y": 8, "w": 6, "h": 4 }
     }
