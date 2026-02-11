@@ -1,0 +1,6 @@
+{
+  "format": "kc-card-preset-v1",
+  "card_type": "cert_manager",
+  "title": "cert-manager Certificates",
+  "config": {}
+}

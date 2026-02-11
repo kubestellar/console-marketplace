@@ -1,0 +1,6 @@
+{
+  "format": "kc-card-preset-v1",
+  "card_type": "cluster_health",
+  "title": "Kubernetes Cluster Health",
+  "config": {}
+}

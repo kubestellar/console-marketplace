@@ -1,0 +1,6 @@
+{
+  "format": "kc-card-preset-v1",
+  "card_type": "kubescape_scan",
+  "title": "Kubescape Security Scan",
+  "config": {}
+}

@@ -1,0 +1,6 @@
+{
+  "format": "kc-card-preset-v1",
+  "card_type": "service_topology",
+  "title": "Istio Service Mesh",
+  "config": {}
+}

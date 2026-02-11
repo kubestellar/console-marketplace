@@ -1,0 +1,6 @@
+{
+  "format": "kc-card-preset-v1",
+  "card_type": "helm_release_status",
+  "title": "Helm Release Status",
+  "config": {}
+}
