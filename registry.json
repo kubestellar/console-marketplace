@@ -395,7 +395,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/3",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -424,7 +424,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/4",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -453,7 +453,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/5",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -482,7 +482,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/6",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -511,7 +511,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/7",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -540,7 +540,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/8",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -569,7 +569,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/9",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -598,7 +598,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/10",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -627,7 +627,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/11",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -656,7 +656,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/12",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -685,7 +685,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/13",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -714,7 +714,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/14",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -742,7 +742,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/15",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -770,7 +770,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/16",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -799,7 +799,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/17",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -828,7 +828,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/18",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -857,7 +857,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/19",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -886,7 +886,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/20",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -915,7 +915,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/21",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -944,7 +944,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/22",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -972,7 +972,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/23",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1001,7 +1001,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/24",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1030,7 +1030,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/25",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1059,7 +1059,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/26",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1088,7 +1088,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/27",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1117,7 +1117,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/28",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -1145,7 +1145,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/29",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1174,7 +1174,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/30",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1203,7 +1203,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/31",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1231,7 +1231,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/32",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1259,7 +1259,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/33",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -1288,7 +1288,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/34",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1317,7 +1317,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/35",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1346,7 +1346,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/36",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1375,7 +1375,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/37",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1404,7 +1404,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/38",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1433,7 +1433,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/39",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1462,7 +1462,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/40",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1491,7 +1491,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/41",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -1520,7 +1520,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/42",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1549,7 +1549,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/43",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1578,7 +1578,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/44",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1606,7 +1606,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/45",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1635,7 +1635,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/46",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
@@ -1664,7 +1664,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/47",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1693,7 +1693,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/48",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1721,7 +1721,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/49",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1749,7 +1749,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/50",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1778,7 +1778,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/51",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1807,7 +1807,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/52",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1836,7 +1836,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/53",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1865,7 +1865,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/54",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1894,7 +1894,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/55",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1923,7 +1923,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/56",
       "difficulty": "intermediate",
       "skills": [
         "TypeScript",
@@ -1952,7 +1952,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/57",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -1980,7 +1980,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/58",
       "difficulty": "beginner",
       "skills": [
         "TypeScript",
@@ -2009,7 +2009,7 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "help-wanted",
-      "issueUrl": "",
+      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/59",
       "difficulty": "advanced",
       "skills": [
         "TypeScript",
