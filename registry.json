@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "updatedAt": "2026-02-10T00:00:00Z",
+  "version": "2.0.0",
+  "updatedAt": "2026-02-11T00:00:00Z",
   "items": [
     {
       "id": "sre-overview",
@@ -9,7 +9,11 @@
       "author": "kubestellar",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/sre-overview/dashboard.json",
-      "tags": ["sre", "monitoring", "production"],
+      "tags": [
+        "sre",
+        "monitoring",
+        "production"
+      ],
       "cardCount": 6,
       "type": "dashboard"
     },
@@ -20,7 +24,11 @@
       "author": "kubestellar",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/security-audit/dashboard.json",
-      "tags": ["security", "compliance", "rbac"],
+      "tags": [
+        "security",
+        "compliance",
+        "rbac"
+      ],
       "cardCount": 5,
       "type": "dashboard"
     },
@@ -31,7 +39,12 @@
       "author": "kubestellar",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/gitops-pipeline/dashboard.json",
-      "tags": ["gitops", "helm", "argocd", "deployments"],
+      "tags": [
+        "gitops",
+        "helm",
+        "argocd",
+        "deployments"
+      ],
       "cardCount": 5,
       "type": "dashboard"
     },
@@ -42,7 +55,11 @@
       "author": "kubestellar",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/pod-health-monitor.json",
-      "tags": ["monitoring", "pods", "health"],
+      "tags": [
+        "monitoring",
+        "pods",
+        "health"
+      ],
       "cardCount": 1,
       "type": "card-preset"
     },
@@ -53,7 +70,11 @@
       "author": "kubestellar",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/warning-event-stream.json",
-      "tags": ["events", "monitoring", "alerts"],
+      "tags": [
+        "events",
+        "monitoring",
+        "alerts"
+      ],
       "cardCount": 1,
       "type": "card-preset"
     },
@@ -64,7 +85,11 @@
       "author": "kubestellar",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/cluster-overview.json",
-      "tags": ["clusters", "overview", "health"],
+      "tags": [
+        "clusters",
+        "overview",
+        "health"
+      ],
       "cardCount": 1,
       "type": "card-preset"
     },
@@ -75,10 +100,20 @@
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/midnight-blue.json",
-      "tags": ["dark", "blue", "minimal"],
+      "tags": [
+        "dark",
+        "blue",
+        "minimal"
+      ],
       "cardCount": 0,
       "type": "theme",
-      "themeColors": ["#0891b2", "#3b82f6", "#6366f1", "#10b981", "#06b6d4"]
+      "themeColors": [
+        "#0891b2",
+        "#3b82f6",
+        "#6366f1",
+        "#10b981",
+        "#06b6d4"
+      ]
     },
     {
       "id": "amber-glow",
@@ -87,10 +122,1904 @@
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/amber-glow.json",
-      "tags": ["dark", "warm", "amber"],
+      "tags": [
+        "dark",
+        "warm",
+        "amber"
+      ],
       "cardCount": 0,
       "type": "theme",
-      "themeColors": ["#f59e0b", "#f97316", "#ef4444", "#10b981", "#06b6d4"]
+      "themeColors": [
+        "#f59e0b",
+        "#f97316",
+        "#ef4444",
+        "#10b981",
+        "#06b6d4"
+      ]
+    },
+    {
+      "id": "cncf-kubernetes",
+      "name": "Kubernetes Cluster Health",
+      "description": "Monitor Kubernetes cluster health, node status, and resource utilization across your fleet.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubernetes.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "orchestration",
+        "monitoring"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Orchestration",
+        "website": "https://kubernetes.io"
+      }
+    },
+    {
+      "id": "cncf-helm",
+      "name": "Helm Release Status",
+      "description": "Track Helm chart releases, versions, and deployment status across all clusters.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-helm.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "helm",
+        "deployments"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "App Definition",
+        "website": "https://helm.sh"
+      }
+    },
+    {
+      "id": "cncf-argo",
+      "name": "Argo CD Applications",
+      "description": "Monitor ArgoCD application sync status, health, and GitOps workflow across clusters.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-argo.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "gitops",
+        "argocd"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "App Definition",
+        "website": "https://argoproj.github.io/cd"
+      }
+    },
+    {
+      "id": "cncf-prometheus",
+      "name": "Prometheus Alerts",
+      "description": "Active alerts and firing rules from Prometheus AlertManager across clusters.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-prometheus.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "observability",
+        "monitoring"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Observability",
+        "website": "https://prometheus.io"
+      }
+    },
+    {
+      "id": "cncf-opa",
+      "name": "OPA Gatekeeper Policies",
+      "description": "OPA Gatekeeper policy violations, constraint templates, and compliance status.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opa.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "policies"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://www.openpolicyagent.org"
+      }
+    },
+    {
+      "id": "cncf-falco",
+      "name": "Falco Runtime Alerts",
+      "description": "Runtime security alerts from Falco detecting suspicious behavior in containers.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-falco.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "runtime"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://falco.org"
+      }
+    },
+    {
+      "id": "cncf-cert-manager",
+      "name": "cert-manager Certificates",
+      "description": "TLS certificate status, expiry tracking, and issuer health from cert-manager.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cert-manager.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "certificates"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://cert-manager.io"
+      }
+    },
+    {
+      "id": "cncf-istio",
+      "name": "Istio Service Mesh",
+      "description": "Istio service mesh topology, traffic routing, and sidecar injection status.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-istio.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "service-mesh",
+        "networking"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Service Mesh",
+        "website": "https://istio.io"
+      }
+    },
+    {
+      "id": "cncf-kyverno",
+      "name": "Kyverno Policies",
+      "description": "Kyverno policy reports, violations, and admission control status.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kyverno.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "security",
+        "policies"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Security",
+        "website": "https://kyverno.io"
+      }
+    },
+    {
+      "id": "cncf-kubescape",
+      "name": "Kubescape Security Scan",
+      "description": "Kubescape security scan results, framework compliance, and risk assessment.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubescape.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "security",
+        "compliance"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Security",
+        "website": "https://kubescape.io"
+      }
+    },
+    {
+      "id": "cncf-opencost",
+      "name": "OpenCost Overview",
+      "description": "Kubernetes cost monitoring with per-namespace and per-workload cost breakdown.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opencost.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "observability",
+        "cost"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Observability",
+        "website": "https://opencost.io"
+      }
+    },
+    {
+      "id": "cncf-envoy",
+      "name": "Envoy Proxy",
+      "description": "Monitor Envoy proxy configurations, listeners, clusters, and traffic routing across your service mesh.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-envoy.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "service-mesh",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Envoy Admin API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Service Mesh",
+        "website": "https://www.envoyproxy.io"
+      }
+    },
+    {
+      "id": "cncf-containerd",
+      "name": "containerd",
+      "description": "Container runtime status, image management, and namespace utilization from containerd.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-containerd.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "containerd API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Runtime",
+        "website": "https://containerd.io"
+      }
+    },
+    {
+      "id": "cncf-coredns",
+      "name": "CoreDNS",
+      "description": "DNS query metrics, cache hit rates, and resolution performance from CoreDNS.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-coredns.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "DNS Metrics"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Orchestration",
+        "website": "https://coredns.io"
+      }
+    },
+    {
+      "id": "cncf-etcd",
+      "name": "etcd",
+      "description": "etcd cluster health, leader status, key-value store metrics, and WAL performance.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-etcd.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "etcd API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Orchestration",
+        "website": "https://etcd.io"
+      }
+    },
+    {
+      "id": "cncf-fluentd",
+      "name": "Fluentd",
+      "description": "Log pipeline status, buffer utilization, and output plugin health from Fluentd.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-fluentd.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "observability",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Fluentd API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Observability",
+        "website": "https://www.fluentd.org"
+      }
+    },
+    {
+      "id": "cncf-grpc",
+      "name": "gRPC",
+      "description": "gRPC service health, call metrics, and error rates from gRPC reflection endpoints.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-grpc.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "gRPC Reflection"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "App Definition",
+        "website": "https://grpc.io"
+      }
+    },
+    {
+      "id": "cncf-jaeger",
+      "name": "Jaeger Tracing",
+      "description": "Distributed trace collection, service dependencies, and latency analysis from Jaeger.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-jaeger.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "observability",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Jaeger API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Observability",
+        "website": "https://www.jaegertracing.io"
+      }
+    },
+    {
+      "id": "cncf-linkerd",
+      "name": "Linkerd",
+      "description": "Linkerd service mesh metrics, mTLS status, and proxy health across workloads.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-linkerd.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "service-mesh",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Linkerd API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Service Mesh",
+        "website": "https://linkerd.io"
+      }
+    },
+    {
+      "id": "cncf-crio",
+      "name": "CRI-O",
+      "description": "CRI-O container runtime metrics, image pulls, and pod sandbox status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-crio.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "CRI-O API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Runtime",
+        "website": "https://cri-o.io"
+      }
+    },
+    {
+      "id": "cncf-tikv",
+      "name": "TiKV",
+      "description": "TiKV distributed key-value store metrics, region status, and storage utilization.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-tikv.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "storage",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "TiKV API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Storage",
+        "website": "https://tikv.org"
+      }
+    },
+    {
+      "id": "cncf-vitess",
+      "name": "Vitess",
+      "description": "Vitess database clustering status, tablet health, and query performance via VTAdmin.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-vitess.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "storage",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "VTAdmin API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Storage",
+        "website": "https://vitess.io"
+      }
+    },
+    {
+      "id": "cncf-cloudevents",
+      "name": "CloudEvents",
+      "description": "CloudEvents message flow, event source tracking, and delivery status monitoring.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cloudevents.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "serverless",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Serverless",
+        "website": "https://cloudevents.io"
+      }
+    },
+    {
+      "id": "cncf-tuf",
+      "name": "TUF",
+      "description": "The Update Framework metadata status, signature verification, and repository health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-tuf.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://theupdateframework.io"
+      }
+    },
+    {
+      "id": "cncf-harbor",
+      "name": "Harbor Registry",
+      "description": "Harbor container registry projects, repositories, vulnerability scan results, and replication status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-harbor.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "provisioning",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Harbor API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Provisioning",
+        "website": "https://goharbor.io"
+      }
+    },
+    {
+      "id": "cncf-rook",
+      "name": "Rook Storage",
+      "description": "Rook-Ceph cluster health, OSD status, pool utilization, and storage capacity.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-rook.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "storage",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Ceph API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Storage",
+        "website": "https://rook.io"
+      }
+    },
+    {
+      "id": "cncf-spiffe",
+      "name": "SPIFFE",
+      "description": "SPIFFE identity federation, trust domain status, and workload identity management.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-spiffe.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "SPIRE API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://spiffe.io"
+      }
+    },
+    {
+      "id": "cncf-spire",
+      "name": "SPIRE",
+      "description": "SPIRE server health, agent registration, and workload attestation status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-spire.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "SPIRE API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://spiffe.io/spire"
+      }
+    },
+    {
+      "id": "cncf-cubefs",
+      "name": "CubeFS",
+      "description": "CubeFS distributed file system health, volume status, and metadata server metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cubefs.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "storage",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "CubeFS API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Storage",
+        "website": "https://cubefs.io"
+      }
+    },
+    {
+      "id": "cncf-dapr",
+      "name": "Dapr",
+      "description": "Dapr sidecar status, component health, and distributed application building block metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-dapr.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Dapr API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Runtime",
+        "website": "https://dapr.io"
+      }
+    },
+    {
+      "id": "cncf-dragonfly",
+      "name": "Dragonfly",
+      "description": "Dragonfly P2P image distribution, download progress, and seed peer status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-dragonfly.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "provisioning",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Provisioning",
+        "website": "https://d7y.io"
+      }
+    },
+    {
+      "id": "cncf-keda",
+      "name": "KEDA",
+      "description": "KEDA autoscaler status, scaled object metrics, and trigger queue depths.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keda.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Orchestration",
+        "website": "https://keda.sh"
+      }
+    },
+    {
+      "id": "cncf-knative",
+      "name": "Knative",
+      "description": "Knative serving revisions, traffic routing, and eventing broker status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-knative.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "serverless",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Knative API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Serverless",
+        "website": "https://knative.dev"
+      }
+    },
+    {
+      "id": "cncf-cilium",
+      "name": "Cilium",
+      "description": "Cilium eBPF networking, network policy enforcement, and Hubble flow visibility.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cilium.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "networking",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Hubble API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Networking",
+        "website": "https://cilium.io"
+      }
+    },
+    {
+      "id": "cncf-crossplane",
+      "name": "Crossplane",
+      "description": "Crossplane managed resources, composite claims, and cloud provider status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-crossplane.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "provisioning",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Crossplane CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Provisioning",
+        "website": "https://crossplane.io"
+      }
+    },
+    {
+      "id": "cncf-flux",
+      "name": "Flux CD",
+      "description": "Flux GitOps sources, kustomizations, and Helm release reconciliation status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flux.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Flux CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "App Definition",
+        "website": "https://fluxcd.io"
+      }
+    },
+    {
+      "id": "cncf-in-toto",
+      "name": "in-toto",
+      "description": "in-toto supply chain layout verification, step attestation, and link metadata status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-in-toto.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Security",
+        "website": "https://in-toto.io"
+      }
+    },
+    {
+      "id": "cncf-opentelemetry",
+      "name": "OpenTelemetry",
+      "description": "OpenTelemetry collector health, pipeline status, and telemetry data flow metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opentelemetry.json",
+      "tags": [
+        "cncf",
+        "graduated",
+        "observability",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "OTLP API"
+      ],
+      "cncfProject": {
+        "maturity": "graduated",
+        "category": "Observability",
+        "website": "https://opentelemetry.io"
+      }
+    },
+    {
+      "id": "cncf-backstage",
+      "name": "Backstage",
+      "description": "Backstage developer portal catalog, component health, and plugin status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-backstage.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Backstage API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "App Definition",
+        "website": "https://backstage.io"
+      }
+    },
+    {
+      "id": "cncf-buildpacks",
+      "name": "Cloud Native Buildpacks",
+      "description": "Buildpack build status, builder health, and image build history.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-buildpacks.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "App Definition",
+        "website": "https://buildpacks.io"
+      }
+    },
+    {
+      "id": "cncf-cloud-custodian",
+      "name": "Cloud Custodian",
+      "description": "Cloud Custodian policy execution results, resource compliance, and remediation actions.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cloud-custodian.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Security",
+        "website": "https://cloudcustodian.io"
+      }
+    },
+    {
+      "id": "cncf-cni",
+      "name": "CNI",
+      "description": "Container Network Interface plugin status, network allocation, and connectivity health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cni.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "networking",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "CNI API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Networking",
+        "website": "https://www.cni.dev"
+      }
+    },
+    {
+      "id": "cncf-contour",
+      "name": "Contour",
+      "description": "Contour ingress proxy status, HTTPProxy resources, and Envoy fleet health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-contour.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "networking",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Networking",
+        "website": "https://projectcontour.io"
+      }
+    },
+    {
+      "id": "cncf-cortex",
+      "name": "Cortex",
+      "description": "Cortex multi-tenant metrics storage, ingester ring status, and query performance.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cortex.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "observability",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Cortex API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Observability",
+        "website": "https://cortexmetrics.io"
+      }
+    },
+    {
+      "id": "cncf-chaos-mesh",
+      "name": "Chaos Mesh",
+      "description": "Chaos Mesh experiment status, workflow progress, and chaos injection schedules.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-chaos-mesh.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Runtime",
+        "website": "https://chaos-mesh.org"
+      }
+    },
+    {
+      "id": "cncf-fluid",
+      "name": "Fluid",
+      "description": "Fluid dataset caching status, runtime health, and data access acceleration metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-fluid.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "storage",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Storage",
+        "website": "https://fluid-cloudnative.github.io"
+      }
+    },
+    {
+      "id": "cncf-kserve",
+      "name": "KServe",
+      "description": "KServe inference service status, model serving metrics, and autoscaling health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kserve.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Runtime",
+        "website": "https://kserve.github.io/kserve"
+      }
+    },
+    {
+      "id": "cncf-karmada",
+      "name": "Karmada",
+      "description": "Karmada multi-cluster resource propagation, override policies, and member cluster status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-karmada.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Karmada API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Orchestration",
+        "website": "https://karmada.io"
+      }
+    },
+    {
+      "id": "cncf-keycloak",
+      "name": "Keycloak",
+      "description": "Keycloak realm status, user sessions, client configurations, and authentication flows.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keycloak.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Keycloak API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Security",
+        "website": "https://www.keycloak.org"
+      }
+    },
+    {
+      "id": "cncf-kubeflow",
+      "name": "Kubeflow",
+      "description": "Kubeflow pipeline runs, experiment tracking, and ML workflow status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubeflow.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Kubeflow API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Runtime",
+        "website": "https://www.kubeflow.org"
+      }
+    },
+    {
+      "id": "cncf-kubevirt",
+      "name": "KubeVirt",
+      "description": "KubeVirt virtual machine status, migration progress, and virtualization metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubevirt.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "KubeVirt API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Runtime",
+        "website": "https://kubevirt.io"
+      }
+    },
+    {
+      "id": "cncf-kubevela",
+      "name": "KubeVela",
+      "description": "KubeVela application status, component health, and OAM resource tracking.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubevela.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "App Definition",
+        "website": "https://kubevela.io"
+      }
+    },
+    {
+      "id": "cncf-lima",
+      "name": "Lima",
+      "description": "Lima virtual machine instances, port forwarding status, and resource usage.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-lima.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Runtime",
+        "website": "https://lima-vm.io"
+      }
+    },
+    {
+      "id": "cncf-longhorn",
+      "name": "Longhorn",
+      "description": "Longhorn distributed storage volumes, replica health, and backup status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-longhorn.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "storage",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Longhorn API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Storage",
+        "website": "https://longhorn.io"
+      }
+    },
+    {
+      "id": "cncf-metal3",
+      "name": "Metal3",
+      "description": "Metal3 bare metal host provisioning, BMC status, and machine health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-metal3.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "provisioning",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Metal3 API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Provisioning",
+        "website": "https://metal3.io"
+      }
+    },
+    {
+      "id": "cncf-nats",
+      "name": "NATS",
+      "description": "NATS messaging server status, JetStream streams, and consumer health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-nats.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "streaming",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "NATS API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Streaming",
+        "website": "https://nats.io"
+      }
+    },
+    {
+      "id": "cncf-notary",
+      "name": "Notary",
+      "description": "Notary container image signing status, trust policies, and signature verification.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-notary.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Security",
+        "website": "https://notaryproject.dev"
+      }
+    },
+    {
+      "id": "cncf-openfeature",
+      "name": "OpenFeature",
+      "description": "OpenFeature flag evaluation status, provider health, and feature flag configurations.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openfeature.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "App Definition",
+        "website": "https://openfeature.dev"
+      }
+    },
+    {
+      "id": "cncf-openfga",
+      "name": "OpenFGA",
+      "description": "OpenFGA authorization model status, relationship tuples, and access check metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openfga.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "security",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "OpenFGA API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Security",
+        "website": "https://openfga.dev"
+      }
+    },
+    {
+      "id": "cncf-openkruise",
+      "name": "OpenKruise",
+      "description": "OpenKruise advanced workload status, sidecar injection, and image pre-pulling progress.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openkruise.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Orchestration",
+        "website": "https://openkruise.io"
+      }
+    },
+    {
+      "id": "cncf-openyurt",
+      "name": "OpenYurt",
+      "description": "OpenYurt edge node pools, autonomy status, and edge-cloud connectivity.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openyurt.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Orchestration",
+        "website": "https://openyurt.io"
+      }
+    },
+    {
+      "id": "cncf-operator-framework",
+      "name": "Operator Framework",
+      "description": "OLM operator subscriptions, install plans, and catalog source status.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-operator-framework.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "OLM API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "App Definition",
+        "website": "https://operatorframework.io"
+      }
+    },
+    {
+      "id": "cncf-strimzi",
+      "name": "Strimzi",
+      "description": "Strimzi Kafka cluster health, topic status, and consumer group lag metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-strimzi.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "streaming",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Strimzi CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Streaming",
+        "website": "https://strimzi.io"
+      }
+    },
+    {
+      "id": "cncf-thanos",
+      "name": "Thanos",
+      "description": "Thanos global view metrics, store gateway status, and compactor health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-thanos.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "observability",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Thanos API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Observability",
+        "website": "https://thanos.io"
+      }
+    },
+    {
+      "id": "cncf-volcano",
+      "name": "Volcano",
+      "description": "Volcano batch scheduling queues, job status, and GPU resource allocation.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-volcano.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "orchestration",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "intermediate",
+      "skills": [
+        "TypeScript",
+        "React",
+        "K8s CRDs"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Orchestration",
+        "website": "https://volcano.sh"
+      }
+    },
+    {
+      "id": "cncf-wasmcloud",
+      "name": "wasmCloud",
+      "description": "wasmCloud host status, actor inventory, and capability provider health.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-wasmcloud.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "runtime",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Runtime",
+        "website": "https://wasmcloud.com"
+      }
+    },
+    {
+      "id": "cncf-artifact-hub",
+      "name": "Artifact Hub",
+      "description": "Artifact Hub package discovery, repository sync status, and package statistics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-artifact-hub.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "app-definition",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "beginner",
+      "skills": [
+        "TypeScript",
+        "React",
+        "REST API"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "App Definition",
+        "website": "https://artifacthub.io"
+      }
+    },
+    {
+      "id": "cncf-flatcar",
+      "name": "Flatcar Container Linux",
+      "description": "Flatcar node OS versions, update status, and container-optimized host metrics.",
+      "author": "Community",
+      "version": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flatcar.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "provisioning",
+        "help-wanted"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "help-wanted",
+      "issueUrl": "",
+      "difficulty": "advanced",
+      "skills": [
+        "TypeScript",
+        "React"
+      ],
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Provisioning",
+        "website": "https://www.flatcar.org"
+      }
     }
   ]
 }

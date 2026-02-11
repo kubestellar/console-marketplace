@@ -1,0 +1,6 @@
+{
+  "format": "kc-card-preset-v1",
+  "card_type": "argocd_applications",
+  "title": "Argo CD Applications",
+  "config": {}
+}
