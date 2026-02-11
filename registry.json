@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-02-10T00:00:00Z",
+  "items": [
+    {
+      "id": "sre-overview",
+      "name": "SRE Overview",
+      "description": "Production monitoring dashboard with cluster health, pod status, resource utilization, and recent events at a glance.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/sre-overview/dashboard.json",
+      "tags": ["sre", "monitoring", "production"],
+      "cardCount": 6,
+      "type": "dashboard"
+    },
+    {
+      "id": "security-audit",
+      "name": "Security Audit",
+      "description": "Security-focused dashboard showing RBAC issues, network policies, pod security violations, and compliance status across clusters.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/security-audit/dashboard.json",
+      "tags": ["security", "compliance", "rbac"],
+      "cardCount": 5,
+      "type": "dashboard"
+    },
+    {
+      "id": "gitops-pipeline",
+      "name": "GitOps Pipeline",
+      "description": "Track Helm releases, ArgoCD sync status, configuration drift, and deployment history across your fleet.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/gitops-pipeline/dashboard.json",
+      "tags": ["gitops", "helm", "argocd", "deployments"],
+      "cardCount": 5,
+      "type": "dashboard"
+    }
+  ]
+}

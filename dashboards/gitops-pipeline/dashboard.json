@@ -1,0 +1,36 @@
+{
+  "format": "kc-dashboard-v1",
+  "name": "GitOps Pipeline",
+  "description": "Track Helm releases, ArgoCD sync status, configuration drift, and deployment history across your fleet.",
+  "exported_at": "2026-02-10T00:00:00Z",
+  "layout": {
+    "columns": 12
+  },
+  "cards": [
+    {
+      "card_type": "helm-releases-card",
+      "config": {},
+      "position": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "gitops-drift-card",
+      "config": {},
+      "position": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "deployments-card",
+      "config": {},
+      "position": { "x": 0, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "deployment-issues-card",
+      "config": {},
+      "position": { "x": 6, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "events-card",
+      "config": {},
+      "position": { "x": 0, "y": 8, "w": 12, "h": 4 }
+    }
+  ]
+}

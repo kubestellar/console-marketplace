@@ -1,0 +1,41 @@
+{
+  "format": "kc-dashboard-v1",
+  "name": "SRE Overview",
+  "description": "Production monitoring dashboard with cluster health, pod status, resource utilization, and recent events at a glance.",
+  "exported_at": "2026-02-10T00:00:00Z",
+  "layout": {
+    "columns": 12
+  },
+  "cards": [
+    {
+      "card_type": "clusters-card",
+      "config": {},
+      "position": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "nodes-card",
+      "config": {},
+      "position": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "pods-card",
+      "config": {},
+      "position": { "x": 0, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "deployments-card",
+      "config": {},
+      "position": { "x": 6, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "events-card",
+      "config": {},
+      "position": { "x": 0, "y": 8, "w": 6, "h": 4 }
+    },
+    {
+      "card_type": "pod-issues-card",
+      "config": {},
+      "position": { "x": 6, "y": 8, "w": 6, "h": 4 }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+name: Validate JSON
+
+on:
+  pull_request:
+    paths:
+      - 'registry.json'
+      - 'dashboards/**/*.json'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate registry.json
+        run: |
+          echo "Validating registry.json..."
+          python3 -m json.tool registry.json > /dev/null
+          echo "registry.json is valid JSON"
+
+      - name: Validate dashboard files
+        run: |
+          errors=0
+          for f in dashboards/*/dashboard.json; do
+            if [ -f "$f" ]; then
+              if python3 -m json.tool "$f" > /dev/null 2>&1; then
+                echo "OK: $f"
+              else
+                echo "INVALID: $f"
+                errors=$((errors + 1))
+              fi
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "Found $errors invalid JSON file(s)"
+            exit 1
+          fi
+
+      - name: Validate dashboard format
+        run: |
+          python3 - <<'SCRIPT'
+          import json, sys, glob
+
+          errors = 0
+          for path in glob.glob("dashboards/*/dashboard.json"):
+              with open(path) as f:
+                  data = json.load(f)
+
+              if data.get("format") != "kc-dashboard-v1":
+                  print(f"ERROR: {path} missing or wrong 'format' field (expected 'kc-dashboard-v1')")
+                  errors += 1
+
+              if not data.get("name"):
+                  print(f"ERROR: {path} missing 'name' field")
+                  errors += 1
+
+              if not isinstance(data.get("cards"), list):
+                  print(f"ERROR: {path} missing or invalid 'cards' array")
+                  errors += 1
+              else:
+                  for i, card in enumerate(data["cards"]):
+                      if not card.get("card_type"):
+                          print(f"ERROR: {path} cards[{i}] missing 'card_type'")
+                          errors += 1
+                      if not isinstance(card.get("position"), dict):
+                          print(f"ERROR: {path} cards[{i}] missing 'position'")
+                          errors += 1
+
+              print(f"OK: {path} ({len(data.get('cards', []))} cards)")
+
+          # Validate registry entries match dashboard directories
+          with open("registry.json") as f:
+              registry = json.load(f)
+
+          for item in registry.get("items", []):
+              dashboard_path = f"dashboards/{item['id']}/dashboard.json"
+              try:
+                  with open(dashboard_path) as f:
+                      pass
+                  print(f"OK: registry entry '{item['id']}' has matching dashboard file")
+              except FileNotFoundError:
+                  print(f"ERROR: registry entry '{item['id']}' has no dashboard file at {dashboard_path}")
+                  errors += 1
+
+          if errors > 0:
+              print(f"\n{errors} error(s) found")
+              sys.exit(1)
+
+          print("\nAll validations passed")
+          SCRIPT
