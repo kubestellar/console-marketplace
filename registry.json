@@ -447,19 +447,11 @@
       "tags": [
         "cncf",
         "graduated",
-        "orchestration",
-        "help-wanted"
+        "orchestration"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/5",
-      "difficulty": "beginner",
-      "skills": [
-        "TypeScript",
-        "React",
-        "DNS Metrics"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "graduated",
         "category": "Orchestration",
