@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "operator-framework_status",
+  "card_type": "operator_framework_status",
   "title": "Operator Framework",
   "config": {},
   "_placeholder": true,

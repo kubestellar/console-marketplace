@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "pod-issues",
+  "card_type": "pod_issues",
   "title": "Pod Health Monitor",
   "config": {}
 }

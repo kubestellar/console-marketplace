@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "in-toto_status",
+  "card_type": "in_toto_status",
   "title": "in-toto",
   "config": {},
   "_placeholder": true,

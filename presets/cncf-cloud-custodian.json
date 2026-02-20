@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "cloud-custodian_status",
+  "card_type": "cloud_custodian_status",
   "title": "Cloud Custodian",
   "config": {},
   "_placeholder": true,

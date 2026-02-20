@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "warning-events",
+  "card_type": "warning_events",
   "title": "Warning Event Stream",
   "config": {}
 }

@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "artifact-hub_status",
+  "card_type": "artifact_hub_status",
   "title": "Artifact Hub",
   "config": {}
 }
