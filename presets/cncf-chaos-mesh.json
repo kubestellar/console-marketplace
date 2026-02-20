@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "chaos-mesh_status",
+  "card_type": "chaos_mesh_status",
   "title": "Chaos Mesh",
   "config": {},
   "_placeholder": true,
