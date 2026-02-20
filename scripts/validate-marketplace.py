@@ -444,6 +444,19 @@ def get_all_marketplace_card_types(base):
     return card_types
 
 
+def get_placeholder_card_types(base):
+    """Collect card_type values from presets marked as _placeholder: true."""
+    placeholder_types = set()
+    files = find_json_files(base, ["presets/*.json", "card-presets/*.json"])
+    for f in files:
+        data, err = load_json(f)
+        if err:
+            continue
+        if data.get("_placeholder") and data.get("card_type"):
+            placeholder_types.add(data["card_type"])
+    return placeholder_types
+
+
 def check_card_type_existence(base, console_path, results):
     """Check that marketplace card_types exist in console's card registry."""
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
@@ -477,8 +490,13 @@ def check_demo_data(base, console_path, known_types, results):
     type_to_comp = parse_card_type_to_component(registry_ts)
     lazy_imports = parse_lazy_imports(registry_ts)
     cards_dir = os.path.join(console_path, "web/src/components/cards")
+    placeholder_types = get_placeholder_card_types(base)
 
     for ct in sorted(known_types):
+        if ct in placeholder_types:
+            results.note("demo-data", f"`{ct}` skipped (placeholder preset)")
+            continue
+
         comp_name = type_to_comp.get(ct)
         if not comp_name:
             continue  # CNCF dynamic cards won't have a mapping
