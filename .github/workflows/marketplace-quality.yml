@@ -1,0 +1,84 @@
+name: Marketplace Quality Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'registry.json'
+      - 'presets/**'
+      - 'card-presets/**'
+      - 'dashboards/**'
+      - 'themes/**'
+      - 'scripts/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ── Fast static validation (~1 min) ──────────────────────────────
+  static-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@v4
+
+      - name: Run static checks
+        id: static
+        run: |
+          python3 scripts/validate-marketplace.py \
+            --mode static \
+            --github-summary "$GITHUB_STEP_SUMMARY" \
+            2>&1 | tee /tmp/static-results.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Fail on errors
+        if: steps.static.outputs.exit_code == '1'
+        run: |
+          echo "::error::Static validation found errors. See job summary."
+          cat /tmp/static-results.txt | grep "ERROR"
+          exit 1
+
+  # ── Cross-repo card quality checks (~3 min) ──────────────────────
+  card-quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@v4
+
+      - name: Checkout console (sparse)
+        uses: actions/checkout@v4
+        with:
+          repository: kubestellar/console
+          path: console
+          sparse-checkout: |
+            web/src/components/cards/cardRegistry.ts
+            web/src/components/cards
+            web/src/hooks
+            web/src/locales/en/cards.json
+          sparse-checkout-cone-mode: false
+
+      - name: Run cross-repo quality checks
+        id: quality
+        run: |
+          python3 scripts/validate-marketplace.py \
+            --mode cross-repo \
+            --console-path ./console \
+            --github-summary "$GITHUB_STEP_SUMMARY" \
+            2>&1 | tee /tmp/quality-results.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Fail on errors
+        if: steps.quality.outputs.exit_code == '1'
+        run: |
+          echo "::error::Card quality gate found errors. See job summary."
+          cat /tmp/quality-results.txt | grep "ERROR"
+          exit 1
+
+      - name: Warn on warnings
+        if: steps.quality.outputs.exit_code == '2'
+        run: |
+          echo "::warning::Card quality gate found warnings (non-blocking). See job summary."
