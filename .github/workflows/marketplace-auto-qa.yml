@@ -42,9 +42,7 @@ jobs:
           python3 scripts/validate-marketplace.py \
             --mode full \
             --console-path ./console \
-            --json > /tmp/scan-results.json 2>/tmp/scan-log.txt
-
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+            --json > /tmp/scan-results.json 2>/tmp/scan-log.txt || true
 
           # Extract counts for issue creation
           ERROR_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['errors']))")
