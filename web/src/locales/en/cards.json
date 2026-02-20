@@ -1,0 +1,322 @@
+{
+  "active_alerts": {
+    "title": "Active Alerts",
+    "description": "Displays active Prometheus alerts across the cluster"
+  },
+  "argocd_applications": {
+    "title": "Argo CD Applications",
+    "description": "Shows Argo CD application sync and health status"
+  },
+  "artifact_hub_status": {
+    "title": "Artifact Hub",
+    "description": "Displays Artifact Hub package and repository status"
+  },
+  "backstage_status": {
+    "title": "Backstage",
+    "description": "Shows Backstage developer portal status"
+  },
+  "buildpacks_status": {
+    "title": "Cloud Native Buildpacks",
+    "description": "Displays Cloud Native Buildpacks builder status"
+  },
+  "cert_manager": {
+    "title": "cert-manager Certificates",
+    "description": "Shows TLS certificate status managed by cert-manager"
+  },
+  "chaos_mesh_status": {
+    "title": "Chaos Mesh",
+    "description": "Displays Chaos Mesh experiments and fault injection status"
+  },
+  "cilium_status": {
+    "title": "Cilium",
+    "description": "Shows Cilium CNI and network policy status"
+  },
+  "cloud_custodian_status": {
+    "title": "Cloud Custodian",
+    "description": "Displays Cloud Custodian policy compliance status"
+  },
+  "cloudevents_status": {
+    "title": "CloudEvents",
+    "description": "Shows CloudEvents broker and source status"
+  },
+  "cluster_health": {
+    "title": "Cluster Health",
+    "description": "Overall Kubernetes cluster health and node status"
+  },
+  "clusters": {
+    "title": "Cluster Overview",
+    "description": "High-level overview of connected clusters"
+  },
+  "cni_status": {
+    "title": "CNI",
+    "description": "Container Network Interface plugin status"
+  },
+  "compute_overview": {
+    "title": "Compute Overview",
+    "description": "CPU and memory utilization across nodes"
+  },
+  "containerd_status": {
+    "title": "containerd",
+    "description": "Shows containerd container runtime status"
+  },
+  "contour_status": {
+    "title": "Contour",
+    "description": "Displays Contour ingress controller status"
+  },
+  "coredns_status": {
+    "title": "CoreDNS",
+    "description": "Shows CoreDNS DNS server health and query metrics"
+  },
+  "cortex_status": {
+    "title": "Cortex",
+    "description": "Displays Cortex metrics storage and query status"
+  },
+  "crio_status": {
+    "title": "CRI-O",
+    "description": "Shows CRI-O container runtime status"
+  },
+  "crossplane_status": {
+    "title": "Crossplane",
+    "description": "Displays Crossplane composite resource and provider status"
+  },
+  "cubefs_status": {
+    "title": "CubeFS",
+    "description": "Shows CubeFS distributed file system status"
+  },
+  "dapr_status": {
+    "title": "Dapr",
+    "description": "Displays Dapr sidecar and component status"
+  },
+  "deployment_issues": {
+    "title": "Deployment Issues",
+    "description": "Shows deployments with errors or degraded replicas"
+  },
+  "deployment_status": {
+    "title": "Deployment Status",
+    "description": "Overview of deployment replica counts and rollout status"
+  },
+  "dragonfly_status": {
+    "title": "Dragonfly",
+    "description": "Displays Dragonfly P2P file distribution status"
+  },
+  "envoy_status": {
+    "title": "Envoy Proxy",
+    "description": "Shows Envoy proxy listener and cluster status"
+  },
+  "etcd_status": {
+    "title": "etcd",
+    "description": "Displays etcd cluster health and leader election status"
+  },
+  "event_stream": {
+    "title": "Event Stream",
+    "description": "Live stream of Kubernetes events"
+  },
+  "falco_alerts": {
+    "title": "Falco Runtime Alerts",
+    "description": "Displays Falco runtime security alerts and rule violations"
+  },
+  "flatcar_status": {
+    "title": "Flatcar Container Linux",
+    "description": "Shows Flatcar node OS version and update status"
+  },
+  "fluentd_status": {
+    "title": "Fluentd",
+    "description": "Displays Fluentd log collection pipeline status"
+  },
+  "fluid_status": {
+    "title": "Fluid",
+    "description": "Shows Fluid dataset and runtime caching status"
+  },
+  "flux_status": {
+    "title": "Flux CD",
+    "description": "Displays Flux GitOps reconciliation status"
+  },
+  "gitops_drift": {
+    "title": "GitOps Drift",
+    "description": "Detects drift between Git source and live cluster state"
+  },
+  "grpc_status": {
+    "title": "gRPC",
+    "description": "Shows gRPC service health and connectivity status"
+  },
+  "harbor_status": {
+    "title": "Harbor Registry",
+    "description": "Displays Harbor container registry status and quota usage"
+  },
+  "helm_release_status": {
+    "title": "Helm Release Status",
+    "description": "Shows Helm chart release versions and deployment status"
+  },
+  "in_toto_status": {
+    "title": "in-toto",
+    "description": "Displays in-toto supply chain attestation status"
+  },
+  "jaeger_status": {
+    "title": "Jaeger Tracing",
+    "description": "Shows Jaeger distributed tracing collector status"
+  },
+  "karmada_status": {
+    "title": "Karmada",
+    "description": "Displays Karmada multi-cluster propagation status"
+  },
+  "keda_status": {
+    "title": "KEDA",
+    "description": "Shows KEDA ScaledObject and trigger status"
+  },
+  "keycloak_status": {
+    "title": "Keycloak",
+    "description": "Displays Keycloak identity and access management status"
+  },
+  "knative_status": {
+    "title": "Knative",
+    "description": "Shows Knative Serving and Eventing component status"
+  },
+  "kserve_status": {
+    "title": "KServe",
+    "description": "Displays KServe model serving inference service status"
+  },
+  "kubeflow_status": {
+    "title": "Kubeflow",
+    "description": "Shows Kubeflow ML pipeline and notebook status"
+  },
+  "kubescape_scan": {
+    "title": "Kubescape Security Scan",
+    "description": "Displays Kubescape security scan results and compliance scores"
+  },
+  "kubevela_status": {
+    "title": "KubeVela",
+    "description": "Shows KubeVela application and component status"
+  },
+  "kubevirt_status": {
+    "title": "KubeVirt",
+    "description": "Displays KubeVirt virtual machine status"
+  },
+  "kyverno_policies": {
+    "title": "Kyverno Policies",
+    "description": "Shows Kyverno policy validation and mutation results"
+  },
+  "lima_status": {
+    "title": "Lima",
+    "description": "Displays Lima virtual machine instance status"
+  },
+  "linkerd_status": {
+    "title": "Linkerd",
+    "description": "Shows Linkerd service mesh data plane health"
+  },
+  "longhorn_status": {
+    "title": "Longhorn",
+    "description": "Displays Longhorn distributed block storage volume status"
+  },
+  "metal3_status": {
+    "title": "Metal3",
+    "description": "Shows Metal3 bare metal host provisioning status"
+  },
+  "namespace_rbac": {
+    "title": "Namespace RBAC",
+    "description": "Overview of namespace role bindings and access controls"
+  },
+  "nats_status": {
+    "title": "NATS",
+    "description": "Displays NATS messaging server cluster status"
+  },
+  "network_overview": {
+    "title": "Network Overview",
+    "description": "Network ingress, services, and connectivity summary"
+  },
+  "notary_status": {
+    "title": "Notary",
+    "description": "Shows Notary content trust and image signing status"
+  },
+  "opa_policies": {
+    "title": "OPA Gatekeeper Policies",
+    "description": "Displays OPA Gatekeeper constraint template and violation status"
+  },
+  "opencost_overview": {
+    "title": "OpenCost Overview",
+    "description": "Shows OpenCost cloud cost allocation and spending overview"
+  },
+  "openfeature_status": {
+    "title": "OpenFeature",
+    "description": "Displays OpenFeature flag provider and evaluation status"
+  },
+  "openfga_status": {
+    "title": "OpenFGA",
+    "description": "Shows OpenFGA fine-grained authorization store status"
+  },
+  "openkruise_status": {
+    "title": "OpenKruise",
+    "description": "Displays OpenKruise extended workload status"
+  },
+  "opentelemetry_status": {
+    "title": "OpenTelemetry",
+    "description": "Shows OpenTelemetry collector and instrumentation status"
+  },
+  "openyurt_status": {
+    "title": "OpenYurt",
+    "description": "Displays OpenYurt edge node pool and tunnel status"
+  },
+  "operator_framework_status": {
+    "title": "Operator Framework",
+    "description": "Shows OLM operator subscription and install plan status"
+  },
+  "pod_issues": {
+    "title": "Pod Issues",
+    "description": "Shows pods in error or degraded state"
+  },
+  "rook_status": {
+    "title": "Rook Storage",
+    "description": "Displays Rook Ceph storage cluster health and OSD status"
+  },
+  "security_issues": {
+    "title": "Security Issues",
+    "description": "Highlights security policy violations and misconfigurations"
+  },
+  "service_topology": {
+    "title": "Istio Service Mesh",
+    "description": "Shows Istio service mesh topology and traffic flow"
+  },
+  "spiffe_status": {
+    "title": "SPIFFE",
+    "description": "Displays SPIFFE workload identity registration status"
+  },
+  "spire_status": {
+    "title": "SPIRE",
+    "description": "Shows SPIRE server and agent attestation status"
+  },
+  "strimzi_status": {
+    "title": "Strimzi",
+    "description": "Displays Strimzi Kafka cluster and topic status"
+  },
+  "thanos_status": {
+    "title": "Thanos",
+    "description": "Shows Thanos long-term metrics storage and query status"
+  },
+  "tikv_status": {
+    "title": "TiKV",
+    "description": "Displays TiKV distributed transactional key-value store status"
+  },
+  "top_pods": {
+    "title": "Top Pods",
+    "description": "Lists pods with highest CPU and memory consumption"
+  },
+  "tuf_status": {
+    "title": "TUF",
+    "description": "Shows The Update Framework repository and delegation status"
+  },
+  "vitess_status": {
+    "title": "Vitess",
+    "description": "Displays Vitess database sharding and tablet status"
+  },
+  "volcano_status": {
+    "title": "Volcano",
+    "description": "Shows Volcano batch scheduling job and queue status"
+  },
+  "warning_events": {
+    "title": "Warning Events",
+    "description": "Shows recent Kubernetes warning events"
+  },
+  "wasmcloud_status": {
+    "title": "wasmCloud",
+    "description": "Displays wasmCloud actor and provider lattice status"
+  }
+}

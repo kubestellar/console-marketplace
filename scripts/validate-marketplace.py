@@ -608,13 +608,10 @@ def check_consecutive_failures(base, console_path, known_types, results):
 def check_i18n_keys(base, console_path, known_types, results):
     """Check that marketplace card_types have i18n translation keys."""
     cards_json_path = os.path.join(console_path, "web/src/locales/en/cards.json")
-    if not os.path.isfile(cards_json_path):
-        results.warn("i18n", "Console cards.json not found — skipping i18n check")
-        return
+    marketplace_cards_json_path = os.path.join(base, "web/src/locales/en/cards.json")
 
-    data, err = load_json(cards_json_path)
-    if err:
-        results.warn("i18n", f"Failed to parse cards.json: {err}")
+    if not os.path.isfile(cards_json_path) and not os.path.isfile(marketplace_cards_json_path):
+        results.warn("i18n", "Console cards.json not found — skipping i18n check")
         return
 
     # Flatten keys — cards.json may be nested
@@ -627,11 +624,22 @@ def check_i18n_keys(base, console_path, known_types, results):
         else:
             all_keys.add(prefix.rstrip("."))
 
-    flatten(data)
+    def load_keys_from(path):
+        data, err = load_json(path)
+        if err:
+            results.warn("i18n", f"Failed to parse {os.path.basename(path)}: {err}")
+            return
+        flatten(data)
+        if isinstance(data, dict):
+            all_keys.update(data.keys())
 
-    # Also add top-level keys
-    if isinstance(data, dict):
-        all_keys.update(data.keys())
+    if os.path.isfile(cards_json_path):
+        load_keys_from(cards_json_path)
+
+    # Also merge marketplace-local translations so marketplace repo can
+    # self-document i18n keys without requiring console changes
+    if os.path.isfile(marketplace_cards_json_path):
+        load_keys_from(marketplace_cards_json_path)
 
     for ct in sorted(known_types):
         # Check for the card_type as a key or prefix
