@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "clusters",
+  "card_type": "cluster_health",
   "title": "Cluster Overview",
   "config": {}
 }
