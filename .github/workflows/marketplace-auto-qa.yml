@@ -82,18 +82,18 @@ jobs:
       - name: Ensure labels exist
         if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.CONSOLE_AUTO }}
+          GH_TOKEN: ${{ secrets.CONSOLE_AUTO || github.token }}
         run: |
           LABELS=(
-            "auto-qa:0E8A16:Automated quality assurance finding"
-            "auto-qa:schema:E53935:JSON schema violations"
-            "auto-qa:card-quality:FB8C00:Card quality issues from console cross-reference"
-            "auto-qa:registry:7B1FA2:Registry consistency issues"
-            "auto-qa:theme:1565C0:Theme validation issues"
-            "auto-qa:drift:FF6F00:Card type drift between marketplace and console"
+            "auto-qa|0E8A16|Automated quality assurance finding"
+            "auto-qa:schema|E53935|JSON schema violations"
+            "auto-qa:card-quality|FB8C00|Card quality issues from console cross-reference"
+            "auto-qa:registry|7B1FA2|Registry consistency issues"
+            "auto-qa:theme|1565C0|Theme validation issues"
+            "auto-qa:drift|FF6F00|Card type drift between marketplace and console"
           )
           for entry in "${LABELS[@]}"; do
-            IFS=':' read -r name color desc <<< "$entry"
+            IFS='|' read -r name color desc <<< "$entry"
             gh label create "$name" \
               --repo "${{ github.repository }}" \
               --color "$color" \
@@ -110,7 +110,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          github-token: ${{ secrets.CONSOLE_AUTO }}
+          github-token: ${{ secrets.CONSOLE_AUTO || github.token }}
           script: |
             const fs = require('fs');
             const sha = process.env.COMMIT_SHA.substring(0, 7);
