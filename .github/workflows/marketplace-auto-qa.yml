@@ -125,7 +125,7 @@ jobs:
       - name: Ensure labels exist
         if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.CONSOLE_AUTO }}
+          GH_TOKEN: ${{ secrets.CONSOLE_AUTO || github.token }}
         run: |
           LABELS=(
             "auto-qa|0E8A16|Automated quality assurance finding"
@@ -153,7 +153,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          github-token: ${{ secrets.CONSOLE_AUTO }}
+          github-token: ${{ secrets.CONSOLE_AUTO || github.token }}
           script: |
             const fs = require('fs');
             const prefix = process.env.ISSUE_PREFIX;
