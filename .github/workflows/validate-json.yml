@@ -5,6 +5,9 @@ on:
     paths:
       - 'registry.json'
       - 'dashboards/**/*.json'
+      - 'presets/**/*.json'
+      - 'card-presets/**/*.json'
+      - 'themes/**/*.json'
 
 permissions:
   contents: read

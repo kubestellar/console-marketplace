@@ -1,0 +1,270 @@
+name: Marketplace Auto-QA
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      skip_issue_creation:
+        description: 'Skip creating issues (dry run)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  nightly-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@v4
+
+      - name: Checkout console (sparse)
+        uses: actions/checkout@v4
+        with:
+          repository: kubestellar/console
+          path: console
+          sparse-checkout: |
+            web/src/components/cards/cardRegistry.ts
+            web/src/components/cards
+            web/src/hooks
+            web/src/locales/en/cards.json
+          sparse-checkout-cone-mode: false
+
+      - name: Run full quality scan
+        id: scan
+        continue-on-error: true
+        run: |
+          python3 scripts/validate-marketplace.py \
+            --mode full \
+            --console-path ./console \
+            --json > /tmp/scan-results.json 2>/tmp/scan-log.txt
+
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+          # Extract counts for issue creation
+          ERROR_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['errors']))")
+          WARN_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['warnings']))")
+          echo "error_count=$ERROR_COUNT" >> "$GITHUB_OUTPUT"
+          echo "warn_count=$WARN_COUNT" >> "$GITHUB_OUTPUT"
+
+          # Generate grouped markdown for issue body
+          python3 - /tmp/scan-results.json /tmp/scan-grouped.md << 'PYEOF'
+          import json, sys
+          from collections import defaultdict
+
+          with open(sys.argv[1]) as f:
+              data = json.load(f)
+
+          groups = defaultdict(list)
+          for item in data.get("errors", []):
+              groups[item["category"]].append(f"- {item['message']}")
+          for item in data.get("warnings", []):
+              groups[item["category"]].append(f"- {item['message']}")
+
+          with open(sys.argv[2], "w") as f:
+              for cat in sorted(groups.keys()):
+                  f.write(f"**{cat}** ({len(groups[cat])} finding(s))\n")
+                  for line in groups[cat][:20]:
+                      f.write(f"{line}\n")
+                  if len(groups[cat]) > 20:
+                      f.write(f"- ... and {len(groups[cat]) - 20} more\n")
+                  f.write("\n")
+          PYEOF
+
+          # Summary
+          echo "### Marketplace Auto-QA: $ERROR_COUNT error(s), $WARN_COUNT warning(s)" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/scan-grouped.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Ensure labels exist
+        if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.CONSOLE_AUTO }}
+        run: |
+          LABELS=(
+            "auto-qa:0E8A16:Automated quality assurance finding"
+            "auto-qa:schema:E53935:JSON schema violations"
+            "auto-qa:card-quality:FB8C00:Card quality issues from console cross-reference"
+            "auto-qa:registry:7B1FA2:Registry consistency issues"
+            "auto-qa:theme:1565C0:Theme validation issues"
+            "auto-qa:drift:FF6F00:Card type drift between marketplace and console"
+          )
+          for entry in "${LABELS[@]}"; do
+            IFS=':' read -r name color desc <<< "$entry"
+            gh label create "$name" \
+              --repo "${{ github.repository }}" \
+              --color "$color" \
+              --description "$desc" \
+              2>/dev/null || true
+          done
+
+      - name: Create issues for findings
+        if: (steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0') && inputs.skip_issue_creation != true
+        uses: actions/github-script@v7
+        env:
+          ERROR_COUNT: ${{ steps.scan.outputs.error_count }}
+          WARN_COUNT: ${{ steps.scan.outputs.warn_count }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          github-token: ${{ secrets.CONSOLE_AUTO }}
+          script: |
+            const fs = require('fs');
+            const sha = process.env.COMMIT_SHA.substring(0, 7);
+            const runUrl = process.env.RUN_URL;
+            const errorCount = process.env.ERROR_COUNT;
+            const warnCount = process.env.WARN_COUNT;
+            const now = new Date().toISOString().split('T')[0];
+
+            const grouped = fs.readFileSync('/tmp/scan-grouped.md', 'utf8');
+            const scanData = JSON.parse(fs.readFileSync('/tmp/scan-results.json', 'utf8'));
+
+            // Determine primary category from errors
+            const categories = new Set();
+            for (const item of [...scanData.errors, ...scanData.warnings]) {
+              categories.add(item.category);
+            }
+
+            // Map categories to auto-qa labels
+            const categoryLabels = {
+              'json-syntax': 'auto-qa:schema',
+              'preset-schema': 'auto-qa:schema',
+              'dashboard-schema': 'auto-qa:schema',
+              'dashboard-grid': 'auto-qa:schema',
+              'theme-schema': 'auto-qa:theme',
+              'naming': 'auto-qa:schema',
+              'registry': 'auto-qa:registry',
+              'card-type': 'auto-qa:card-quality',
+              'demo-data': 'auto-qa:card-quality',
+              'isDemoData': 'auto-qa:card-quality',
+              'consecutiveFailures': 'auto-qa:card-quality',
+              'i18n': 'auto-qa:card-quality',
+              'cors': 'auto-qa:card-quality',
+              'download-url': 'auto-qa:registry',
+              'staleness': 'auto-qa:registry',
+              'theme-consistency': 'auto-qa:theme',
+              'cncf-coverage': 'auto-qa:card-quality',
+            };
+
+            const issueLabels = new Set(['bug', 'ai-fix-requested', 'help wanted',
+                                          'auto-qa', 'triage/accepted']);
+            for (const cat of categories) {
+              const label = categoryLabels[cat];
+              if (label) issueLabels.add(label);
+            }
+
+            // Check for existing issues (dedup)
+            const [{ data: openIssues }, { data: closedIssues }] = await Promise.all([
+              github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: 'auto-qa',
+                per_page: 100,
+              }),
+              github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'closed',
+                labels: 'auto-qa',
+                per_page: 50,
+                sort: 'updated',
+                direction: 'desc',
+              }),
+            ]);
+
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            const recentlyClosed = closedIssues.filter(i => new Date(i.closed_at) > sevenDaysAgo);
+
+            const normalize = (t) => t.replace(/\[Auto-QA\]\s*/, '').replace(/\d+/g, 'N').toLowerCase().trim();
+
+            const title = `[Auto-QA] Marketplace quality: ${errorCount} error(s), ${warnCount} warning(s)`;
+            const pattern = normalize(title);
+            const existing = [...openIssues, ...recentlyClosed];
+            const duplicate = existing.find(i => normalize(i.title) === pattern);
+
+            if (duplicate) {
+              const status = duplicate.state === 'open' ? 'still open' : `closed ${new Date(duplicate.closed_at).toLocaleDateString()}`;
+              core.info(`Skipping duplicate: "${title}" matches #${duplicate.number} (${status})`);
+
+              // If open, update the body with latest findings
+              if (duplicate.state === 'open') {
+                const body = [
+                  `## Auto-QA [Marketplace Quality]: Nightly Scan`,
+                  '',
+                  `**Updated:** ${now} | **Commit:** \`${sha}\` | **Run:** [View](${runUrl})`,
+                  `**Errors:** ${errorCount} | **Warnings:** ${warnCount}`,
+                  '',
+                  '### Findings',
+                  '',
+                  grouped,
+                  '',
+                  '### How to Fix',
+                  '- Fix naming: replace hyphens with underscores in card_type values',
+                  '- Fix registry: ensure every registry entry has a matching file',
+                  '- Fix card types: use valid card_type values from console cardRegistry.ts',
+                  '- Run locally: `python3 scripts/validate-marketplace.py --mode cross-repo --console-path <path-to-console>`',
+                  '',
+                  '---',
+                  `*Updated by [Marketplace Auto-QA](${runUrl}).*`,
+                ].join('\n');
+
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: duplicate.number,
+                  body,
+                });
+                core.info(`Updated issue #${duplicate.number} with latest findings`);
+              }
+              return;
+            }
+
+            const body = [
+              `## Auto-QA [Marketplace Quality]: Nightly Scan`,
+              '',
+              `**Detected:** ${now} | **Commit:** \`${sha}\` | **Run:** [View](${runUrl})`,
+              `**Errors:** ${errorCount} | **Warnings:** ${warnCount}`,
+              '',
+              '### Findings',
+              '',
+              grouped,
+              '',
+              '### How to Fix',
+              '- Fix naming: replace hyphens with underscores in card_type values',
+              '- Fix registry: ensure every registry entry has a matching file',
+              '- Fix card types: use valid card_type values from console cardRegistry.ts',
+              '- Run locally: `python3 scripts/validate-marketplace.py --mode cross-repo --console-path <path-to-console>`',
+              '',
+              '---',
+              `*This issue was automatically created by the [Marketplace Auto-QA](${runUrl}).*`,
+              '*Labels `ai-fix-requested` and `help wanted` enable Copilot to fix this after triage.*',
+            ].join('\n');
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: [...issueLabels],
+            });
+
+            core.info(`Created issue #${issue.number}: ${title}`);
+
+            // Auto-assign Copilot
+            try {
+              await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                assignees: ['copilot-swe-agent[bot]'],
+              });
+              core.info(`Assigned Copilot to #${issue.number}`);
+            } catch (e) {
+              core.warning(`Could not assign Copilot to #${issue.number}: ${e.message}`);
+            }
