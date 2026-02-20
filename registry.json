@@ -1997,24 +1997,17 @@
       "id": "cncf-flatcar",
       "name": "Flatcar Container Linux",
       "description": "Flatcar node OS versions, update status, and container-optimized host metrics.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "kubestellar",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flatcar.json",
       "tags": [
         "cncf",
         "incubating",
-        "provisioning",
-        "help-wanted"
+        "provisioning"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/59",
-      "difficulty": "advanced",
-      "skills": [
-        "TypeScript",
-        "React"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Provisioning",

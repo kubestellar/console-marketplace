@@ -2,5 +2,7 @@
   "format": "kc-card-preset-v1",
   "card_type": "artifact-hub_status",
   "title": "Artifact Hub",
-  "config": {}
+  "config": {},
+  "_placeholder": true,
+  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
 }
