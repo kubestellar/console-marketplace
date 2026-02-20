@@ -855,8 +855,11 @@ def main():
 
     console_path = os.path.abspath(args.console_path) if args.console_path else None
 
+    # When --json is used, send verbose progress to stderr so stdout is clean JSON
+    log = (lambda msg: print(msg, file=sys.stderr)) if args.json else print
+
     # ── Static checks (all modes) ──
-    print("=== Static Validation ===")
+    log("=== Static Validation ===")
     check_json_syntax(base, results)
     check_preset_schema(base, results)
     check_dashboard_schema(base, results)
@@ -867,7 +870,7 @@ def main():
     # ── Cross-repo checks ──
     known_types = set()
     if args.mode in ("cross-repo", "full") and console_path:
-        print("\n=== Cross-Repo Quality Checks ===")
+        log("\n=== Cross-Repo Quality Checks ===")
         known_types = check_card_type_existence(base, console_path, results)
         check_demo_data(base, console_path, known_types, results)
         check_is_demo_data_wiring(base, console_path, known_types, results)
@@ -877,7 +880,7 @@ def main():
 
     # ── Nightly-only checks ──
     if args.mode == "full":
-        print("\n=== Nightly Checks ===")
+        log("\n=== Nightly Checks ===")
         check_download_urls(base, results)
         check_registry_staleness(base, results)
         check_theme_consistency(base, results)
@@ -885,7 +888,6 @@ def main():
             check_cncf_coverage(base, console_path, results)
 
     # ── Output ──
-    print()
     if args.json:
         print(json.dumps(results.to_json(), indent=2))
     else:
