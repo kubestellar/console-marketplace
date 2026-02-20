@@ -1,4 +1,12 @@
 name: Marketplace Auto-QA
+# Nightly quality scan with per-category issue creation.
+# Mirrors the issue creation logic from kubestellar/console auto-qa.yml.
+#
+# IMPORTANT: The CONSOLE_AUTO secret (PAT) must have these permissions:
+#   - repo (full control) - for contents, issues, pull requests
+#   - workflow - for actions access
+#   Or use a Fine-Grained PAT with: Contents (read/write), Issues (read/write),
+#   Pull requests (read/write), Actions (read), Metadata (read)
 
 on:
   schedule:
@@ -11,9 +19,15 @@ on:
         default: false
         type: boolean
 
+env:
+  MAX_ISSUES_PER_RUN: 3
+  ISSUE_PREFIX: "[Auto-QA]"
+
 permissions:
-  contents: read
+  contents: write      # Copilot needs write access to create branches
   issues: write
+  pull-requests: write # Copilot needs to create PRs
+  actions: read        # Copilot needs to view workflow status
 
 jobs:
   nightly-scan:
@@ -44,34 +58,63 @@ jobs:
             --console-path ./console \
             --json > /tmp/scan-results.json 2>/tmp/scan-log.txt || true
 
-          # Extract counts for issue creation
+          # Extract counts for summary
           ERROR_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['errors']))")
           WARN_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['warnings']))")
           echo "error_count=$ERROR_COUNT" >> "$GITHUB_OUTPUT"
           echo "warn_count=$WARN_COUNT" >> "$GITHUB_OUTPUT"
 
-          # Generate grouped markdown for issue body
-          python3 - /tmp/scan-results.json /tmp/scan-grouped.md << 'PYEOF'
+          # Generate grouped markdown for issue bodies
+          python3 - /tmp/scan-results.json << 'PYEOF'
           import json, sys
           from collections import defaultdict
 
           with open(sys.argv[1]) as f:
               data = json.load(f)
 
-          groups = defaultdict(list)
+          # Group by category for per-category issue creation
+          groups = defaultdict(lambda: {"errors": [], "warnings": []})
           for item in data.get("errors", []):
-              groups[item["category"]].append(f"- {item['message']}")
+              groups[item["category"]]["errors"].append(item["message"])
           for item in data.get("warnings", []):
-              groups[item["category"]].append(f"- {item['message']}")
+              groups[item["category"]]["warnings"].append(item["message"])
 
-          with open(sys.argv[2], "w") as f:
+          # Write per-category files
+          for cat, items in groups.items():
+              with open(f"/tmp/scan-category-{cat}.md", "w") as f:
+                  for msg in items["errors"][:30]:
+                      f.write(f"- :x: {msg}\n")
+                  for msg in items["warnings"][:30]:
+                      f.write(f"- :warning: {msg}\n")
+                  total = len(items["errors"]) + len(items["warnings"])
+                  shown = min(len(items["errors"]), 30) + min(len(items["warnings"]), 30)
+                  if total > shown:
+                      f.write(f"- ... and {total - shown} more\n")
+
+          # Write combined summary
+          with open("/tmp/scan-grouped.md", "w") as f:
               for cat in sorted(groups.keys()):
-                  f.write(f"**{cat}** ({len(groups[cat])} finding(s))\n")
-                  for line in groups[cat][:20]:
-                      f.write(f"{line}\n")
-                  if len(groups[cat]) > 20:
-                      f.write(f"- ... and {len(groups[cat]) - 20} more\n")
+                  items = groups[cat]
+                  total = len(items["errors"]) + len(items["warnings"])
+                  f.write(f"**{cat}** ({total} finding(s))\n")
+                  for msg in items["errors"][:20]:
+                      f.write(f"- {msg}\n")
+                  for msg in items["warnings"][:20]:
+                      f.write(f"- {msg}\n")
+                  total_shown = min(len(items["errors"]), 20) + min(len(items["warnings"]), 20)
+                  if total > total_shown:
+                      f.write(f"- ... and {total - total_shown} more\n")
                   f.write("\n")
+
+          # Write category manifest (JSON) for the issue creation step
+          manifest = {}
+          for cat, items in groups.items():
+              manifest[cat] = {
+                  "errors": len(items["errors"]),
+                  "warnings": len(items["warnings"]),
+              }
+          with open("/tmp/scan-categories.json", "w") as f:
+              json.dump(manifest, f)
           PYEOF
 
           # Summary
@@ -82,7 +125,7 @@ jobs:
       - name: Ensure labels exist
         if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.CONSOLE_AUTO || github.token }}
+          GH_TOKEN: ${{ secrets.CONSOLE_AUTO }}
         run: |
           LABELS=(
             "auto-qa|0E8A16|Automated quality assurance finding"
@@ -110,25 +153,23 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          github-token: ${{ secrets.CONSOLE_AUTO || github.token }}
+          github-token: ${{ secrets.CONSOLE_AUTO }}
           script: |
             const fs = require('fs');
+            const prefix = process.env.ISSUE_PREFIX;
+            const maxIssues = parseInt(process.env.MAX_ISSUES_PER_RUN);
             const sha = process.env.COMMIT_SHA.substring(0, 7);
+            const fullSha = process.env.COMMIT_SHA;
             const runUrl = process.env.RUN_URL;
             const errorCount = process.env.ERROR_COUNT;
             const warnCount = process.env.WARN_COUNT;
-            const now = new Date().toISOString().split('T')[0];
+            const now = new Date().toISOString();
+            const today = now.split('T')[0];
 
-            const grouped = fs.readFileSync('/tmp/scan-grouped.md', 'utf8');
             const scanData = JSON.parse(fs.readFileSync('/tmp/scan-results.json', 'utf8'));
+            const categoryManifest = JSON.parse(fs.readFileSync('/tmp/scan-categories.json', 'utf8'));
 
-            // Determine primary category from errors
-            const categories = new Set();
-            for (const item of [...scanData.errors, ...scanData.warnings]) {
-              categories.add(item.category);
-            }
-
-            // Map categories to auto-qa labels
+            // Map scan categories to auto-qa labels (same as console pattern)
             const categoryLabels = {
               'json-syntax': 'auto-qa:schema',
               'preset-schema': 'auto-qa:schema',
@@ -149,14 +190,117 @@ jobs:
               'cncf-coverage': 'auto-qa:card-quality',
             };
 
-            const issueLabels = new Set(['bug', 'ai-fix-requested', 'help wanted',
-                                          'auto-qa', 'triage/accepted']);
-            for (const cat of categories) {
-              const label = categoryLabels[cat];
-              if (label) issueLabels.add(label);
+            // Human-readable category names for issue titles
+            const categoryNames = {
+              'json-syntax': 'JSON Syntax',
+              'preset-schema': 'Preset Schema',
+              'dashboard-schema': 'Dashboard Schema',
+              'dashboard-grid': 'Dashboard Grid',
+              'theme-schema': 'Theme Schema',
+              'naming': 'Naming Conventions',
+              'registry': 'Registry Consistency',
+              'card-type': 'Card Type Existence',
+              'demo-data': 'Demo Data Coverage',
+              'isDemoData': 'isDemoData Wiring',
+              'consecutiveFailures': 'Consecutive Failures Forwarding',
+              'i18n': 'i18n Key Coverage',
+              'cors': 'CORS Proxy Compliance',
+              'download-url': 'Download URL Validation',
+              'staleness': 'Registry Staleness',
+              'theme-consistency': 'Theme Consistency',
+              'cncf-coverage': 'CNCF Coverage',
+            };
+
+            // Category-specific fix guidance
+            const categoryFixes = {
+              'json-syntax': ['Fix JSON syntax errors (missing commas, brackets, quotes)'],
+              'preset-schema': ['Ensure format is "kc-card-preset-v1"', 'Add required fields: card_type, title'],
+              'dashboard-schema': ['Ensure format is "kc-dashboard-v1"', 'Add required fields: name, cards array with card_type + position'],
+              'dashboard-grid': ['Ensure x + w <= 12 (no grid overflow)', 'Fix overlapping card positions'],
+              'theme-schema': ['Add required color tokens (background, foreground, card, primary, etc.)', 'Add brandPrimary and chartColors array (>=4 items)'],
+              'naming': ['Replace hyphens with underscores in card_type values (use snake_case)'],
+              'registry': ['Ensure every registry entry has a matching file', 'Remove duplicate IDs', 'Match type field to directory (dashboard → dashboards/)'],
+              'card-type': ['Use valid card_type values from console cardRegistry.ts', 'Check for typos or renamed card types'],
+              'demo-data': ['Add demoData.ts for each card type in console', 'See console isDemoData wiring guide'],
+              'isDemoData': ['Destructure isDemoData from useCached* hooks', 'Pass isDemoData to useCardLoadingState()'],
+              'consecutiveFailures': ['Forward consecutiveFailures from hook return to useCardLoadingState()'],
+              'i18n': ['Add translation keys in web/src/locales/en/cards.json for each card type'],
+              'cors': ['Use backend proxy /api/proxy/ instead of direct external fetch'],
+              'download-url': ['Fix broken downloadUrl paths in registry.json'],
+              'staleness': ['Update the updatedAt field in registry entries'],
+              'theme-consistency': ['All themes must define the same set of color keys'],
+              'cncf-coverage': ['Create console card implementations for CNCF preset types'],
+            };
+
+            function readCategoryOutput(cat) {
+              try {
+                return fs.readFileSync(`/tmp/scan-category-${cat}.md`, 'utf8').trim();
+              } catch {
+                return '(details not available)';
+              }
             }
 
-            // Check for existing issues (dedup)
+            function buildBody(categoryName, output, fixes, isError) {
+              return [
+                `## Auto-QA [Marketplace Quality]: ${categoryName}`,
+                '',
+                `**Detected:** ${now} | **Commit:** \`${sha}\` | **Run:** [View](${runUrl})`,
+                '',
+                '### Findings',
+                '',
+                output,
+                '',
+                '### How to Fix',
+                ...fixes.map(f => `- ${f}`),
+                '- Run locally: `python3 scripts/validate-marketplace.py --mode cross-repo --console-path <path-to-console>`',
+                '',
+                '---',
+                `*This issue was automatically created by the [Marketplace Auto-QA workflow](${runUrl}).*`,
+                '*Labels `ai-fix-requested` and `help wanted` enable Copilot to fix this after triage.*',
+              ].join('\n');
+            }
+
+            // ── Build per-category checks (same pattern as console auto-qa) ──
+
+            const checks = [];
+
+            for (const [cat, counts] of Object.entries(categoryManifest)) {
+              const total = counts.errors + counts.warnings;
+              if (total === 0) continue;
+
+              const label = categoryLabels[cat] || 'auto-qa';
+              const name = categoryNames[cat] || cat;
+              const fixes = categoryFixes[cat] || ['Review the findings and fix accordingly'];
+              const output = readCategoryOutput(cat);
+              const isError = counts.errors > 0;
+
+              checks.push({
+                title: `${prefix} ${name}: ${counts.errors} error(s), ${counts.warnings} warning(s)`,
+                body: buildBody(name, output, fixes, isError),
+                labels: [
+                  isError ? 'bug' : 'enhancement',
+                  'ai-fix-requested', 'help wanted', 'auto-qa', 'triage/accepted',
+                  label,
+                ],
+              });
+            }
+
+            if (checks.length === 0) {
+              core.info('All checks passed. No issues to create.');
+              return;
+            }
+
+            // Sort: errors first, then by finding count
+            checks.sort((a, b) => {
+              const aIsErr = a.labels.includes('bug') ? 0 : 1;
+              const bIsErr = b.labels.includes('bug') ? 0 : 1;
+              return aIsErr - bIsErr;
+            });
+
+            core.info(`${checks.length} category finding(s) to process. Creating up to ${maxIssues} issues...`);
+
+            // ── Dedup: fetch existing auto-qa issues (same as console) ──
+
             const [{ data: openIssues }, { data: closedIssues }] = await Promise.all([
               github.rest.issues.listForRepo({
                 owner: context.repo.owner,
@@ -176,93 +320,87 @@ jobs:
               }),
             ]);
 
+            // Filter closed issues to only those closed in the last 7 days
             const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            const recentlyClosed = closedIssues.filter(i => new Date(i.closed_at) > sevenDaysAgo);
+            const recentlyClosedIssues = closedIssues.filter(i => new Date(i.closed_at) > sevenDaysAgo);
+            const existingIssues = [...openIssues, ...recentlyClosedIssues];
 
-            const normalize = (t) => t.replace(/\[Auto-QA\]\s*/, '').replace(/\d+/g, 'N').toLowerCase().trim();
+            core.info(`Found ${openIssues.length} open + ${recentlyClosedIssues.length} recently closed auto-qa issues`);
 
-            const title = `[Auto-QA] Marketplace quality: ${errorCount} error(s), ${warnCount} warning(s)`;
-            const pattern = normalize(title);
-            const existing = [...openIssues, ...recentlyClosed];
-            const duplicate = existing.find(i => normalize(i.title) === pattern);
+            // Helper to extract the core issue pattern (removes dynamic counts/numbers)
+            // Same logic as console auto-qa extractPattern()
+            const extractPattern = (title) => {
+              return title
+                .replace(/\[Auto-QA\]\s*/, '')
+                .replace(/\d+\s*(critical|high|error|warning)/gi, '$1')
+                .replace(/\d+/g, 'N')
+                .toLowerCase()
+                .trim();
+            };
 
-            if (duplicate) {
-              const status = duplicate.state === 'open' ? 'still open' : `closed ${new Date(duplicate.closed_at).toLocaleDateString()}`;
-              core.info(`Skipping duplicate: "${title}" matches #${duplicate.number} (${status})`);
+            // ── Create issues (rate-limited, same as console) ──
 
-              // If open, update the body with latest findings
-              if (duplicate.state === 'open') {
-                const body = [
-                  `## Auto-QA [Marketplace Quality]: Nightly Scan`,
-                  '',
-                  `**Updated:** ${now} | **Commit:** \`${sha}\` | **Run:** [View](${runUrl})`,
-                  `**Errors:** ${errorCount} | **Warnings:** ${warnCount}`,
-                  '',
-                  '### Findings',
-                  '',
-                  grouped,
-                  '',
-                  '### How to Fix',
-                  '- Fix naming: replace hyphens with underscores in card_type values',
-                  '- Fix registry: ensure every registry entry has a matching file',
-                  '- Fix card types: use valid card_type values from console cardRegistry.ts',
-                  '- Run locally: `python3 scripts/validate-marketplace.py --mode cross-repo --console-path <path-to-console>`',
-                  '',
-                  '---',
-                  `*Updated by [Marketplace Auto-QA](${runUrl}).*`,
-                ].join('\n');
+            let created = 0;
 
-                await github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: duplicate.number,
-                  body,
-                });
-                core.info(`Updated issue #${duplicate.number} with latest findings`);
+            for (const check of checks) {
+              if (created >= maxIssues) {
+                core.warning(`Rate limit reached (${maxIssues} issues). Remaining findings skipped.`);
+                break;
               }
-              return;
-            }
 
-            const body = [
-              `## Auto-QA [Marketplace Quality]: Nightly Scan`,
-              '',
-              `**Detected:** ${now} | **Commit:** \`${sha}\` | **Run:** [View](${runUrl})`,
-              `**Errors:** ${errorCount} | **Warnings:** ${warnCount}`,
-              '',
-              '### Findings',
-              '',
-              grouped,
-              '',
-              '### How to Fix',
-              '- Fix naming: replace hyphens with underscores in card_type values',
-              '- Fix registry: ensure every registry entry has a matching file',
-              '- Fix card types: use valid card_type values from console cardRegistry.ts',
-              '- Run locally: `python3 scripts/validate-marketplace.py --mode cross-repo --console-path <path-to-console>`',
-              '',
-              '---',
-              `*This issue was automatically created by the [Marketplace Auto-QA](${runUrl}).*`,
-              '*Labels `ai-fix-requested` and `help wanted` enable Copilot to fix this after triage.*',
-            ].join('\n');
+              // Check for duplicates using pattern matching
+              const checkPattern = extractPattern(check.title);
+              const duplicate = existingIssues.find(i => {
+                const existingPattern = extractPattern(i.title);
+                return existingPattern === checkPattern;
+              });
 
-            const { data: issue } = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title,
-              body,
-              labels: [...issueLabels],
-            });
+              if (duplicate) {
+                const status = duplicate.state === 'open' ? 'still open' : `closed ${new Date(duplicate.closed_at).toLocaleDateString()}`;
+                core.info(`Skipping duplicate: "${check.title}" matches #${duplicate.number} (${status})`);
 
-            core.info(`Created issue #${issue.number}: ${title}`);
+                // If open, update the body with latest findings
+                if (duplicate.state === 'open') {
+                  await github.rest.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: duplicate.number,
+                    body: check.body,
+                    labels: check.labels,
+                  });
+                  core.info(`Updated issue #${duplicate.number} with latest findings`);
+                }
+                continue;
+              }
 
-            // Auto-assign Copilot
-            try {
-              await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+              const { data: issue } = await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: issue.number,
-                assignees: ['copilot-swe-agent[bot]'],
+                title: check.title,
+                body: check.body,
+                labels: check.labels,
               });
-              core.info(`Assigned Copilot to #${issue.number}`);
-            } catch (e) {
-              core.warning(`Could not assign Copilot to #${issue.number}: ${e.message}`);
+
+              core.info(`Created issue #${issue.number}: ${check.title}`);
+
+              // Auto-assign Copilot coding agent (same as console)
+              const repo = `${context.repo.owner}/${context.repo.repo}`;
+              try {
+                await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  assignees: ['copilot-swe-agent[bot]'],
+                  agent_assignment: {
+                    target_repo: repo,
+                    base_branch: 'main',
+                  },
+                });
+                core.info(`Assigned Copilot to #${issue.number}`);
+              } catch (e) {
+                core.warning(`Could not assign Copilot to #${issue.number}: ${e.message}`);
+              }
+              created++;
             }
+
+            core.info(`Marketplace Auto-QA complete: ${created} issue(s) created, ${checks.length} category finding(s) total.`);
