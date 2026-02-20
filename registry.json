@@ -79,7 +79,7 @@
       "type": "card-preset"
     },
     {
-      "id": "cluster-overview-card",
+      "id": "cluster-overview",
       "name": "Cluster Overview",
       "description": "At-a-glance cluster health and status card showing all connected clusters with their node counts and health indicators.",
       "author": "kubestellar",
