@@ -651,35 +651,46 @@ def check_i18n_keys(base, console_path, known_types, results):
 
 def check_cors_proxy(base, console_path, known_types, results):
     """Check that card hooks don't make direct external fetch calls."""
-    hooks_dir = os.path.join(console_path, "web/src/hooks")
-    if not os.path.isdir(hooks_dir):
-        results.warn("cors", "Console hooks directory not found — skipping CORS check")
+    # Scan both the console hooks directory and the marketplace's own hooks directory
+    scan_roots = []
+
+    console_hooks = os.path.join(console_path, "web/src/hooks")
+    if os.path.isdir(console_hooks):
+        scan_roots.append((console_hooks, console_path))
+
+    marketplace_hooks = os.path.join(base, "web/src/hooks")
+    if os.path.isdir(marketplace_hooks):
+        scan_roots.append((marketplace_hooks, base))
+
+    if not scan_roots:
+        results.warn("cors", "No hooks directory found — skipping CORS check")
         return
 
-    # Scan all hook files for direct external fetch
-    hook_files = glob.glob(os.path.join(hooks_dir, "**/*.ts"), recursive=True) + \
-                 glob.glob(os.path.join(hooks_dir, "**/*.tsx"), recursive=True)
+    # Check for direct external fetch (not through proxy)
+    patterns = [
+        r"""fetch\(\s*['"`]https?://(?!localhost|127\.0\.0\.1)""",
+        r"""axios\.\w+\(\s*['"`]https?://(?!localhost|127\.0\.0\.1)""",
+    ]
 
-    for hf in hook_files:
-        try:
-            with open(hf) as f:
-                content = f.read()
-        except Exception:
-            continue
+    for hooks_dir, rel_root in scan_roots:
+        hook_files = glob.glob(os.path.join(hooks_dir, "**/*.ts"), recursive=True) + \
+                     glob.glob(os.path.join(hooks_dir, "**/*.tsx"), recursive=True)
 
-        rel = os.path.relpath(hf, console_path)
+        for hf in hook_files:
+            try:
+                with open(hf) as f:
+                    content = f.read()
+            except Exception:
+                continue
 
-        # Check for direct external fetch (not through proxy)
-        patterns = [
-            r"""fetch\(\s*['"`]https?://(?!localhost|127\.0\.0\.1)""",
-            r"""axios\.\w+\(\s*['"`]https?://(?!localhost|127\.0\.0\.1)""",
-        ]
-        for pat in patterns:
-            matches = re.findall(pat, content)
-            if matches:
-                results.warn("cors",
-                            f"`{rel}` contains direct external fetch — "
-                            f"should use backend proxy `/api/proxy/`")
+            rel = os.path.relpath(hf, rel_root)
+
+            for pat in patterns:
+                matches = re.findall(pat, content)
+                if matches:
+                    results.warn("cors",
+                                f"`{rel}` contains direct external fetch — "
+                                f"should use backend proxy `/api/proxy/`")
 
 
 # ── Nightly-only checks ─────────────────────────────────────────────
