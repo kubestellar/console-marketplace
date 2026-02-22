@@ -7,6 +7,7 @@
       "name": "SRE Overview",
       "description": "Production monitoring dashboard with cluster health, pod status, resource utilization, and recent events at a glance.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/sre-overview/dashboard.json",
       "tags": [
@@ -22,6 +23,7 @@
       "name": "Security Audit",
       "description": "Security-focused dashboard showing RBAC issues, network policies, pod security violations, and compliance status across clusters.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/security-audit/dashboard.json",
       "tags": [
@@ -37,6 +39,7 @@
       "name": "GitOps Pipeline",
       "description": "Track Helm releases, ArgoCD sync status, configuration drift, and deployment history across your fleet.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/gitops-pipeline/dashboard.json",
       "tags": [
@@ -53,6 +56,7 @@
       "name": "Pod Health Monitor",
       "description": "Card showing pods with issues like CrashLoopBackOff, OOMKilled, pending states, and high restart counts.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/pod-health-monitor.json",
       "tags": [
@@ -68,6 +72,7 @@
       "name": "Warning Event Stream",
       "description": "Live stream of warning-level Kubernetes events across all clusters, filtered to show only actionable alerts.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/warning-event-stream.json",
       "tags": [
@@ -83,6 +88,7 @@
       "name": "Cluster Overview",
       "description": "At-a-glance cluster health and status card showing all connected clusters with their node counts and health indicators.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/cluster-overview.json",
       "tags": [
@@ -96,7 +102,7 @@
     {
       "id": "midnight-blue",
       "name": "Midnight Blue",
-      "description": "Deep blue theme with navy tones and teal accents — a calmer alternative to the default space theme.",
+      "description": "Deep blue theme with navy tones and teal accents \u2014 a calmer alternative to the default space theme.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/midnight-blue.json",
@@ -118,7 +124,7 @@
     {
       "id": "amber-glow",
       "name": "Amber Glow",
-      "description": "Warm amber and orange tones on a dark background — cozy and easy on the eyes for late-night ops.",
+      "description": "Warm amber and orange tones on a dark background \u2014 cozy and easy on the eyes for late-night ops.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/amber-glow.json",
@@ -142,6 +148,7 @@
       "name": "Kubernetes Cluster Health",
       "description": "Monitor Kubernetes cluster health, node status, and resource utilization across your fleet.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubernetes.json",
       "tags": [
@@ -164,6 +171,7 @@
       "name": "Helm Release Status",
       "description": "Track Helm chart releases, versions, and deployment status across all clusters.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-helm.json",
       "tags": [
@@ -186,6 +194,7 @@
       "name": "Argo CD Applications",
       "description": "Monitor ArgoCD application sync status, health, and GitOps workflow across clusters.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-argo.json",
       "tags": [
@@ -208,6 +217,7 @@
       "name": "Prometheus Alerts",
       "description": "Active alerts and firing rules from Prometheus AlertManager across clusters.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-prometheus.json",
       "tags": [
@@ -230,6 +240,7 @@
       "name": "OPA Gatekeeper Policies",
       "description": "OPA Gatekeeper policy violations, constraint templates, and compliance status.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opa.json",
       "tags": [
@@ -252,6 +263,7 @@
       "name": "Falco Runtime Alerts",
       "description": "Runtime security alerts from Falco detecting suspicious behavior in containers.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-falco.json",
       "tags": [
@@ -274,6 +286,7 @@
       "name": "cert-manager Certificates",
       "description": "TLS certificate status, expiry tracking, and issuer health from cert-manager.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cert-manager.json",
       "tags": [
@@ -296,6 +309,7 @@
       "name": "Istio Service Mesh",
       "description": "Istio service mesh topology, traffic routing, and sidecar injection status.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-istio.json",
       "tags": [
@@ -318,6 +332,7 @@
       "name": "Kyverno Policies",
       "description": "Kyverno policy reports, violations, and admission control status.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kyverno.json",
       "tags": [
@@ -340,6 +355,7 @@
       "name": "Kubescape Security Scan",
       "description": "Kubescape security scan results, framework compliance, and risk assessment.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubescape.json",
       "tags": [
@@ -362,6 +378,7 @@
       "name": "OpenCost Overview",
       "description": "Kubernetes cost monitoring with per-namespace and per-workload cost breakdown.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opencost.json",
       "tags": [
@@ -1990,6 +2007,7 @@
       "name": "Flatcar Container Linux",
       "description": "Flatcar node OS versions, update status, and container-optimized host metrics.",
       "author": "kubestellar",
+      "authorGithub": "clubanderson",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flatcar.json",
       "tags": [
