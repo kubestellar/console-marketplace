@@ -1629,27 +1629,6 @@
       }
     },
     {
-      "id": "cncf-metal3",
-      "name": "Metal3",
-      "description": "Metal3 bare metal host provisioning and BMC status monitoring.",
-      "author": "kubestellar",
-      "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-metal3.json",
-      "tags": [
-        "cncf",
-        "incubating",
-        "provisioning"
-      ],
-      "cardCount": 1,
-      "type": "card-preset",
-      "status": "available",
-      "cncfProject": {
-        "maturity": "incubating",
-        "category": "Provisioning",
-        "website": "https://metal3.io"
-      }
-    },
-    {
       "id": "cncf-nats",
       "name": "NATS",
       "description": "NATS messaging server status, JetStream streams, and consumer health.",
@@ -1992,6 +1971,27 @@
         "maturity": "incubating",
         "category": "App Definition",
         "website": "https://artifacthub.io"
+      }
+    },
+    {
+      "id": "cncf-metal3",
+      "name": "Metal3",
+      "description": "Metal3 bare metal host provisioning and BMC status monitoring.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-metal3.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "provisioning"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Provisioning",
+        "website": "https://metal3.io"
       }
     },
     {
