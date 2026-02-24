@@ -50,7 +50,9 @@
       ],
       "cardCount": 5,
       "type": "dashboard"
-    },
+    }
+  ],
+  "presets": [
     {
       "id": "pod-health-monitor",
       "name": "Pod Health Monitor",
@@ -102,7 +104,7 @@
     {
       "id": "midnight-blue",
       "name": "Midnight Blue",
-      "description": "Deep blue theme with navy tones and teal accents \u2014 a calmer alternative to the default space theme.",
+      "description": "Deep blue theme with navy tones and teal accents — a calmer alternative to the default space theme.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/midnight-blue.json",
@@ -124,7 +126,7 @@
     {
       "id": "amber-glow",
       "name": "Amber Glow",
-      "description": "Warm amber and orange tones on a dark background \u2014 cozy and easy on the eyes for late-night ops.",
+      "description": "Warm amber and orange tones on a dark background — cozy and easy on the eyes for late-night ops.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/amber-glow.json",
