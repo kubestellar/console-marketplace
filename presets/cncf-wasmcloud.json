@@ -2,5 +2,14 @@
   "format": "kc-card-preset-v1",
   "card_type": "wasmcloud_status",
   "title": "wasmCloud",
-  "config": {}
+  "config": {
+    "hostsApi": "/api/mcp/wasmcloud/hosts",
+    "actorsApi": "/api/mcp/wasmcloud/actors",
+    "refreshInterval": 30,
+    "metrics": {
+      "showHosts": true,
+      "showActors": true,
+      "showRunning": true
+    }
+  }
 }
