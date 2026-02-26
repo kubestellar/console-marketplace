@@ -1950,23 +1950,17 @@
       "name": "wasmCloud",
       "description": "wasmCloud host status, actor inventory, and capability provider health.",
       "author": "Community",
-      "version": "0.0.1",
+      "version": "1.0.0",
+      "authorGithub": "p172913",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-wasmcloud.json",
       "tags": [
         "cncf",
         "incubating",
-        "runtime",
-        "help-wanted"
+        "runtime"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/57",
-      "difficulty": "beginner",
-      "skills": [
-        "TypeScript",
-        "React"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Runtime",

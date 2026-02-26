@@ -2,7 +2,14 @@
   "format": "kc-card-preset-v1",
   "card_type": "wasmcloud_status",
   "title": "wasmCloud",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "config": {
+    "hostsApi": "/api/mcp/wasmcloud/hosts",
+    "actorsApi": "/api/mcp/wasmcloud/actors",
+    "refreshInterval": 30,
+    "metrics": {
+      "showHosts": true,
+      "showActors": true,
+      "showRunning": true
+    }
+  }
 }
