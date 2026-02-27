@@ -1,0 +1,37 @@
+name: Copilot Setup Steps
+# Pre-configures the Copilot coding agent's Ubuntu VM with tools needed
+# to validate and test marketplace changes (JSON presets, themes, dashboards).
+
+on: workflow_dispatch
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Checkout console (sparse, for validation)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: kubestellar/console
+          path: console
+          sparse-checkout: |
+            web/src/components/cards/cardRegistry.ts
+            web/src/components/cards
+            web/src/hooks
+            web/src/locales/en/cards.json
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate marketplace JSON
+        run: python3 scripts/validate-marketplace.py --mode full --console-path ./console || true
+
+      - name: Verify registry.json is valid JSON
+        run: python3 -m json.tool registry.json > /dev/null
