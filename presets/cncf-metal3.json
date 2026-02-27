@@ -2,7 +2,5 @@
   "format": "kc-card-preset-v1",
   "card_type": "metal3_status",
   "title": "Metal3",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "config": {}
 }

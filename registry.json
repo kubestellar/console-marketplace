@@ -50,7 +50,9 @@
       ],
       "cardCount": 5,
       "type": "dashboard"
-    },
+    }
+  ],
+  "presets": [
     {
       "id": "pod-health-monitor",
       "name": "Pod Health Monitor",
@@ -1629,35 +1631,6 @@
       }
     },
     {
-      "id": "cncf-metal3",
-      "name": "Metal3",
-      "description": "Metal3 bare metal host provisioning, BMC status, and machine health.",
-      "author": "Community",
-      "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-metal3.json",
-      "tags": [
-        "cncf",
-        "incubating",
-        "provisioning",
-        "help-wanted"
-      ],
-      "cardCount": 1,
-      "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/46",
-      "difficulty": "advanced",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Metal3 API"
-      ],
-      "cncfProject": {
-        "maturity": "incubating",
-        "category": "Provisioning",
-        "website": "https://metal3.io"
-      }
-    },
-    {
       "id": "cncf-nats",
       "name": "NATS",
       "description": "NATS messaging server status, JetStream streams, and consumer health.",
@@ -1994,6 +1967,27 @@
         "maturity": "incubating",
         "category": "App Definition",
         "website": "https://artifacthub.io"
+      }
+    },
+    {
+      "id": "cncf-metal3",
+      "name": "Metal3",
+      "description": "Metal3 bare metal host provisioning and BMC status monitoring.",
+      "author": "kubestellar",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-metal3.json",
+      "tags": [
+        "cncf",
+        "incubating",
+        "provisioning"
+      ],
+      "cardCount": 1,
+      "type": "card-preset",
+      "status": "available",
+      "cncfProject": {
+        "maturity": "incubating",
+        "category": "Provisioning",
+        "website": "https://metal3.io"
       }
     },
     {
