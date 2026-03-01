@@ -650,13 +650,10 @@ def check_i18n_keys(base, console_path, known_types, results):
 
 
 def check_cors_proxy(base, console_path, known_types, results):
-    """Check that card hooks don't make direct external fetch calls."""
-    # Scan both the console hooks directory and the marketplace's own hooks directory
+    """Check that marketplace hooks don't make direct external fetch calls."""
+    # Only scan the marketplace's own hooks directory; the console repo is an
+    # external dependency with its own CI/QA and is outside marketplace control.
     scan_roots = []
-
-    console_hooks = os.path.join(console_path, "web/src/hooks")
-    if os.path.isdir(console_hooks):
-        scan_roots.append((console_hooks, console_path))
 
     marketplace_hooks = os.path.join(base, "web/src/hooks")
     if os.path.isdir(marketplace_hooks):
