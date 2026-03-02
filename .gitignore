@@ -4,3 +4,5 @@
 *~
 .idea/
 .vscode/
+# Console repo is checked out by Copilot setup steps for validation only — not part of this repo
+console/
