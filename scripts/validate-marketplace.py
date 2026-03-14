@@ -127,7 +127,8 @@ def find_json_files(base, patterns):
 # ── Console source parsers ───────────────────────────────────────────
 
 def parse_card_registry(registry_ts_path):
-    """Extract card type keys from RAW_CARD_COMPONENTS in cardRegistry.ts."""
+    """Extract card type keys from RAW_CARD_COMPONENTS in cardRegistry.ts
+    and from the unified descriptor system in cardDescriptors.registry.ts."""
     with open(registry_ts_path) as f:
         content = f.read()
 
@@ -146,6 +147,17 @@ def parse_card_registry(registry_ts_path):
             m = re.match(r"\s+(\w+):\s", line)
             if m:
                 card_types.add(m.group(1))
+
+    # Also collect cards registered via the unified descriptor system
+    descriptors_path = os.path.join(
+        os.path.dirname(registry_ts_path), "cardDescriptors.registry.ts"
+    )
+    if os.path.isfile(descriptors_path):
+        with open(descriptors_path) as f:
+            for line in f:
+                m = re.match(r"\s+id:\s*['\"]([\w-]+)['\"]", line)
+                if m:
+                    card_types.add(m.group(1))
 
     return card_types
 
