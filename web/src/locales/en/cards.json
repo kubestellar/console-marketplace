@@ -257,6 +257,24 @@
     "title": "Notary",
     "description": "Shows Notary content trust and image signing status"
   },
+  "notaryStatus": {
+    "fetchError": "Failed to fetch Notary status",
+    "fetchErrorHint": "Check that the Notary operator is reachable and the API is available",
+    "notInstalled": "Notary is not installed",
+    "notInstalledHint": "Install Notary to start signing and verifying container images",
+    "notInstalledShort": "Not installed",
+    "installGuide": "View install guide",
+    "clusters": "Clusters",
+    "signed": "Signed",
+    "unsigned": "Unsigned",
+    "docs": "Docs",
+    "signedPct": "{{pct}}% signed",
+    "trustPolicyCount": "{{count}} trust policies",
+    "signedCount": "{{count}} signed",
+    "unsignedCount": "{{count}} unsigned",
+    "policyCount": "{{count}} policies",
+    "morePolicies": "+{{count}} more"
+  },
   "opa_policies": {
     "title": "OPA Gatekeeper Policies",
     "description": "Displays OPA Gatekeeper constraint template and violation status"
