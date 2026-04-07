@@ -102,6 +102,23 @@
       "type": "card-preset"
     },
     {
+      "id": "kubeflow-monitoring",
+      "name": "Kubeflow Monitoring",
+      "description": "Monitor Kubeflow ML pipelines, experiments, notebook servers, and distributed training jobs across clusters.",
+      "author": "kubestellar",
+      "authorGithub": "XxSURYANSHxX",
+      "version": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/kubeflow-monitoring.json",
+      "tags": [
+        "kubeflow",
+        "ml",
+        "pipelines",
+        "monitoring"
+      ],
+      "cardCount": 1,
+      "type": "card-preset"
+    },
+    {
       "id": "midnight-blue",
       "name": "Midnight Blue",
       "description": "Deep blue theme with navy tones and teal accents \u2014 a calmer alternative to the default space theme.",
@@ -1490,25 +1507,21 @@
       "id": "cncf-kubeflow",
       "name": "Kubeflow",
       "description": "Kubeflow pipeline runs, experiment tracking, and ML workflow status.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "kubestellar",
+      "authorGithub": "XxSURYANSHxX",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubeflow.json",
       "tags": [
         "cncf",
         "incubating",
         "runtime",
-        "help-wanted"
+        "ml",
+        "pipelines",
+        "monitoring"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/41",
-      "difficulty": "advanced",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Kubeflow API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Runtime",

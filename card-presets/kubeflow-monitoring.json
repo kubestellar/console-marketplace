@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
   "card_type": "kubeflow_status",
-  "title": "Kubeflow",
+  "title": "Kubeflow Monitoring",
   "config": {}
 }
