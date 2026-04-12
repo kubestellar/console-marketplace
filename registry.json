@@ -1478,25 +1478,19 @@
       "id": "cncf-keycloak",
       "name": "Keycloak",
       "description": "Keycloak realm status, user sessions, client configurations, and authentication flows.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "suhaani-agarwal",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keycloak.json",
       "tags": [
         "cncf",
         "incubating",
         "security",
-        "help-wanted"
+        "identity",
+        "authentication"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/40",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Keycloak API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Security",
