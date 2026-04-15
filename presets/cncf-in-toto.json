@@ -1,8 +1,9 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "in_toto_status",
+  "card_type": "intoto_supply_chain",
   "title": "in-toto",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "description": "in-toto supply chain layout verification, step attestation, and link metadata status.",
+  "category": "Security",
+  "defaultSize": { "w": 6, "h": 4 },
+  "config": {}
 }

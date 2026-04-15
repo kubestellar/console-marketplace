@@ -1132,12 +1132,11 @@
       "tags": [
         "cncf",
         "graduated",
-        "security",
-        "help-wanted"
+        "security"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
+      "status": "available",
       "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/28",
       "difficulty": "advanced",
       "skills": [
