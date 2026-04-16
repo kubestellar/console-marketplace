@@ -1478,7 +1478,8 @@
       "id": "cncf-keycloak",
       "name": "Keycloak",
       "description": "Keycloak realm status, user sessions, client configurations, and authentication flows.",
-      "author": "suhaani-agarwal",
+      "author": "Community",
+      "authorGithub": "suhaani-agarwal",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keycloak.json",
       "tags": [
