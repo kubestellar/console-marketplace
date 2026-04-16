@@ -1762,24 +1762,20 @@
       "name": "OpenKruise",
       "description": "OpenKruise advanced workload status, sidecar injection, and image pre-pulling progress.",
       "author": "Community",
-      "version": "0.0.1",
+      "authorGithub": "XxSURYANSHxX",
+      "version": "0.1.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openkruise.json",
       "tags": [
         "cncf",
         "incubating",
         "orchestration",
-        "help-wanted"
+        "workloads",
+        "sidecar",
+        "monitoring"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/51",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "K8s CRDs"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Orchestration",
