@@ -150,6 +150,25 @@ def parse_card_registry(registry_ts_path):
     return card_types
 
 
+def parse_card_descriptors(console_path):
+    """Extract card type keys from cardDescriptors.registry.ts."""
+    descriptors_path = os.path.join(
+        console_path, "web/src/components/cards/cardDescriptors.registry.ts"
+    )
+    if not os.path.isfile(descriptors_path):
+        return set()
+
+    with open(descriptors_path) as f:
+        content = f.read()
+
+    card_types = set()
+    # Match cardType: "some_type" or cardType: 'some_type'
+    for m in re.finditer(r"cardType\s*:\s*['\"](\w+)['\"]", content):
+        card_types.add(m.group(1))
+
+    return card_types
+
+
 def parse_lazy_imports(registry_ts_path):
     """Map ComponentName -> import path from lazy() calls."""
     with open(registry_ts_path) as f:
@@ -452,12 +471,16 @@ def check_card_type_existence(base, console_path, results):
         return set()
 
     console_types = parse_card_registry(registry_ts)
+    descriptor_types = parse_card_descriptors(console_path)
     marketplace_types = get_all_marketplace_card_types(base)
 
     known = set()
     for ct in sorted(marketplace_types):
         if ct in console_types:
             results.ok("card-type", f"`{ct}` exists in console registry")
+            known.add(ct)
+        elif ct in descriptor_types:
+            results.ok("card-type", f"`{ct}` exists in console descriptor registry")
             known.add(ct)
         elif ct.endswith("_status"):
             # CNCF dynamic card pattern — placeholder awaiting dedicated implementation
