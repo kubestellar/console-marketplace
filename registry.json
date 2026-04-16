@@ -1137,12 +1137,6 @@
       "cardCount": 1,
       "type": "card-preset",
       "status": "available",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/28",
-      "difficulty": "advanced",
-      "skills": [
-        "TypeScript",
-        "React"
-      ],
       "cncfProject": {
         "maturity": "graduated",
         "category": "Security",
