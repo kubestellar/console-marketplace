@@ -1,6 +1,6 @@
 {
   "format": "kc-card-preset-v1",
-  "card_type": "active_alerts",
+  "card_type": "alert_rules",
   "title": "Prometheus Alerts",
   "config": {}
 }
