@@ -150,6 +150,24 @@ def parse_card_registry(registry_ts_path):
     return card_types
 
 
+def parse_card_descriptors(descriptors_ts_path):
+    """Extract card type ids from the unified cardDescriptors.registry.ts.
+
+    The console has migrated some cards from the legacy RAW_CARD_COMPONENTS
+    map to a descriptor-based registry (CardDescriptor[]). Each descriptor
+    entry is an object literal with an `id: '<type>'` field. Without
+    reading this file, cards migrated to the descriptor system appear
+    "not found in console registry" even though they are present.
+    """
+    if not os.path.isfile(descriptors_ts_path):
+        return set()
+    with open(descriptors_ts_path) as f:
+        content = f.read()
+    # Match `id: 'card_type',` or `id: "card_type",` — the descriptor
+    # registry uses single-quoted string ids on their own line.
+    return set(re.findall(r"^\s*id:\s*['\"]([\w-]+)['\"]\s*,", content, re.MULTILINE))
+
+
 def parse_lazy_imports(registry_ts_path):
     """Map ComponentName -> import path from lazy() calls."""
     with open(registry_ts_path) as f:
@@ -447,11 +465,14 @@ def get_all_marketplace_card_types(base):
 def check_card_type_existence(base, console_path, results):
     """Check that marketplace card_types exist in console's card registry."""
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
+    descriptors_ts = os.path.join(console_path, "web/src/components/cards/cardDescriptors.registry.ts")
     if not os.path.isfile(registry_ts):
         results.error("card-type", f"Console card registry not found at {registry_ts}")
         return set()
 
-    console_types = parse_card_registry(registry_ts)
+    # Merge both registries: the legacy RAW_CARD_COMPONENTS map and the
+    # newer descriptor-based registry that some cards have been migrated to.
+    console_types = parse_card_registry(registry_ts) | parse_card_descriptors(descriptors_ts)
     marketplace_types = get_all_marketplace_card_types(base)
 
     known = set()
