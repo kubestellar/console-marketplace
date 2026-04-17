@@ -1948,25 +1948,18 @@
       "id": "cncf-artifact-hub",
       "name": "Artifact Hub",
       "description": "Artifact Hub package discovery, repository sync status, and package statistics.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "ANAMASGARD",
+      "authorGithub": "ANAMASGARD",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-artifact-hub.json",
       "tags": [
         "cncf",
         "incubating",
-        "app-definition",
-        "help-wanted"
+        "app-definition"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/58",
-      "difficulty": "beginner",
-      "skills": [
-        "TypeScript",
-        "React",
-        "REST API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "App Definition",
