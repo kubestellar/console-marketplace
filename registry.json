@@ -1127,7 +1127,8 @@
       "name": "in-toto",
       "description": "in-toto supply chain layout verification, step attestation, and link metadata status.",
       "author": "Community",
-      "version": "0.0.1",
+      "authorGithub": "aashu2006",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-in-toto.json",
       "tags": [
         "cncf",
