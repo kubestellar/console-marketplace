@@ -1780,26 +1780,22 @@
     {
       "id": "cncf-openyurt",
       "name": "OpenYurt",
-      "description": "OpenYurt edge node pools, autonomy status, and edge-cloud connectivity.",
+      "description": "OpenYurt edge node pools, autonomy status, and Raven gateway connectivity.",
       "author": "Community",
-      "version": "0.0.1",
+      "authorGithub": "XxSURYANSHxX",
+      "version": "0.1.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openyurt.json",
       "tags": [
         "cncf",
         "incubating",
         "orchestration",
-        "help-wanted"
+        "edge",
+        "nodepool",
+        "monitoring"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/52",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "K8s CRDs"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Orchestration",

@@ -346,6 +346,29 @@
     "title": "OpenYurt",
     "description": "Displays OpenYurt edge node pool and tunnel status"
   },
+  "openyurt": {
+    "healthy": "Healthy",
+    "degraded": "Degraded",
+    "notInstalled": "OpenYurt not detected",
+    "notInstalledHint": "No OpenYurt controller pods found. Deploy OpenYurt to enable edge computing features.",
+    "fetchError": "Failed to fetch OpenYurt status",
+    "controllerPods": "pods",
+    "totalNodes": "Nodes",
+    "edgePools": "Edge Pools",
+    "readyPools": "Ready",
+    "gateways": "Gateways",
+    "nodes": "nodes",
+    "autonomous": "Autonomous",
+    "searchPlaceholder": "Search node pools\u2026",
+    "noNodePools": "Controller running",
+    "noNodePoolsHint": "NodePool data requires the OpenYurt CRD API.",
+    "noSearchResults": "No node pools match your search.",
+    "ravenGateways": "Raven Gateways",
+    "syncedJustNow": "just now",
+    "syncedMinutesAgo": "{{count}}m ago",
+    "syncedHoursAgo": "{{count}}h ago",
+    "syncedDaysAgo": "{{count}}d ago"
+  },
   "operator_framework_status": {
     "title": "Operator Framework",
     "description": "Shows OLM operator subscription and install plan status"

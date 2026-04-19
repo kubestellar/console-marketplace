@@ -2,7 +2,8 @@
   "format": "kc-card-preset-v1",
   "card_type": "openyurt_status",
   "title": "OpenYurt",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "description": "OpenYurt edge node pools, autonomy status, and Raven gateway connectivity.",
+  "category": "Orchestration",
+  "defaultSize": { "w": 6, "h": 4 },
+  "config": {}
 }
