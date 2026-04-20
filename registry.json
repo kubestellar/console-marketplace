@@ -1586,23 +1586,16 @@
       "name": "Lima",
       "description": "Lima virtual machine instances, port forwarding status, and resource usage.",
       "author": "Community",
-      "version": "0.0.1",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-lima.json",
       "tags": [
         "cncf",
         "incubating",
-        "runtime",
-        "help-wanted"
+        "runtime"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/44",
-      "difficulty": "beginner",
-      "skills": [
-        "TypeScript",
-        "React"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Runtime",

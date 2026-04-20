@@ -2,7 +2,10 @@
   "format": "kc-card-preset-v1",
   "card_type": "lima_status",
   "title": "Lima",
+  "description": "Lima virtual machine instances, runtime health, and resource usage.",
+  "category": "Runtime",
+  "project": "lima",
+  "cncf_status": "incubating",
   "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "source": "console"
 }
