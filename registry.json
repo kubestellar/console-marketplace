@@ -1017,25 +1017,18 @@
       "id": "cncf-knative",
       "name": "Knative",
       "description": "Knative serving revisions, traffic routing, and eventing broker status.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "kubestellar",
+      "authorGithub": "aashu2006",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-knative.json",
       "tags": [
         "cncf",
         "graduated",
-        "serverless",
-        "help-wanted"
+        "serverless"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/24",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Knative API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "graduated",
         "category": "Serverless",

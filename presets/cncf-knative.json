@@ -2,7 +2,9 @@
   "format": "kc-card-preset-v1",
   "card_type": "knative_status",
   "title": "Knative",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "description": "Knative serving revisions, traffic routing, and eventing broker status.",
+  "category": "Serverless",
+  "project": "knative",
+  "cncf_status": "graduated",
+  "config": {}
 }
