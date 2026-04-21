@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "updatedAt": "2026-04-08T00:00:00Z",
+  "updatedAt": "2026-04-18T10:00:00Z",
   "items": [
     {
       "id": "sre-overview",
@@ -1859,27 +1859,21 @@
     },
     {
       "id": "cncf-thanos",
-      "name": "Thanos",
-      "description": "Thanos global view metrics, store gateway status, and compactor health.",
-      "author": "Community",
-      "version": "0.0.1",
+      "name": "Thanos Status",
+      "description": "Global metrics view, store gateway health, and query status for Thanos clusters.",
+      "author": "Pranjal6955",
+      "authorGithub": "Pranjal6955",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-thanos.json",
       "tags": [
         "cncf",
         "incubating",
         "observability",
-        "help-wanted"
+        "monitoring"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/55",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Thanos API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Observability",
