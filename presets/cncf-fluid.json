@@ -2,7 +2,9 @@
   "format": "kc-card-preset-v1",
   "card_type": "fluid_status",
   "title": "Fluid",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "description": "Fluid dataset caching status and data access acceleration metrics.",
+  "category": "Storage",
+  "project": "fluid",
+  "cncf_status": "incubating",
+  "config": {}
 }

@@ -1383,26 +1383,19 @@
     {
       "id": "cncf-fluid",
       "name": "Fluid",
-      "description": "Fluid dataset caching status, runtime health, and data access acceleration metrics.",
-      "author": "Community",
-      "version": "0.0.1",
+      "description": "Fluid dataset caching status and data access acceleration metrics.",
+      "author": "kubestellar",
+      "authorGithub": "aashu2006",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-fluid.json",
       "tags": [
         "cncf",
         "incubating",
-        "storage",
-        "help-wanted"
+        "storage"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/37",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "K8s CRDs"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Storage",
