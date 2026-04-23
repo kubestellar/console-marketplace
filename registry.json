@@ -1391,24 +1391,20 @@
       "name": "KServe",
       "description": "KServe inference service status, model serving metrics, and autoscaling health.",
       "author": "Community",
-      "version": "0.0.1",
+      "authorGithub": "XxSURYANSHxX",
+      "version": "0.1.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kserve.json",
       "tags": [
         "cncf",
         "incubating",
         "runtime",
-        "help-wanted"
+        "inference",
+        "model-serving",
+        "monitoring"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/38",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "K8s CRDs"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Runtime",

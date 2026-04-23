@@ -2,7 +2,8 @@
   "format": "kc-card-preset-v1",
   "card_type": "kserve_status",
   "title": "KServe",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "description": "KServe inference service status, model serving metrics, and autoscaling health.",
+  "category": "Runtime",
+  "defaultSize": { "w": 6, "h": 4 },
+  "config": {}
 }
