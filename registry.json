@@ -1097,8 +1097,9 @@
       "id": "cncf-flux",
       "name": "Flux CD",
       "description": "Flux GitOps sources, kustomizations, and Helm release reconciliation status.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "ANAMASGARD",
+      "authorGithub": "ANAMASGARD",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flux.json",
       "tags": [
         "cncf",
@@ -1108,14 +1109,7 @@
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/27",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Flux CRDs"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "graduated",
         "category": "App Definition",
