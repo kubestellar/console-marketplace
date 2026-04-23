@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "updatedAt": "2026-04-18T10:00:00Z",
+  "updatedAt": "2026-04-21T21:00:00Z",
   "items": [
     {
       "id": "sre-overview",
@@ -1037,30 +1037,26 @@
     },
     {
       "id": "cncf-cilium",
-      "name": "Cilium",
+      "name": "Cilium Status",
       "description": "Cilium eBPF networking, network policy enforcement, and Hubble flow visibility.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "Pranjal6955",
+      "authorGithub": "Pranjal6955",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cilium.json",
       "tags": [
         "cncf",
         "graduated",
+        "ebpf",
         "networking",
-        "help-wanted"
+        "security",
+        "hubble"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/25",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Hubble API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "graduated",
-        "category": "Networking",
+        "category": "Network",
         "website": "https://cilium.io"
       }
     },
