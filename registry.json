@@ -902,25 +902,18 @@
       "id": "cncf-cubefs",
       "name": "CubeFS",
       "description": "CubeFS distributed file system health, volume status, and metadata server metrics.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "kubestellar",
+      "authorGithub": "aashu2006",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cubefs.json",
       "tags": [
         "cncf",
         "graduated",
-        "storage",
-        "help-wanted"
+        "storage"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/20",
-      "difficulty": "advanced",
-      "skills": [
-        "TypeScript",
-        "React",
-        "CubeFS API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "graduated",
         "category": "Storage",
