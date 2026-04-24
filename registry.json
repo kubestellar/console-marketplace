@@ -1325,25 +1325,18 @@
       "id": "cncf-chaos-mesh",
       "name": "Chaos Mesh",
       "description": "Chaos Mesh experiment status, workflow progress, and chaos injection schedules.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "KubeStellar Team",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-chaos-mesh.json",
       "tags": [
         "cncf",
         "incubating",
         "runtime",
-        "help-wanted"
+        "chaos-engineering"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/36",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "K8s CRDs"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "incubating",
         "category": "Runtime",
