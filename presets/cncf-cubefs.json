@@ -2,7 +2,9 @@
   "format": "kc-card-preset-v1",
   "card_type": "cubefs_status",
   "title": "CubeFS",
-  "config": {},
-  "_placeholder": true,
-  "_help_wanted": "This card preset is a placeholder. See the associated GitHub issue for implementation instructions."
+  "description": "CubeFS distributed file system health, volume status, and node topology.",
+  "category": "Storage",
+  "project": "cubefs",
+  "cncf_status": "graduated",
+  "config": {}
 }
