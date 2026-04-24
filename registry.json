@@ -121,7 +121,7 @@
     {
       "id": "midnight-blue",
       "name": "Midnight Blue",
-      "description": "Deep blue theme with navy tones and teal accents \u2014 a calmer alternative to the default space theme.",
+      "description": "Deep blue theme with navy tones and teal accents — a calmer alternative to the default space theme.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/midnight-blue.json",
@@ -143,7 +143,7 @@
     {
       "id": "amber-glow",
       "name": "Amber Glow",
-      "description": "Warm amber and orange tones on a dark background \u2014 cozy and easy on the eyes for late-night ops.",
+      "description": "Warm amber and orange tones on a dark background — cozy and easy on the eyes for late-night ops.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/amber-glow.json",
@@ -585,30 +585,23 @@
       "id": "cncf-jaeger",
       "name": "Jaeger Tracing",
       "description": "Distributed trace collection, service dependencies, and latency analysis from Jaeger.",
-      "author": "Community",
-      "version": "0.0.1",
+      "author": "kubestellar",
+      "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-jaeger.json",
       "tags": [
         "cncf",
         "graduated",
-        "observability",
-        "help-wanted"
+        "observability"
       ],
       "cardCount": 1,
       "type": "card-preset",
-      "status": "help-wanted",
-      "issueUrl": "https://github.com/kubestellar/console-marketplace/issues/9",
-      "difficulty": "intermediate",
-      "skills": [
-        "TypeScript",
-        "React",
-        "Jaeger API"
-      ],
+      "status": "available",
       "cncfProject": {
         "maturity": "graduated",
         "category": "Observability",
         "website": "https://www.jaegertracing.io"
-      }
+      },
+      "authorGithub": "Pranjal6955"
     },
     {
       "id": "cncf-linkerd",
