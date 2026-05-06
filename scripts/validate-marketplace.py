@@ -203,8 +203,10 @@ def parse_sub_registry_categories(cards_dir):
             pos += 1
         comp_block = content[start:pos - 1]
 
-        # Card type keys are snake_case (contain at least one underscore) and
-        # are immediately followed by a colon.  CamelCase values are skipped.
+        # Card type keys are always snake_case (lowercase with at least one
+        # underscore, e.g. `cluster_health`).  TypeScript identifiers in the
+        # values are CamelCase (e.g. `ClusterHealth`) and are therefore
+        # excluded by requiring at least one `_` in the matched token.
         for m in re.finditer(r"\b([a-z][a-z0-9]*(?:_[a-z0-9]+)+)\s*:", comp_block):
             card_types.add(m.group(1))
 
@@ -222,7 +224,7 @@ def get_all_console_card_types(cards_dir):
     """
     registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
     descriptors_ts = os.path.join(cards_dir, "cardDescriptors.registry.ts")
-    types: set = set()
+    types = set()
     if os.path.isfile(registry_ts):
         types |= parse_card_registry(registry_ts)
     if os.path.isfile(descriptors_ts):
@@ -866,7 +868,7 @@ def check_theme_consistency(base, results):
 
 def check_cncf_coverage(base, console_path, results):
     """Flag CNCF presets without console implementations."""
-    console_types: set = set()
+    console_types = set()
     cards_dir = os.path.join(console_path, "web/src/components/cards")
     registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
     if os.path.isfile(registry_ts):
