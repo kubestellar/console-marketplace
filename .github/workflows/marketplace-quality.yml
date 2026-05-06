@@ -55,9 +55,8 @@ jobs:
           repository: kubestellar/console
           path: console
           sparse-checkout: |
-            web/src/components/cards/cardRegistry.ts
-            web/src/components/cards
-            web/src/hooks
+            web/src/components/cards/**
+            web/src/hooks/**
             web/src/locales/en/cards.json
           sparse-checkout-cone-mode: false
 
