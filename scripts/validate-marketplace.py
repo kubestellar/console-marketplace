@@ -168,6 +168,69 @@ def parse_card_descriptors(descriptors_ts_path):
     return set(re.findall(r"^\s*id:\s*['\"]([\w-]+)['\"]\s*,", content, re.MULTILINE))
 
 
+def parse_sub_registry_categories(cards_dir):
+    """Extract card type keys from CardRegistryCategory sub-files.
+
+    The console splits RAW_CARD_COMPONENTS across multiple category files
+    (cardRegistry.cluster.ts, cardRegistry.security.ts, etc.).  Each file
+    exports a CardRegistryCategory whose `components` object is keyed by
+    snake_case card type.  Without scanning these files, every card defined
+    in a sub-registry appears "not found" even though it is fully registered.
+    """
+    card_types = set()
+    for path in glob.glob(os.path.join(cards_dir, "cardRegistry.*.ts")):
+        if os.path.basename(path) == "cardRegistry.ts":
+            continue  # Skip the root registry file
+        try:
+            with open(path) as f:
+                content = f.read()
+        except OSError:
+            continue
+
+        # Locate the `components: {` block and extract snake_case card type keys.
+        # Track brace depth so nested braces (e.g. safeLazy calls) are handled.
+        start = content.find("components: {")
+        if start == -1:
+            continue
+        start += len("components: {")
+        depth = 1
+        pos = start
+        while pos < len(content) and depth > 0:
+            if content[pos] == "{":
+                depth += 1
+            elif content[pos] == "}":
+                depth -= 1
+            pos += 1
+        comp_block = content[start:pos - 1]
+
+        # Card type keys are snake_case (contain at least one underscore) and
+        # are immediately followed by a colon.  CamelCase values are skipped.
+        for m in re.finditer(r"\b([a-z][a-z0-9]*(?:_[a-z0-9]+)+)\s*:", comp_block):
+            card_types.add(m.group(1))
+
+    return card_types
+
+
+def get_all_console_card_types(cards_dir):
+    """Collect every registered card type from the console card registry.
+
+    Merges three sources so that cards are found regardless of which
+    registration mechanism the console currently uses:
+      1. RAW_CARD_COMPONENTS block in cardRegistry.ts (legacy static map)
+      2. CardDescriptor ids in cardDescriptors.registry.ts
+      3. CardRegistryCategory components in cardRegistry.*.ts sub-files
+    """
+    registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
+    descriptors_ts = os.path.join(cards_dir, "cardDescriptors.registry.ts")
+    types: set = set()
+    if os.path.isfile(registry_ts):
+        types |= parse_card_registry(registry_ts)
+    if os.path.isfile(descriptors_ts):
+        types |= parse_card_descriptors(descriptors_ts)
+    types |= parse_sub_registry_categories(cards_dir)
+    return types
+
+
 def parse_lazy_imports(registry_ts_path):
     """Map ComponentName -> import path from lazy() calls."""
     with open(registry_ts_path) as f:
@@ -465,14 +528,14 @@ def get_all_marketplace_card_types(base):
 def check_card_type_existence(base, console_path, results):
     """Check that marketplace card_types exist in console's card registry."""
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
-    descriptors_ts = os.path.join(console_path, "web/src/components/cards/cardDescriptors.registry.ts")
+    cards_dir = os.path.join(console_path, "web/src/components/cards")
     if not os.path.isfile(registry_ts):
         results.error("card-type", f"Console card registry not found at {registry_ts}")
         return set()
 
-    # Merge both registries: the legacy RAW_CARD_COMPONENTS map and the
-    # newer descriptor-based registry that some cards have been migrated to.
-    console_types = parse_card_registry(registry_ts) | parse_card_descriptors(descriptors_ts)
+    # Merge all registry sources: legacy RAW_CARD_COMPONENTS, descriptor-based
+    # registry, and the newer CardRegistryCategory sub-files.
+    console_types = get_all_console_card_types(cards_dir)
     marketplace_types = get_all_marketplace_card_types(base)
 
     known = set()
@@ -803,10 +866,11 @@ def check_theme_consistency(base, results):
 
 def check_cncf_coverage(base, console_path, results):
     """Flag CNCF presets without console implementations."""
-    console_types = set()
-    registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
+    console_types: set = set()
+    cards_dir = os.path.join(console_path, "web/src/components/cards")
+    registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
     if os.path.isfile(registry_ts):
-        console_types = parse_card_registry(registry_ts)
+        console_types = get_all_console_card_types(cards_dir)
 
     cncf_files = find_json_files(base, ["presets/cncf-*.json"])
     missing = []
@@ -838,7 +902,8 @@ def generate_quality_table(base, console_path, known_types, results):
     if not os.path.isfile(registry_ts):
         return ""
 
-    console_types = parse_card_registry(registry_ts)
+    cards_dir = os.path.join(console_path, "web/src/components/cards")
+    console_types = get_all_console_card_types(cards_dir)
     marketplace_types = get_all_marketplace_card_types(base)
 
     lines = [
