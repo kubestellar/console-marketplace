@@ -126,26 +126,59 @@ def find_json_files(base, patterns):
 
 # ── Console source parsers ───────────────────────────────────────────
 
+def _extract_object_block(content, anchor):
+    """Return the object literal body following anchor, handling nested braces."""
+    anchor_idx = content.find(anchor)
+    if anchor_idx == -1:
+        return ""
+
+    block_start = content.find("{", anchor_idx)
+    if block_start == -1:
+        return ""
+
+    depth = 0
+    for idx in range(block_start, len(content)):
+        char = content[idx]
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return content[block_start + 1:idx]
+
+    return ""
+
+
+
 def parse_card_registry(registry_ts_path):
-    """Extract card type keys from RAW_CARD_COMPONENTS in cardRegistry.ts."""
+    """Extract card type keys from console card registry (main + category files)."""
     with open(registry_ts_path) as f:
         content = f.read()
 
+    registry_dir = os.path.dirname(registry_ts_path)
     card_types = set()
-    in_block = False
-    for line in content.split("\n"):
-        if "RAW_CARD_COMPONENTS" in line and "{" in line:
-            in_block = True
+
+    # Parse inline types from the Object.assign({ ... }) call in cardRegistry.ts.
+    inline_components = _extract_object_block(content, "Object.assign(")
+    for match in re.finditer(r"(\w+)\s*:", inline_components):
+        card_types.add(match.group(1))
+
+    unified_match = re.search(r"_UNIFIED_ONLY_TYPES\s*=\s*\[(.*?)\]", content, re.DOTALL)
+    if unified_match:
+        for card_type in re.findall(r"['\"]([\w-]+)['\"]", unified_match.group(1)):
+            card_types.add(card_type)
+
+    category_pattern = os.path.join(registry_dir, "cardRegistry.*.ts")
+    for category_file in sorted(glob.glob(category_pattern)):
+        if os.path.basename(category_file) == "cardRegistry.types.ts":
             continue
-        if in_block and line.strip() == "}":
-            break
-        if in_block:
-            stripped = line.strip()
-            if stripped.startswith("//"):
-                continue
-            m = re.match(r"\s+(\w+):\s", line)
-            if m:
-                card_types.add(m.group(1))
+
+        with open(category_file) as f:
+            category_content = f.read()
+
+        components_block = _extract_object_block(category_content, "components:")
+        for match in re.finditer(r"(\w+)\s*:", components_block):
+            card_types.add(match.group(1))
 
     return card_types
 
