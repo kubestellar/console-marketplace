@@ -24,9 +24,7 @@ import re
 import sys
 import urllib.request
 import urllib.error
-from collections import defaultdict
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
 # ── Result tracking ──────────────────────────────────────────────────
 
