@@ -26,7 +26,7 @@ console-marketplace/
 │   ├── sre-overview/
 │   │   └── dashboard.json
 │   └── ...
-├── presets/                   # CNCF project card presets (68 projects)
+├── presets/                   # Preset catalog entries
 │   ├── cncf-kubernetes.json
 │   └── ...
 ├── card-presets/              # Individual card presets
