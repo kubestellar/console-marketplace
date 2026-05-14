@@ -45,7 +45,7 @@ jobs:
       - name: Validate dashboard format
         run: |
           python3 - <<'SCRIPT'
-          import json, sys, glob
+          import json, sys, glob, os
 
           errors = 0
           for path in glob.glob("dashboards/*/dashboard.json"):
@@ -74,18 +74,32 @@ jobs:
 
               print(f"OK: {path} ({len(data.get('cards', []))} cards)")
 
-          # Validate registry entries match dashboard directories
+          # Validate registry entries match actual files
           with open("registry.json") as f:
               registry = json.load(f)
 
-          for item in registry.get("items", []):
-              dashboard_path = f"dashboards/{item['id']}/dashboard.json"
-              try:
-                  with open(dashboard_path) as f:
-                      pass
-                  print(f"OK: registry entry '{item['id']}' has matching dashboard file")
-              except FileNotFoundError:
-                  print(f"ERROR: registry entry '{item['id']}' has no dashboard file at {dashboard_path}")
+          all_entries = registry.get("items", []) + registry.get("presets", [])
+          for item in all_entries:
+              item_type = item.get("type", "")
+              item_id = item.get("id", "?")
+
+              if item_type == "dashboard":
+                  expected = f"dashboards/{item_id}/dashboard.json"
+              elif item_type == "card-preset":
+                  if os.path.isfile(f"presets/{item_id}.json"):
+                      expected = f"presets/{item_id}.json"
+                  else:
+                      expected = f"card-presets/{item_id}.json"
+              elif item_type == "theme":
+                  expected = f"themes/{item_id}.json"
+              else:
+                  print(f"WARN: registry entry '{item_id}' has unknown type '{item_type}'")
+                  continue
+
+              if os.path.isfile(expected):
+                  print(f"OK: registry entry '{item_id}' ({item_type}) has matching file")
+              else:
+                  print(f"ERROR: registry entry '{item_id}' ({item_type}) missing file at {expected}")
                   errors += 1
 
           if errors > 0:

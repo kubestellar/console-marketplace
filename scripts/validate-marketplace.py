@@ -490,7 +490,7 @@ def check_registry_consistency(base, results):
         results.error("registry", f"registry.json: {err}")
         return
 
-    items = data.get("items", [])
+    items = data.get("items", []) + data.get("presets", [])
     seen_ids = set()
 
     for item in items:
@@ -817,7 +817,7 @@ def check_download_urls(base, results):
     if err:
         return
 
-    for item in data.get("items", []):
+    for item in data.get("items", []) + data.get("presets", []):
         url = item.get("downloadUrl", "")
         item_id = item.get("id", "?")
         if not url:
