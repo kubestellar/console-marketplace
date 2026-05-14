@@ -45,7 +45,7 @@ jobs:
       - name: Validate dashboard format
         run: |
           python3 - <<'SCRIPT'
-          import json, sys, glob, os
+          import glob, json, os, re, sys
 
           errors = 0
           for path in glob.glob("dashboards/*/dashboard.json"):
@@ -74,37 +74,54 @@ jobs:
 
               print(f"OK: {path} ({len(data.get('cards', []))} cards)")
 
-          # Validate registry entries match actual files
+          # Validate registry entries across both items[] and presets[]
           with open("registry.json") as f:
               registry = json.load(f)
 
-          all_entries = registry.get("items", []) + registry.get("presets", [])
-          for item in all_entries:
-              item_type = item.get("type", "")
-              item_id = item.get("id", "?")
+          registry_entries = registry.get("items", []) + registry.get("presets", [])
+          seen_ids = set()
+
+          for item in registry_entries:
+              item_id = item.get("id")
+              item_type = item.get("type")
+
+              if item_id in seen_ids:
+                  print(f"ERROR: duplicate registry id '{item_id}'")
+                  errors += 1
+              seen_ids.add(item_id)
 
               if item_type == "dashboard":
-                  expected = f"dashboards/{item_id}/dashboard.json"
+                  expected_paths = [f"dashboards/{item_id}/dashboard.json"]
               elif item_type == "card-preset":
-                  if os.path.isfile(f"presets/{item_id}.json"):
-                      expected = f"presets/{item_id}.json"
-                  else:
-                      expected = f"card-presets/{item_id}.json"
+                  expected_paths = [f"presets/{item_id}.json", f"card-presets/{item_id}.json"]
               elif item_type == "theme":
-                  expected = f"themes/{item_id}.json"
+                  expected_paths = [f"themes/{item_id}.json"]
               else:
-                  print(f"WARN: registry entry '{item_id}' has unknown type '{item_type}'")
-                  continue
+                  expected_paths = []
 
-              if os.path.isfile(expected):
-                  print(f"OK: registry entry '{item_id}' ({item_type}) has matching file")
-              else:
-                  print(f"ERROR: registry entry '{item_id}' ({item_type}) missing file at {expected}")
+              if expected_paths and not any(os.path.isfile(path) for path in expected_paths):
+                  print(
+                      f"ERROR: registry entry '{item_id}' ({item_type}) has no matching file in "
+                      f"{', '.join(expected_paths)}"
+                  )
                   errors += 1
+              elif expected_paths:
+                  print(f"OK: registry entry '{item_id}' has matching file")
+
+              url = item.get("downloadUrl", "")
+              if url:
+                  match = re.search(r"/main/(.+)$", url)
+                  if match and not os.path.isfile(match.group(1)):
+                      print(
+                          f"ERROR: registry entry '{item_id}' downloadUrl path "
+                          f"'{match.group(1)}' does not match any file"
+                      )
+                      errors += 1
 
           if errors > 0:
               print(f"\n{errors} error(s) found")
               sys.exit(1)
 
+          print(f"Checked {len(registry_entries)} registry entries, {len(seen_ids)} unique IDs")
           print("\nAll validations passed")
           SCRIPT

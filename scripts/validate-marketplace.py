@@ -483,6 +483,11 @@ def check_naming_conventions(base, results):
                              f"must be snake_case: '{suggested}'")
 
 
+def get_registry_entries(data):
+    """Return all registry entries from both items and presets arrays."""
+    return data.get("items", []) + data.get("presets", [])
+
+
 def check_registry_consistency(base, results):
     """Validate registry.json entries match actual files."""
     data, err = load_json(os.path.join(base, "registry.json"))
@@ -490,10 +495,10 @@ def check_registry_consistency(base, results):
         results.error("registry", f"registry.json: {err}")
         return
 
-    items = data.get("items", []) + data.get("presets", [])
+    entries = get_registry_entries(data)
     seen_ids = set()
 
-    for item in items:
+    for item in entries:
         item_id = item.get("id", "<no-id>")
         item_type = item.get("type", "<no-type>")
 
@@ -538,7 +543,7 @@ def check_registry_consistency(base, results):
                                  f"Registry '{item_id}': downloadUrl path '{url_path}' "
                                  f"does not match any file")
 
-    results.ok("registry", f"Checked {len(items)} registry entries, {len(seen_ids)} unique IDs")
+    results.ok("registry", f"Checked {len(entries)} registry entries, {len(seen_ids)} unique IDs")
 
 
 # ── Cross-repo checks (require console checkout) ────────────────────
@@ -817,7 +822,7 @@ def check_download_urls(base, results):
     if err:
         return
 
-    for item in data.get("items", []) + data.get("presets", []):
+    for item in get_registry_entries(data):
         url = item.get("downloadUrl", "")
         item_id = item.get("id", "?")
         if not url:
