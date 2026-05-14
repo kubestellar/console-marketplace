@@ -21,10 +21,13 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ```
 console-marketplace/
-├── registry.json              # Main registry
+├── registry.json              # Main registry (items + presets arrays)
 ├── dashboards/                # Full dashboard exports
 │   ├── sre-overview/
 │   │   └── dashboard.json
+│   └── ...
+├── presets/                   # CNCF project card presets (68 projects)
+│   ├── cncf-kubernetes.json
 │   └── ...
 ├── card-presets/              # Individual card presets
 │   ├── pod-health-monitor.json
