@@ -218,21 +218,29 @@ def parse_sub_registry_categories(cards_dir):
         except OSError:
             continue
 
-        # Locate the `components: {` block and extract snake_case card type keys.
+        # Locate the `components: {` or `components: Record<...> = {` block and extract snake_case card type keys.
         # Track brace depth so nested braces (e.g. safeLazy calls) are handled.
         start = content.find("components: {")
         if start == -1:
-            continue
-        start += len("components: {")
+            # Try to find "components: Record" pattern (e.g., "const components: Record<...> = {")
+            # Find the opening brace after "= {" pattern
+            match = re.search(r"components:\s*(?:Record<[^>]*>\s*)+=\s*\{", content)
+            if match:
+                start = match.end() - 1  # Position of the opening brace
+            else:
+                continue
+        else:
+            start += len("components: {")
+        
         depth = 1
-        pos = start
+        pos = start + 1
         while pos < len(content) and depth > 0:
             if content[pos] == "{":
                 depth += 1
             elif content[pos] == "}":
                 depth -= 1
             pos += 1
-        comp_block = content[start:pos - 1]
+        comp_block = content[start + 1 : pos - 1]
 
         # Card type keys are always snake_case (lowercase with at least one
         # underscore, e.g. `cluster_health`).  TypeScript identifiers in the
