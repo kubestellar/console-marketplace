@@ -174,7 +174,14 @@ def parse_card_registry(registry_ts_path):
         with open(category_file) as f:
             category_content = f.read()
 
-        components_block = _extract_object_block(category_content, "components:")
+        # Try "const components" first (handles `const components: Record<...> = {...}`)
+        # then fall back to "components:" anchor for inline object patterns.
+        # We must try `const components` first because `components:` can match
+        # inside interface/type definitions (e.g., CardRegistryDomain) where the
+        # next `{` belongs to an unrelated function body.
+        components_block = _extract_object_block(category_content, "const components")
+        if not components_block:
+            components_block = _extract_object_block(category_content, "components:")
         for match in re.finditer(r"(\w+)\s*:", components_block):
             card_types.add(match.group(1))
 
