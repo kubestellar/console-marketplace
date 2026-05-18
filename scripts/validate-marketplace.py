@@ -175,6 +175,10 @@ def parse_card_registry(registry_ts_path):
             category_content = f.read()
 
         components_block = _extract_object_block(category_content, "components:")
+        if not components_block:
+            # Fallback: handle shorthand pattern where components is declared as a separate variable
+            # e.g., const components: Record<...> = { key: Value, ... }
+            components_block = _extract_object_block(category_content, "const components")
         for match in re.finditer(r"(\w+)\s*:", components_block):
             card_types.add(match.group(1))
 
