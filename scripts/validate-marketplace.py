@@ -207,6 +207,10 @@ def parse_sub_registry_categories(cards_dir):
     exports a CardRegistryCategory whose `components` object is keyed by
     snake_case card type.  Without scanning these files, every card defined
     in a sub-registry appears "not found" even though it is fully registered.
+
+    Also handles CardRegistryDomain files (e.g. cardRegistry.core.ts) where
+    components are declared as `const components: ... = { ... }` rather than
+    as an inline `components: { ... }` property.
     """
     card_types = set()
     for path in glob.glob(os.path.join(cards_dir, "cardRegistry.*.ts")):
@@ -218,12 +222,21 @@ def parse_sub_registry_categories(cards_dir):
         except OSError:
             continue
 
-        # Locate the `components: {` block and extract snake_case card type keys.
+        # Locate the components block and extract snake_case card type keys.
         # Track brace depth so nested braces (e.g. safeLazy calls) are handled.
-        start = content.find("components: {")
-        if start == -1:
-            continue
-        start += len("components: {")
+        #
+        # Two formats are supported:
+        #   1. CardRegistryCategory:  `components: {`  (inline property)
+        #   2. CardRegistryDomain:    `const components[: <type>] = {`  (variable)
+        m = re.search(r'\bcomponents:\s*\{', content)
+        if m:
+            start = m.end()
+        else:
+            m = re.search(r'\bconst\s+components\b[^{=]*=\s*\{', content)
+            if not m:
+                continue
+            start = m.end()
+
         depth = 1
         pos = start
         while pos < len(content) and depth > 0:
