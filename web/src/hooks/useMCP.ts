@@ -1,3 +1,10 @@
+const EMPTY_CLUSTERS: string[] = []
+
 export function useClusters() {
-  return { isLoading: false }
+  return {
+    clusters: EMPTY_CLUSTERS,
+    isLoading: false,
+    error: null,
+    refetch: async () => {},
+  }
 }
