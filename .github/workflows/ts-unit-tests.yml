@@ -1,0 +1,45 @@
+name: TypeScript Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - 'web/src/**'
+  push:
+    branches: [main]
+    paths:
+      - 'web/src/**'
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@v4
+
+      - name: Checkout console (vitest config & shared deps)
+        uses: actions/checkout@v4
+        with:
+          repository: kubestellar/console
+          path: console-parent
+          sparse-checkout: |
+            web/package.json
+            web/package-lock.json
+            web/vitest.config.ts
+            web/tsconfig.json
+            web/tsconfig.node.json
+            web/src/test-setup.ts
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: console-parent/web
+        run: npm ci
+
+      - name: Run vitest
+        working-directory: console-parent/web
+        run: npx vitest run --dir ${{ github.workspace }}/web/src --passWithNoTests
+        env:
+          NODE_OPTIONS: '--max_old_space_size=4096'
