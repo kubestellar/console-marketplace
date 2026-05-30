@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { cleanup, render } from '@testing-library/react'
 import type { OpenYurtDemoData } from '../demoData'
 
 vi.mock('../../../../lib/demoMode', () => ({
@@ -70,8 +70,8 @@ vi.mock('../../../../lib/cards/CardComponents', () => ({
   ),
 }))
 
-vi.mock('../../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="skeleton" />,
+vi.mock('../../../ui/Skeleton', () => ({
+  Skeleton: () => <div data-testid="openyurt-skeleton" />,
   SkeletonStats: () => <div data-testid="skeleton-stats" />,
   SkeletonList: () => <div data-testid="skeleton-list" />,
 }))
@@ -112,6 +112,10 @@ function lastLoadingStateCall() {
 }
 
 describe('OpenYurtStatus', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockUseDemoMode.mockReturnValue({
@@ -234,8 +238,8 @@ describe('OpenYurtStatus', () => {
       hasData: false,
       isRefreshing: false,
     })
-    const { queryByTestId } = render(<OpenYurtStatus />)
-    expect(queryByTestId('openyurt-skeleton')).not.toBeNull()
+    const { queryAllByTestId } = render(<OpenYurtStatus />)
+    expect(queryAllByTestId('openyurt-skeleton').length).toBeGreaterThan(0)
   })
 
   it('renders scoped nodepool error when fetchError.resource=nodepools and no data', () => {
