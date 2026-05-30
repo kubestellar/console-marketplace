@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { OPENKRUISE_DEMO_DATA } from './demoData'
 
 interface DisplayItem {
   cluster: string
@@ -11,20 +12,27 @@ const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
+const mockUseOpenKruiseStatus = vi.fn()
 
-vi.mock('../../hooks/useMCP', () => ({
+vi.mock('../../../hooks/useMCP', () => ({
   useClusters: () => mockUseClusters(),
 }))
 
-vi.mock('../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="kubeflow-skeleton" />,
+vi.mock('../../ui/Skeleton', () => ({
+  Skeleton: () => <div data-testid="openkruise-skeleton" />,
 }))
 
-vi.mock('../ui/ClusterBadge', () => ({
+vi.mock('../../ui/Select', () => ({
+  Select: ({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
+    <select {...props}>{children}</select>
+  ),
+}))
+
+vi.mock('../../ui/ClusterBadge', () => ({
   ClusterBadge: ({ cluster }: { cluster: string }) => <span>{cluster}</span>,
 }))
 
-vi.mock('../../lib/cards/CardComponents', () => ({
+vi.mock('../../../lib/cards/CardComponents', () => ({
   CardSearchInput: ({ value, onChange, placeholder }: {
     value: string
     onChange: (value: string) => void
@@ -32,41 +40,45 @@ vi.mock('../../lib/cards/CardComponents', () => ({
     className?: string
   }) => (
     <input
-      data-testid="kubeflow-search"
+      data-testid="openkruise-search"
       value={value}
       placeholder={placeholder}
       onChange={event => onChange(event.target.value)}
     />
   ),
   CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  CardPaginationFooter: () => <div data-testid="kubeflow-pagination" />,
-  CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,
+  CardPaginationFooter: () => <div data-testid="openkruise-pagination" />,
+  CardAIActions: () => <div data-testid="openkruise-ai-actions" />,
 }))
 
-vi.mock('../../lib/cards/cardHooks', () => ({
+vi.mock('../../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown, options: unknown) => mockUseCardData(items, options),
 }))
 
-vi.mock('./CardDataContext', () => ({
+vi.mock('../CardDataContext', () => ({
   useCardLoadingState: (options: unknown) => mockUseCardLoadingState(options),
 }))
 
-vi.mock('../../hooks/useDemoMode', () => ({
+vi.mock('../../../hooks/useDemoMode', () => ({
   useDemoMode: () => mockUseDemoMode(),
 }))
 
-vi.mock('../../hooks/useGlobalFilters', () => ({
+vi.mock('../../../hooks/useGlobalFilters', () => ({
   useGlobalFilters: () => mockUseGlobalFilters(),
+}))
+
+vi.mock('./useOpenKruiseStatus', () => ({
+  useOpenKruiseStatus: () => mockUseOpenKruiseStatus(),
 }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, vars?: { count?: number }) => vars?.count ?? key,
     i18n: { language: 'en', changeLanguage: vi.fn() },
   }),
 }))
 
-import { KubeflowStatus } from './index'
+import { OpenKruiseStatus } from './index'
 
 function createCardDataResult(items: DisplayItem[]) {
   return {
@@ -75,9 +87,9 @@ function createCardDataResult(items: DisplayItem[]) {
     currentPage: 1,
     totalPages: 1,
     itemsPerPage: 5,
+    setItemsPerPage: vi.fn(),
     goToPage: vi.fn(),
     needsPagination: false,
-    setItemsPerPage: vi.fn(),
     filters: {
       search: '',
       setSearch: vi.fn(),
@@ -100,16 +112,22 @@ function createCardDataResult(items: DisplayItem[]) {
   }
 }
 
-describe('KubeflowStatus', () => {
-  afterEach(() => {
-    cleanup()
-  })
-
+describe('OpenKruiseStatus', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUseClusters.mockReturnValue({ isLoading: false })
-    mockUseDemoMode.mockReturnValue({ isDemoMode: true })
+    mockUseDemoMode.mockReturnValue({ isDemoMode: false })
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
+    mockUseOpenKruiseStatus.mockReturnValue({
+      data: OPENKRUISE_DEMO_DATA,
+      isLoading: false,
+      isRefreshing: true,
+      isFailed: false,
+      isDemoFallback: true,
+      consecutiveFailures: 0,
+      lastRefresh: 1_725_000_000_000,
+      refetch: vi.fn(),
+    })
     mockUseCardLoadingState.mockReturnValue({
       showSkeleton: false,
       showEmptyState: false,
@@ -117,35 +135,37 @@ describe('KubeflowStatus', () => {
     mockUseCardData.mockImplementation((items: DisplayItem[]) => createCardDataResult(items))
   })
 
-  it('renders demo-backed items and reports demo loading state', () => {
-    render(<KubeflowStatus />)
+  it('renders hook-backed items and forwards demo fallback state', () => {
+    render(<OpenKruiseStatus />)
 
     expect(mockUseCardLoadingState).toHaveBeenCalledWith(expect.objectContaining({
       isDemoData: true,
+      isRefreshing: true,
       hasAnyData: true,
+      lastRefresh: 1_725_000_000_000,
     }))
-    expect(screen.getByText('train-fraud-detector-v3')).toBeTruthy()
-    expect(screen.getByTestId('kubeflow-pagination')).toBeTruthy()
+    expect(screen.getByText('frontend-web')).toBeTruthy()
+    expect(screen.getByTestId('openkruise-pagination')).toBeTruthy()
   })
 
-  it('filters items by the global cluster selection before pagination', () => {
+  it('filters resources by the selected global clusters before pagination', () => {
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: ['gke-staging'] })
 
-    render(<KubeflowStatus />)
+    render(<OpenKruiseStatus />)
 
     const filteredItems = mockUseCardData.mock.calls[0]?.[0] as DisplayItem[]
     expect(filteredItems.length).toBeGreaterThan(0)
     expect(filteredItems.every(item => item.cluster === 'gke-staging')).toBe(true)
   })
 
-  it('renders the skeleton state when the loading helper requests it', () => {
+  it('renders the empty state when the loading helper reports no resources', () => {
     mockUseCardLoadingState.mockReturnValue({
-      showSkeleton: true,
-      showEmptyState: false,
+      showSkeleton: false,
+      showEmptyState: true,
     })
 
-    render(<KubeflowStatus />)
+    render(<OpenKruiseStatus />)
 
-    expect(screen.getAllByTestId('kubeflow-skeleton').length).toBeGreaterThan(0)
+    expect(screen.getByText('openkruiseStatus.noResources')).toBeTruthy()
   })
 })
