@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { COREDNS_DEMO_DATA } from './coredns_status/demoData'
 import { KUBEFLOW_DEMO_DATA } from './kubeflow_status/demoData'
 import { NOTARY_DEMO_DATA } from './notary_status/demoData'
 import { OPENKRUISE_DEMO_DATA } from './openkruise_status/demoData'
@@ -12,6 +13,35 @@ function expectStringFields(record: Record<string, unknown>, fields: readonly st
 }
 
 describe('card demo data shapes', () => {
+  it('includes the required CoreDNS server and zone fields', () => {
+    expect(COREDNS_DEMO_DATA.servers.length).toBeGreaterThan(0)
+    expect(COREDNS_DEMO_DATA.zones.length).toBeGreaterThan(0)
+    expectStringFields(COREDNS_DEMO_DATA.servers[0] as Record<string, unknown>, [
+      'name',
+      'namespace',
+      'cluster',
+      'version',
+      'status',
+      'uptime',
+    ])
+    expect(COREDNS_DEMO_DATA.servers[0]).toMatchObject({
+      queriesPerSecond: expect.any(Number),
+      cacheHitRate: expect.any(Number),
+      upstreamLatencyMs: expect.any(Number),
+      errorRate: expect.any(Number),
+    })
+    expectStringFields(COREDNS_DEMO_DATA.zones[0] as Record<string, unknown>, ['zone'])
+    expect(COREDNS_DEMO_DATA.zones[0]).toMatchObject({
+      queryCount: expect.any(Number),
+      nxdomainCount: expect.any(Number),
+      servfailCount: expect.any(Number),
+      avgLatencyMs: expect.any(Number),
+    })
+    expect(COREDNS_DEMO_DATA.totalQueries).toEqual(expect.any(Number))
+    expect(COREDNS_DEMO_DATA.overallCacheHitRate).toEqual(expect.any(Number))
+    expect(COREDNS_DEMO_DATA.lastCheckTime).toEqual(expect.any(String))
+  })
+
   it('includes the required Kubeflow demo sections and field types', () => {
     expect(KUBEFLOW_DEMO_DATA.pipelineRuns.length).toBeGreaterThan(0)
     expect(KUBEFLOW_DEMO_DATA.experiments.length).toBeGreaterThan(0)
