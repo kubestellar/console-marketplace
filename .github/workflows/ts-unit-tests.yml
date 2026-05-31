@@ -47,6 +47,6 @@ jobs:
 
       - name: Run vitest with coverage gate
         working-directory: console-parent/web
-        run: npx vitest run --config "${GITHUB_WORKSPACE}/vitest.marketplace.config.ts" --coverage
+        run: npx vitest run --config "${GITHUB_WORKSPACE}/vitest.marketplace.config.ts" --dir "${GITHUB_WORKSPACE}/web" --coverage
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
