@@ -24,7 +24,7 @@ Thank you for contributing! This guide explains how to submit dashboards, card p
    ```
    dashboards/my-awesome-dashboard/dashboard.json
    ```
-2. (Optional) Add a screenshot as `screenshot.png` (recommended: 1200x630)
+2. (Optional, but strongly recommended) Add a PNG screenshot as `screenshot.png` (recommended: 1200x630). Screenshots are not required by CI, but they help reviewers confirm what the dashboard should look like before they import it.
 
 ### Step 3: Add to Registry
 
@@ -42,6 +42,13 @@ Add an entry to `registry.json`:
   "cardCount": 6,
   "type": "dashboard"
 }
+```
+
+Before opening a PR, validate that your `registry.json` change is well-formed and that the entry fields line up with the file you added:
+
+```bash
+python3 -m json.tool registry.json > /dev/null
+python3 scripts/validate-marketplace.py --mode static
 ```
 
 ## Submitting a Card Preset
@@ -168,6 +175,12 @@ print('dashboard.json looks valid')
 PY
 ```
 
+A dashboard `card_type` is valid only when it matches a real Console card ID in `snake_case`. The authoritative list is in [README.md#available-card-types-153](README.md#available-card-types-153), and the safest verification is the cross-repo validator:
+
+```bash
+python3 scripts/validate-marketplace.py --mode cross-repo --console-path /path/to/console
+```
+
 #### Card presets
 
 Make sure the preset uses `kc-card-preset-v1` and references a real Console card type:
@@ -212,6 +225,7 @@ Use a local checkout of [`kubestellar/console`](https://github.com/kubestellar/c
    const REGISTRY_URL = 'http://localhost:8000/registry.json'
    ```
 5. Reload the Console, open **Marketplace**, and install your dashboard, card preset, or theme.
+6. For dashboards, also test the same JSON through the normal dashboard import flow in the running Console (floating action button → **Import**) and verify the layout and cards render correctly.
 
 You can also test a dashboard import directly against a running local Console:
 
