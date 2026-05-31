@@ -1,6 +1,41 @@
-import { describe, expect, it, vi } from 'vitest'
-import { useOpenKruiseStatus } from './useOpenKruiseStatus'
+import { renderHook } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { OPENKRUISE_DEMO_DATA } from './demoData'
+import { useOpenKruiseStatus, type OpenKruiseStatus } from './useOpenKruiseStatus'
+
+interface CacheOptions<T> {
+  key: string
+  fetcher: () => Promise<T>
+  demoData: T
+  initialData: T
+  category: string
+  persist: boolean
+  demoWhenEmpty: boolean
+}
+
+const EMPTY_STATUS: OpenKruiseStatus = {
+  cloneSets: [],
+  advancedStatefulSets: [],
+  advancedDaemonSets: [],
+  sidecarSets: [],
+  broadcastJobs: [],
+  advancedCronJobs: [],
+  controllerVersion: '',
+  totalInjectedPods: 0,
+  lastCheckTime: '',
+}
+
+const defaultCacheResult = {
+  data: OPENKRUISE_DEMO_DATA,
+  isLoading: false,
+  isRefreshing: false,
+  isFailed: false,
+  isDemoFallback: true,
+  consecutiveFailures: 0,
+  lastRefresh: 1_725_000_000_000,
+  refetch: vi.fn(),
+}
 
 const mockUseCache = vi.fn()
 
@@ -8,53 +43,40 @@ vi.mock('../../../lib/cache', () => ({
   useCache: (options: unknown) => mockUseCache(options),
 }))
 
+function lastCacheOptions(): CacheOptions<OpenKruiseStatus> {
+  return mockUseCache.mock.calls.at(-1)?.[0] as CacheOptions<OpenKruiseStatus>
+}
+
 describe('useOpenKruiseStatus', () => {
-  it('configures cache with OpenKruise defaults for initial state', () => {
-    mockUseCache.mockReturnValue({
-      data: {
-        cloneSets: [],
-        advancedStatefulSets: [],
-        advancedDaemonSets: [],
-        sidecarSets: [],
-        broadcastJobs: [],
-        advancedCronJobs: [],
-        controllerVersion: '',
-        totalInjectedPods: 0,
-        lastCheckTime: '',
-      },
-      isLoading: true,
-      isRefreshing: false,
-      isFailed: false,
-      isDemoFallback: false,
-      consecutiveFailures: 0,
-      lastRefresh: null,
-      refetch: vi.fn(),
-    })
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUseCache.mockReturnValue(defaultCacheResult)
+  })
 
-    useOpenKruiseStatus()
+  it('returns the cache result and configures OpenKruise defaults', () => {
+    const { result } = renderHook(() => useOpenKruiseStatus())
 
-    expect(mockUseCache).toHaveBeenCalledWith(expect.objectContaining({
+    expect(result.current).toEqual(defaultCacheResult)
+    expect(lastCacheOptions()).toMatchObject({
       key: 'openkruise-status',
+      demoData: OPENKRUISE_DEMO_DATA,
+      initialData: EMPTY_STATUS,
       category: 'default',
       persist: true,
       demoWhenEmpty: true,
-      demoData: OPENKRUISE_DEMO_DATA,
-    }))
+    })
   })
 
-  const stateCases = [
-    {
-      name: 'loading',
-      cacheResult: {
-        data: {
-          ...OPENKRUISE_DEMO_DATA,
-          cloneSets: [],
-          advancedStatefulSets: [],
-          advancedDaemonSets: [],
-          sidecarSets: [],
-          broadcastJobs: [],
-          advancedCronJobs: [],
-        },
+  it('uses the demo payload as the fetch result', async () => {
+    renderHook(() => useOpenKruiseStatus())
+
+    await expect(lastCacheOptions().fetcher()).resolves.toEqual(OPENKRUISE_DEMO_DATA)
+  })
+
+  it('passes through loading and failed cache states unchanged', () => {
+    const stateCases = [
+      {
+        data: EMPTY_STATUS,
         isLoading: true,
         isRefreshing: false,
         isFailed: false,
@@ -63,42 +85,24 @@ describe('useOpenKruiseStatus', () => {
         lastRefresh: null,
         refetch: vi.fn(),
       },
-    },
-    {
-      name: 'success',
-      cacheResult: {
+      {
         data: OPENKRUISE_DEMO_DATA,
         isLoading: false,
-        isRefreshing: false,
-        isFailed: false,
-        isDemoFallback: false,
-        consecutiveFailures: 0,
-        lastRefresh: 1_725_000_000_000,
-        refetch: vi.fn(),
-      },
-    },
-    {
-      name: 'error fallback',
-      cacheResult: {
-        data: OPENKRUISE_DEMO_DATA,
-        isLoading: false,
-        isRefreshing: false,
+        isRefreshing: true,
         isFailed: true,
         isDemoFallback: true,
         consecutiveFailures: 2,
         lastRefresh: null,
         refetch: vi.fn(),
       },
-    },
-  ] as const
+    ]
 
-  for (const tc of stateCases) {
-    it(`returns cache state for ${tc.name} behavior`, () => {
-      mockUseCache.mockReturnValue(tc.cacheResult)
+    for (const cacheResult of stateCases) {
+      mockUseCache.mockReturnValueOnce(cacheResult)
+      const { result, unmount } = renderHook(() => useOpenKruiseStatus())
 
-      const result = useOpenKruiseStatus()
-
-      expect(result).toEqual(tc.cacheResult)
-    })
-  }
+      expect(result.current).toEqual(cacheResult)
+      unmount()
+    }
+  })
 })
