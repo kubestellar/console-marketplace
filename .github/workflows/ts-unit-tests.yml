@@ -43,6 +43,6 @@ jobs:
 
       - name: Run vitest
         working-directory: console-parent/web
-        run: npx vitest run --dir ${{ github.workspace }}/web/src --passWithNoTests
+        run: npx vitest run --dir ${{ github.workspace }}/web/src
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
