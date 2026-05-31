@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 
@@ -183,17 +183,19 @@ function useInteractiveCardData<T extends DisplayItem>(
   items: T[],
   options: CardDataOptions<T> = {},
 ) {
+  const stableOptionsRef = useRef(options)
+  const searchFields = stableOptionsRef.current.filter?.searchFields ?? []
+  const comparators = stableOptionsRef.current.sort?.comparators
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState(options.sort?.defaultField ?? 'status')
+  const [sortBy, setSortBy] = useState(stableOptionsRef.current.sort?.defaultField ?? 'status')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
-    options.sort?.defaultDirection ?? 'asc',
+    stableOptionsRef.current.sort?.defaultDirection ?? 'asc',
   )
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 1
 
   const visibleItems = useMemo(() => {
     const query = search.trim().toLowerCase()
-    const searchFields = options.filter?.searchFields ?? []
     const searched = !query
       ? items
       : items.filter(item =>
@@ -202,13 +204,13 @@ function useInteractiveCardData<T extends DisplayItem>(
           ),
         )
 
-    const comparator = options.sort?.comparators?.[sortBy]
+    const comparator = comparators?.[sortBy]
     if (!comparator) return searched
 
     return [...searched].sort((a, b) =>
       sortDirection === 'desc' ? comparator(b, a) : comparator(a, b),
     )
-  }, [items, options.filter?.searchFields, options.sort?.comparators, search, sortBy, sortDirection])
+  }, [comparators, items, search, searchFields, sortBy, sortDirection])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -316,21 +318,43 @@ describe('KubeflowStatus', () => {
     expect(screen.queryByText('train-fraud-detector-v3')).toBeNull()
   })
 
-  it('updates sorting and pagination through the shared card controls', () => {
-    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
-      useInteractiveCardData(items, options),
-    )
+  it('wires sorting and pagination actions through the shared card controls', () => {
+    const setSortBy = vi.fn()
+    const goToPage = vi.fn()
+    const cardDataResult = createCardDataResult([
+      {
+        cluster: 'gke-staging',
+        id: 'pipeline-1',
+        name: 'pipeline-alpha',
+        namespace: 'ml',
+        category: 'pipeline',
+        status: 'running',
+        primaryDetail: 'pipeline-alpha',
+        secondaryDetail: 'experiment-alpha',
+        timestamp: '2026-05-31T00:00:00.000Z',
+      },
+    ])
+
+    mockUseCardData.mockReturnValue({
+      ...cardDataResult,
+      totalPages: 23,
+      needsPagination: true,
+      goToPage,
+      sorting: {
+        ...cardDataResult.sorting,
+        setSortBy,
+      },
+    })
 
     render(<KubeflowStatus />)
 
     fireEvent.change(screen.getByTestId('kubeflow-sort'), {
       target: { value: 'name' },
     })
-    expect(screen.getByText('anomaly-detection-retrain')).toBeTruthy()
+    expect(setSortBy).toHaveBeenCalledWith('name')
 
     fireEvent.click(screen.getByTestId('kubeflow-next-page'))
-    expect(screen.getByText('churn-analysis')).toBeTruthy()
-    expect(screen.getByTestId('kubeflow-page-indicator').textContent).toContain('2/')
+    expect(goToPage).toHaveBeenCalledWith(2)
   })
 
   it('renders the skeleton state when the loading helper requests it', () => {

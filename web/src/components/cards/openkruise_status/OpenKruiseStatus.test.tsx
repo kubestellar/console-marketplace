@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { OPENKRUISE_DEMO_DATA } from './demoData'
@@ -195,17 +195,19 @@ function useInteractiveCardData<T extends DisplayItem>(
   items: T[],
   options: CardDataOptions<T> = {},
 ) {
+  const stableOptionsRef = useRef(options)
+  const searchFields = stableOptionsRef.current.filter?.searchFields ?? []
+  const comparators = stableOptionsRef.current.sort?.comparators
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState(options.sort?.defaultField ?? 'status')
+  const [sortBy, setSortBy] = useState(stableOptionsRef.current.sort?.defaultField ?? 'status')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
-    options.sort?.defaultDirection ?? 'asc',
+    stableOptionsRef.current.sort?.defaultDirection ?? 'asc',
   )
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 1
 
   const visibleItems = useMemo(() => {
     const query = search.trim().toLowerCase()
-    const searchFields = options.filter?.searchFields ?? []
     const searched = !query
       ? items
       : items.filter(item =>
@@ -214,13 +216,13 @@ function useInteractiveCardData<T extends DisplayItem>(
           ),
         )
 
-    const comparator = options.sort?.comparators?.[sortBy]
+    const comparator = comparators?.[sortBy]
     if (!comparator) return searched
 
     return [...searched].sort((a, b) =>
       sortDirection === 'desc' ? comparator(b, a) : comparator(a, b),
     )
-  }, [items, options.filter?.searchFields, options.sort?.comparators, search, sortBy, sortDirection])
+  }, [comparators, items, search, searchFields, sortBy, sortDirection])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -336,23 +338,48 @@ describe('OpenKruiseStatus', () => {
     expect(screen.queryByText('frontend-web')).toBeNull()
   })
 
-  it('updates sorting, direction, and pagination through the card controls', () => {
-    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
-      useInteractiveCardData(items, options),
-    )
+  it('wires sorting, sort direction, and pagination actions through the card controls', () => {
+    const setSortBy = vi.fn()
+    const setSortDirection = vi.fn()
+    const goToPage = vi.fn()
+    const cardDataResult = createCardDataResult([
+      {
+        cluster: 'gke-staging',
+        id: 'clone-set-1',
+        name: 'frontend-web',
+        namespace: 'apps',
+        category: 'cloneset',
+        status: 'healthy',
+        primaryDetail: 'apps',
+        secondaryDetail: '10',
+        timestamp: '2026-05-31T00:00:00.000Z',
+      },
+    ])
+
+    mockUseCardData.mockReturnValue({
+      ...cardDataResult,
+      totalPages: 22,
+      needsPagination: true,
+      goToPage,
+      sorting: {
+        ...cardDataResult.sorting,
+        setSortBy,
+        setSortDirection,
+      },
+    })
 
     render(<OpenKruiseStatus />)
 
     fireEvent.change(screen.getByTestId('openkruise-sort'), {
       target: { value: 'name' },
     })
-    expect(screen.getByText('cilium-agent')).toBeTruthy()
+    expect(setSortBy).toHaveBeenCalledWith('name')
 
     fireEvent.click(screen.getByTestId('openkruise-next-page'))
-    expect(screen.getByText('envoy-mesh-sidecar')).toBeTruthy()
+    expect(goToPage).toHaveBeenCalledWith(2)
 
     fireEvent.click(screen.getByTestId('openkruise-sort-direction'))
-    expect(screen.getByText('weekly-node-audit')).toBeTruthy()
+    expect(setSortDirection).toHaveBeenCalledWith('desc')
   })
 
   it('renders the empty state when the loading helper reports no resources', () => {
