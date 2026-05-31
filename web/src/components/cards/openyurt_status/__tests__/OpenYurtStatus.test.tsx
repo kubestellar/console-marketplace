@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { cleanup, render } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { OpenYurtDemoData } from '../demoData'
 
 vi.mock('../../../../lib/demoMode', () => ({
@@ -46,13 +46,14 @@ vi.mock('react-i18next', () => ({
 }))
 
 const mockUseCardLoadingState = vi.fn()
+const mockUseGlobalFilters = vi.fn()
 vi.mock('../../CardDataContext', () => ({
   useReportCardDataState: vi.fn(),
   useCardLoadingState: (opts: unknown) => mockUseCardLoadingState(opts),
 }))
 
 vi.mock('../../../../hooks/useGlobalFilters', () => ({
-  useGlobalFilters: () => ({ selectedClusters: [] }),
+  useGlobalFilters: () => mockUseGlobalFilters(),
 }))
 
 vi.mock('../../../../lib/cards/CardComponents', () => ({
@@ -123,6 +124,7 @@ describe('OpenYurtStatus', () => {
       toggleDemoMode: vi.fn(),
       setDemoMode: vi.fn(),
     })
+    mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
     mockUseCardLoadingState.mockReturnValue({
       showSkeleton: false,
       showEmptyState: false,
@@ -309,8 +311,30 @@ describe('OpenYurtStatus', () => {
     expect(container.textContent).toContain('OpenYurt not detected')
   })
 
-  it('passes config.cluster through to the hook for multi-cluster contexts', () => {
+  it('filters node pools with the card search input', () => {
+    render(<OpenYurtStatus />)
+
+    fireEvent.change(screen.getByTestId('card-search'), {
+      target: { value: 'hangzhou' },
+    })
+
+    expect(screen.getByText('edge-hangzhou-4')).toBeTruthy()
+    expect(screen.queryByText('cloud-pool')).toBeNull()
+  })
+
+  it('falls back to the first global cluster when config.cluster is not provided', () => {
+    mockUseGlobalFilters.mockReturnValue({ selectedClusters: ['edge-global-cluster'] })
+
+    render(<OpenYurtStatus />)
+
+    expect(mockUseOpenYurtStatus).toHaveBeenCalledWith('edge-global-cluster')
+  })
+
+  it('prefers config.cluster over the global cluster selection', () => {
+    mockUseGlobalFilters.mockReturnValue({ selectedClusters: ['ignored-global-cluster'] })
+
     render(<OpenYurtStatus config={{ cluster: 'edge-shenzhen' }} />)
+
     expect(mockUseOpenYurtStatus).toHaveBeenCalledWith('edge-shenzhen')
   })
 })

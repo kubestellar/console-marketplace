@@ -1,10 +1,22 @@
 import type { ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { OPENKRUISE_DEMO_DATA } from './demoData'
 
-interface DisplayItem {
+interface DisplayItem extends Record<string, unknown> {
   cluster: string
+}
+
+interface CardDataOptions<T> {
+  filter?: {
+    searchFields?: (keyof T)[]
+  }
+  sort?: {
+    defaultField?: string
+    defaultDirection?: 'asc' | 'desc'
+    comparators?: Record<string, (a: T, b: T) => number>
+  }
 }
 
 const mockUseClusters = vi.fn()
@@ -46,8 +58,75 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
       onChange={event => onChange(event.target.value)}
     />
   ),
-  CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  CardPaginationFooter: () => <div data-testid="openkruise-pagination" />,
+  CardControlsRow: ({
+    children,
+    cardControls,
+  }: {
+    children?: ReactNode
+    cardControls?: {
+      sortBy: string
+      sortDirection: 'asc' | 'desc'
+      sortOptions: Array<{ value: string; label: string }>
+      onSortChange: (value: string) => void
+      onSortDirectionChange: (direction: 'asc' | 'desc') => void
+    }
+  }) => (
+    <div>
+      {cardControls && (
+        <>
+          <select
+            data-testid="openkruise-sort"
+            value={cardControls.sortBy}
+            onChange={event => cardControls.onSortChange(event.target.value)}
+          >
+            {cardControls.sortOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <button
+            data-testid="openkruise-sort-direction"
+            onClick={() =>
+              cardControls.onSortDirectionChange(
+                cardControls.sortDirection === 'asc' ? 'desc' : 'asc',
+              )
+            }
+            type="button"
+          >
+            toggle sort
+          </button>
+        </>
+      )}
+      {children}
+    </div>
+  ),
+  CardPaginationFooter: ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    needsPagination,
+  }: {
+    currentPage?: number
+    totalPages?: number
+    onPageChange?: (page: number) => void
+    needsPagination?: boolean
+  }) => (
+    <div data-testid="openkruise-pagination">
+      <span data-testid="openkruise-page-indicator">
+        {currentPage}/{totalPages}
+      </span>
+      {needsPagination && onPageChange && (
+        <button
+          data-testid="openkruise-next-page"
+          onClick={() => onPageChange(currentPage === totalPages ? 1 : (currentPage ?? 1) + 1)}
+          type="button"
+        >
+          next page
+        </button>
+      )}
+    </div>
+  ),
   CardAIActions: () => <div data-testid="openkruise-ai-actions" />,
 }))
 
@@ -112,6 +191,79 @@ function createCardDataResult(items: DisplayItem[]) {
   }
 }
 
+function useInteractiveCardData<T extends DisplayItem>(
+  items: T[],
+  options: CardDataOptions<T> = {},
+) {
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState(options.sort?.defaultField ?? 'status')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    options.sort?.defaultDirection ?? 'asc',
+  )
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 1
+
+  const visibleItems = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    const searchFields = options.filter?.searchFields ?? []
+    const searched = !query
+      ? items
+      : items.filter(item =>
+          searchFields.some(field =>
+            String(item[field] ?? '').toLowerCase().includes(query),
+          ),
+        )
+
+    const comparator = options.sort?.comparators?.[sortBy]
+    if (!comparator) return searched
+
+    return [...searched].sort((a, b) =>
+      sortDirection === 'desc' ? comparator(b, a) : comparator(a, b),
+    )
+  }, [items, options.filter?.searchFields, options.sort?.comparators, search, sortBy, sortDirection])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [items, search, sortBy, sortDirection])
+
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / itemsPerPage))
+  const safePage = Math.min(currentPage, totalPages)
+  const pageItems = visibleItems.slice(
+    (safePage - 1) * itemsPerPage,
+    safePage * itemsPerPage,
+  )
+
+  return {
+    items: pageItems,
+    totalItems: visibleItems.length,
+    currentPage: safePage,
+    totalPages,
+    itemsPerPage,
+    setItemsPerPage: vi.fn(),
+    goToPage: (page: number) => setCurrentPage(Math.min(Math.max(page, 1), totalPages)),
+    needsPagination: visibleItems.length > itemsPerPage,
+    filters: {
+      search,
+      setSearch,
+      localClusterFilter: [],
+      toggleClusterFilter: vi.fn(),
+      clearClusterFilter: vi.fn(),
+      availableClusters: [...new Set(items.map(item => item.cluster))],
+      showClusterFilter: false,
+      setShowClusterFilter: vi.fn(),
+      clusterFilterRef: { current: null },
+    },
+    sorting: {
+      sortBy,
+      setSortBy,
+      sortDirection,
+      setSortDirection,
+    },
+    containerRef: { current: null },
+    containerStyle: {},
+  }
+}
+
 describe('OpenKruiseStatus', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -156,6 +308,51 @@ describe('OpenKruiseStatus', () => {
     const filteredItems = mockUseCardData.mock.calls[0]?.[0] as DisplayItem[]
     expect(filteredItems.length).toBeGreaterThan(0)
     expect(filteredItems.every(item => item.cluster === 'gke-staging')).toBe(true)
+  })
+
+  it('filters visible resources when the category selector changes', () => {
+    render(<OpenKruiseStatus />)
+
+    fireEvent.change(screen.getByLabelText('openkruiseStatus.filterByResource'), {
+      target: { value: 'sidecarset' },
+    })
+
+    expect(screen.getByText('log-collector-sidecar')).toBeTruthy()
+    expect(screen.queryByText('frontend-web')).toBeNull()
+  })
+
+  it('searches OpenKruise resources through the shared card hook', () => {
+    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
+      useInteractiveCardData(items, options),
+    )
+
+    render(<OpenKruiseStatus />)
+
+    fireEvent.change(screen.getByTestId('openkruise-search'), {
+      target: { value: 'redis' },
+    })
+
+    expect(screen.getByText('redis-cluster')).toBeTruthy()
+    expect(screen.queryByText('frontend-web')).toBeNull()
+  })
+
+  it('updates sorting, direction, and pagination through the card controls', () => {
+    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
+      useInteractiveCardData(items, options),
+    )
+
+    render(<OpenKruiseStatus />)
+
+    fireEvent.change(screen.getByTestId('openkruise-sort'), {
+      target: { value: 'name' },
+    })
+    expect(screen.getByText('cilium-agent')).toBeTruthy()
+
+    fireEvent.click(screen.getByTestId('openkruise-next-page'))
+    expect(screen.getByText('envoy-mesh-sidecar')).toBeTruthy()
+
+    fireEvent.click(screen.getByTestId('openkruise-sort-direction'))
+    expect(screen.getByText('weekly-node-audit')).toBeTruthy()
   })
 
   it('renders the empty state when the loading helper reports no resources', () => {

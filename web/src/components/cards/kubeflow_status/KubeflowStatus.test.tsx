@@ -1,9 +1,21 @@
 import type { ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 
-interface DisplayItem {
+interface DisplayItem extends Record<string, unknown> {
   cluster: string
+}
+
+interface CardDataOptions<T> {
+  filter?: {
+    searchFields?: (keyof T)[]
+  }
+  sort?: {
+    defaultField?: string
+    defaultDirection?: 'asc' | 'desc'
+    comparators?: Record<string, (a: T, b: T) => number>
+  }
 }
 
 const mockUseClusters = vi.fn()
@@ -38,8 +50,75 @@ vi.mock('../../lib/cards/CardComponents', () => ({
       onChange={event => onChange(event.target.value)}
     />
   ),
-  CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  CardPaginationFooter: () => <div data-testid="kubeflow-pagination" />,
+  CardControlsRow: ({
+    children,
+    cardControls,
+  }: {
+    children?: ReactNode
+    cardControls?: {
+      sortBy: string
+      sortDirection: 'asc' | 'desc'
+      sortOptions: Array<{ value: string; label: string }>
+      onSortChange: (value: string) => void
+      onSortDirectionChange: (direction: 'asc' | 'desc') => void
+    }
+  }) => (
+    <div>
+      {cardControls && (
+        <>
+          <select
+            data-testid="kubeflow-sort"
+            value={cardControls.sortBy}
+            onChange={event => cardControls.onSortChange(event.target.value)}
+          >
+            {cardControls.sortOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <button
+            data-testid="kubeflow-sort-direction"
+            onClick={() =>
+              cardControls.onSortDirectionChange(
+                cardControls.sortDirection === 'asc' ? 'desc' : 'asc',
+              )
+            }
+            type="button"
+          >
+            toggle sort
+          </button>
+        </>
+      )}
+      {children}
+    </div>
+  ),
+  CardPaginationFooter: ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    needsPagination,
+  }: {
+    currentPage?: number
+    totalPages?: number
+    onPageChange?: (page: number) => void
+    needsPagination?: boolean
+  }) => (
+    <div data-testid="kubeflow-pagination">
+      <span data-testid="kubeflow-page-indicator">
+        {currentPage}/{totalPages}
+      </span>
+      {needsPagination && onPageChange && (
+        <button
+          data-testid="kubeflow-next-page"
+          onClick={() => onPageChange(currentPage === totalPages ? 1 : (currentPage ?? 1) + 1)}
+          type="button"
+        >
+          next page
+        </button>
+      )}
+    </div>
+  ),
   CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,
 }))
 
@@ -100,6 +179,79 @@ function createCardDataResult(items: DisplayItem[]) {
   }
 }
 
+function useInteractiveCardData<T extends DisplayItem>(
+  items: T[],
+  options: CardDataOptions<T> = {},
+) {
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState(options.sort?.defaultField ?? 'status')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    options.sort?.defaultDirection ?? 'asc',
+  )
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 1
+
+  const visibleItems = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    const searchFields = options.filter?.searchFields ?? []
+    const searched = !query
+      ? items
+      : items.filter(item =>
+          searchFields.some(field =>
+            String(item[field] ?? '').toLowerCase().includes(query),
+          ),
+        )
+
+    const comparator = options.sort?.comparators?.[sortBy]
+    if (!comparator) return searched
+
+    return [...searched].sort((a, b) =>
+      sortDirection === 'desc' ? comparator(b, a) : comparator(a, b),
+    )
+  }, [items, options.filter?.searchFields, options.sort?.comparators, search, sortBy, sortDirection])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [items, search, sortBy, sortDirection])
+
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / itemsPerPage))
+  const safePage = Math.min(currentPage, totalPages)
+  const pageItems = visibleItems.slice(
+    (safePage - 1) * itemsPerPage,
+    safePage * itemsPerPage,
+  )
+
+  return {
+    items: pageItems,
+    totalItems: visibleItems.length,
+    currentPage: safePage,
+    totalPages,
+    itemsPerPage,
+    goToPage: (page: number) => setCurrentPage(Math.min(Math.max(page, 1), totalPages)),
+    needsPagination: visibleItems.length > itemsPerPage,
+    setItemsPerPage: vi.fn(),
+    filters: {
+      search,
+      setSearch,
+      localClusterFilter: [],
+      toggleClusterFilter: vi.fn(),
+      clearClusterFilter: vi.fn(),
+      availableClusters: [...new Set(items.map(item => item.cluster))],
+      showClusterFilter: false,
+      setShowClusterFilter: vi.fn(),
+      clusterFilterRef: { current: null },
+    },
+    sorting: {
+      sortBy,
+      setSortBy,
+      sortDirection,
+      setSortDirection,
+    },
+    containerRef: { current: null },
+    containerStyle: {},
+  }
+}
+
 describe('KubeflowStatus', () => {
   afterEach(() => {
     cleanup()
@@ -136,6 +288,49 @@ describe('KubeflowStatus', () => {
     const filteredItems = mockUseCardData.mock.calls[0]?.[0] as DisplayItem[]
     expect(filteredItems.length).toBeGreaterThan(0)
     expect(filteredItems.every(item => item.cluster === 'gke-staging')).toBe(true)
+  })
+
+  it('filters visible resources when the category selector changes', () => {
+    render(<KubeflowStatus />)
+
+    fireEvent.change(screen.getByTitle('kubeflowStatus.filterByResource'), {
+      target: { value: 'notebook' },
+    })
+
+    expect(screen.getByText('fraud-research-notebook')).toBeTruthy()
+    expect(screen.queryByText('train-fraud-detector-v3')).toBeNull()
+  })
+
+  it('searches demo rows through the shared card hook', () => {
+    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
+      useInteractiveCardData(items, options),
+    )
+
+    render(<KubeflowStatus />)
+
+    fireEvent.change(screen.getByTestId('kubeflow-search'), {
+      target: { value: 'research' },
+    })
+
+    expect(screen.getByText('fraud-research-notebook')).toBeTruthy()
+    expect(screen.queryByText('train-fraud-detector-v3')).toBeNull()
+  })
+
+  it('updates sorting and pagination through the shared card controls', () => {
+    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
+      useInteractiveCardData(items, options),
+    )
+
+    render(<KubeflowStatus />)
+
+    fireEvent.change(screen.getByTestId('kubeflow-sort'), {
+      target: { value: 'name' },
+    })
+    expect(screen.getByText('anomaly-detection-retrain')).toBeTruthy()
+
+    fireEvent.click(screen.getByTestId('kubeflow-next-page'))
+    expect(screen.getByText('churn-analysis')).toBeTruthy()
+    expect(screen.getByTestId('kubeflow-page-indicator').textContent).toContain('2/')
   })
 
   it('renders the skeleton state when the loading helper requests it', () => {
