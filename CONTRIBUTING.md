@@ -117,6 +117,10 @@ Include `themeColors` for the preview dots shown in the marketplace:
 
 Marketplace contributions are config-only, but you should still validate them before opening a PR.
 
+### Prerequisites
+
+- **Python 3** (Python 3.6+ recommended) — the marketplace validator uses only standard library modules, no pip dependencies required
+
 ### 1. Run the repository checks locally
 
 From the repository root:
@@ -127,10 +131,12 @@ python3 scripts/validate-marketplace.py --mode static
 python3 scripts/validate-marketplace.py --mode cross-repo --console-path /path/to/console
 ```
 
+**Important:** The CI Marketplace Quality Gate workflow runs `validate-marketplace.py --mode static` on every PR. Running it locally before you push will catch issues early and prevent surprising CI failures.
+
 What these checks catch:
 
 - `python3 -m json.tool`: malformed JSON
-- `--mode static`: registry consistency, naming, dashboard grid/shape checks, required fields
+- `--mode static`: registry consistency, naming, dashboard grid/shape checks, required fields (matches CI behavior)
 - `--mode cross-repo`: everything in `static`, plus validation that referenced `card_type` values exist in a local `kubestellar/console` checkout
 
 If you only changed one file, you can also validate it directly:
