@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { OPENYURT_DEMO_DATA } from './demoData'
-import type { OpenYurtStatus as OpenYurtStatusData, UseOpenYurtStatusResult } from './useOpenYurtStatus'
+import { useOpenYurtStatus, type OpenYurtStatus as OpenYurtStatusData, type UseOpenYurtStatusResult } from './useOpenYurtStatus'
 
 interface CacheOptions<T> {
   key: string
@@ -31,8 +32,6 @@ vi.mock('../../../lib/cache', () => ({
 vi.mock('../../../lib/api', () => ({
   authFetch: (...args: unknown[]) => mockAuthFetch(...args),
 }))
-
-import { useOpenYurtStatus } from './useOpenYurtStatus'
 
 const defaultCacheResult: UseOpenYurtStatusResult = {
   data: OPENYURT_DEMO_DATA,
@@ -156,6 +155,96 @@ describe('useOpenYurtStatus', () => {
     })
   })
 
+  it('falls back to unlabeled pod discovery and derives degraded controller health', async () => {
+    renderHook(() => useOpenYurtStatus())
+
+    mockFetch
+      .mockResolvedValueOnce(jsonResponse({ pods: [] }))
+      .mockResolvedValueOnce(jsonResponse({
+        pods: [
+          {
+            name: 'yurt-hub-0',
+            status: 'Running',
+            ready: '0/1',
+          },
+          {
+            name: 'yurt-tunnel-0',
+            status: 'Running',
+            ready: '1/1',
+          },
+        ],
+      }))
+    mockAuthFetch
+      .mockResolvedValueOnce(jsonResponse({
+        items: [
+          {
+            name: 'edge-unknown',
+            cluster: 'cluster-a',
+            spec: { type: 'mystery' },
+            annotations: { 'node.beta.openyurt.io/autonomy': 'true' },
+            status: { nodes: 3 },
+          },
+        ],
+      }))
+      .mockResolvedValueOnce(jsonResponse({
+        items: [
+          {
+            name: 'gw-disconnected',
+            cluster: 'cluster-a',
+            spec: {
+              proxyNodePool: 'edge-unknown',
+              endpoint: 'gw.internal',
+            },
+            status: { phase: 'Disconnected' },
+          },
+        ],
+      }))
+
+    const data = await lastCacheOptions().fetcher()
+
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      '/api/mcp/pods',
+      expect.objectContaining({ headers: { Accept: 'application/json' } }),
+    )
+    expect(data).toMatchObject({
+      health: 'degraded',
+      controllerPods: { ready: 1, total: 2 },
+      totalNodes: 3,
+      autonomousNodes: 3,
+      fetchError: null,
+    })
+    expect(data.nodePools[0]).toMatchObject({
+      name: 'edge-unknown',
+      type: 'edge',
+      status: 'ready',
+      nodeCount: 3,
+      readyNodes: 3,
+      autonomyEnabled: true,
+    })
+    expect(data.gateways[0]).toMatchObject({
+      name: 'gw-disconnected',
+      nodePool: 'edge-unknown',
+      status: 'disconnected',
+      endpoint: 'gw.internal',
+    })
+  })
+
+  it('returns not-installed when no controller pods are discovered', async () => {
+    renderHook(() => useOpenYurtStatus())
+
+    mockFetch
+      .mockResolvedValueOnce(jsonResponse({ pods: [] }))
+      .mockResolvedValueOnce(jsonResponse({ pods: [] }))
+
+    const data = await lastCacheOptions().fetcher()
+
+    expect(data.health).toBe('not-installed')
+    expect(data.controllerPods).toEqual({ ready: 0, total: 0 })
+    expect(data.fetchError).toBeNull()
+    expect(mockAuthFetch).not.toHaveBeenCalled()
+  })
+
   it('returns a scoped pods fetch error when pod discovery fails', async () => {
     renderHook(() => useOpenYurtStatus())
     mockFetch.mockRejectedValueOnce(new Error('pods unavailable'))
@@ -212,5 +301,53 @@ describe('useOpenYurtStatus', () => {
     })
     expect(data.gateways).toHaveLength(1)
     expect(data.controllerPods).toEqual({ ready: 1, total: 1 })
+  })
+
+  it('surfaces gateway failures while keeping nodepool summaries', async () => {
+    renderHook(() => useOpenYurtStatus())
+
+    mockFetch.mockResolvedValueOnce(jsonResponse({
+      pods: [
+        {
+          name: 'yurt-manager-0',
+          status: 'Running',
+          ready: '1/1',
+          labels: { app: 'yurt-manager' },
+        },
+      ],
+    }))
+    mockAuthFetch
+      .mockResolvedValueOnce(jsonResponse({
+        items: [
+          {
+            name: 'edge-a',
+            cluster: 'cluster-a',
+            spec: { type: 'cloud' },
+            status: { readyNodeNum: 1, unreadyNodeNum: 1 },
+          },
+        ],
+      }))
+      .mockResolvedValueOnce(jsonResponse({}, {
+        ok: false,
+        status: 500,
+        statusText: 'Server Error',
+      }))
+
+    const data = await lastCacheOptions().fetcher()
+
+    expect(data.fetchError).toMatchObject({
+      resource: 'gateways',
+      message: 'HTTP 500 Server Error',
+    })
+    expect(data.health).toBe('degraded')
+    expect(data.nodePools[0]).toMatchObject({
+      name: 'edge-a',
+      type: 'cloud',
+      status: 'degraded',
+      nodeCount: 2,
+      readyNodes: 1,
+      autonomyEnabled: false,
+    })
+    expect(data.gateways).toEqual([])
   })
 })
