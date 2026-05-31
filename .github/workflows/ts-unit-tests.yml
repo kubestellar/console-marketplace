@@ -4,10 +4,14 @@ on:
   pull_request:
     paths:
       - 'web/src/**'
+      - 'vitest.marketplace.config.ts'
+      - '.github/workflows/ts-unit-tests.yml'
   push:
     branches: [main]
     paths:
       - 'web/src/**'
+      - 'vitest.marketplace.config.ts'
+      - '.github/workflows/ts-unit-tests.yml'
 
 jobs:
   vitest:
@@ -16,7 +20,7 @@ jobs:
       - name: Checkout marketplace
         uses: actions/checkout@v4
 
-      - name: Checkout console (vitest config & shared deps)
+      - name: Checkout console (Vitest config and shared deps)
         uses: actions/checkout@v4
         with:
           repository: kubestellar/console
@@ -24,10 +28,10 @@ jobs:
           sparse-checkout: |
             web/package.json
             web/package-lock.json
-            web/vitest.config.ts
+            web/vite.config.ts
             web/tsconfig.json
             web/tsconfig.node.json
-            web/src/test-setup.ts
+            web/src/test/setup.ts
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,8 +45,8 @@ jobs:
       - name: Link console node_modules for marketplace test resolution
         run: ln -s "${GITHUB_WORKSPACE}/console-parent/web/node_modules" "${GITHUB_WORKSPACE}/web/node_modules"
 
-      - name: Run vitest
+      - name: Run vitest with coverage gate
         working-directory: console-parent/web
-        run: npx vitest run --dir ${{ github.workspace }}/web/src
+        run: npx vitest run --config "${GITHUB_WORKSPACE}/vitest.marketplace.config.ts" --coverage
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
