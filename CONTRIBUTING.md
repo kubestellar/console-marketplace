@@ -127,6 +127,29 @@ Marketplace contributions are config-only, but you should still validate them be
 ### Prerequisites
 
 - **Python 3** (Python 3.6+ recommended) — the marketplace validator uses only standard library modules, no pip dependencies required
+- **Git**
+- A local checkout of [`kubestellar/console`](https://github.com/kubestellar/console) for `--mode cross-repo`, local Marketplace UI testing, and TypeScript unit tests
+- **Node.js 22.x** when working with the Console checkout (matches the current Console dev/CI environment)
+
+#### Recommended sibling checkouts for cross-repo work
+
+Keeping the Console and Marketplace repos next to each other makes the validator paths, local UI testing, and TypeScript unit test commands below easier to follow:
+
+```bash
+cd ..
+git clone https://github.com/kubestellar/console.git console
+# console-marketplace should already be checked out beside it
+
+cd console
+cd web && npm install && cd ..
+
+# Start a local Console for end-to-end Marketplace testing
+./start-dev.sh
+# or, if you want GitHub OAuth plus Vite HMR:
+./startup-oauth.sh --dev
+```
+
+The local Console uses backend `http://localhost:8080`, frontend `http://localhost:5174`, and kc-agent `http://localhost:8585`. Wait for the Console to finish starting before you begin the integration checks below.
 
 ### 1. Run the repository checks locally
 
@@ -218,14 +241,27 @@ Use a local checkout of [`kubestellar/console`](https://github.com/kubestellar/c
    ```bash
    python3 -m http.server 8000
    ```
-2. Start your local Console checkout.
+2. If you have not prepared the Console checkout yet, follow the setup steps in [Recommended sibling checkouts for cross-repo work](#recommended-sibling-checkouts-for-cross-repo-work), then wait for the Console to come up at `http://localhost:8080`.
 3. The Console marketplace currently fetches the registry from a hard-coded URL in `web/src/hooks/useMarketplace/demoData.ts`; there is no runtime env var/dev flag for overriding it yet.
-4. For local marketplace testing, temporarily point that `REGISTRY_URL` at your local server:
+4. In your Console checkout, temporarily point `REGISTRY_URL` at your local server by editing `web/src/hooks/useMarketplace/demoData.ts`:
    ```ts
    const REGISTRY_URL = 'http://localhost:8000/registry.json'
    ```
 5. Reload the Console, open **Marketplace**, and install your dashboard, card preset, or theme.
 6. For dashboards, also test the same JSON through the normal dashboard import flow in the running Console (floating action button → **Import**) and verify the layout and cards render correctly.
+7. When you are done testing, revert the temporary override before you commit anything in the Console repo:
+   ```bash
+   cd /path/to/console
+   git restore web/src/hooks/useMarketplace/demoData.ts
+   git status --short
+   ```
+
+If you want to keep the override around for a later test session without risking an accidental Console commit, stash just that file:
+
+```bash
+cd /path/to/console
+git stash push -m "local marketplace registry override" -- web/src/hooks/useMarketplace/demoData.ts
+```
 
 You can also test a dashboard import directly against a running local Console:
 
@@ -237,7 +273,31 @@ await fetch('/api/dashboards/import', {
 })
 ```
 
-### 4. Manual verification checklist
+### 4. Run TypeScript unit tests when changing `web/src/**`
+
+PRs that touch `web/src/**` (plus `vitest.marketplace.config.ts` or `.github/workflows/ts-unit-tests.yml`) run the **TypeScript Unit Tests** workflow. Those tests reuse shared Vitest/Vite config and npm dependencies from `kubestellar/console`, so you need a local Console checkout even though the tests live in this repo.
+
+The CI workflow uses a sparse Console checkout; for local work, a normal sibling checkout is simpler. If you followed the layout above, this is the local equivalent of CI:
+
+```bash
+# one-time shared dependency install in the Console checkout
+cd ../console/web
+npm ci
+
+# one-time symlink so Marketplace tests resolve shared deps from the Console checkout
+cd ../..
+ln -sfn "$(pwd)/console/web/node_modules" console-marketplace/web/node_modules
+
+# run Marketplace TypeScript unit tests
+cd console/web
+npx vitest run \
+  --config ../../console-marketplace/vitest.marketplace.config.ts \
+  --dir ../../console-marketplace/web
+```
+
+Marketplace TypeScript unit tests live under `web/src/**` (including `web/src/**/__tests__/**`). Re-run the command above whenever you change marketplace TypeScript source or tests there.
+
+### 5. Manual verification checklist
 
 Before submitting, verify the following in a running Console:
 
@@ -247,7 +307,7 @@ Before submitting, verify the following in a running Console:
 - **Themes**: capture screenshots of the key surfaces you changed (at minimum: dashboard view, Marketplace, and Settings → Theme)
 - **Themes**: if your theme is light, confirm text contrast on light backgrounds; if dark, confirm contrast on dark cards and panels
 
-### 5. CI requirements for pull requests
+### 6. CI requirements for pull requests
 
 PRs that touch `registry.json`, `dashboards/**`, `presets/**`, `card-presets/**`, `themes/**`, or `scripts/**` trigger CI validation.
 
