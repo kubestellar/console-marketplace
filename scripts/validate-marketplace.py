@@ -24,6 +24,7 @@ import re
 import sys
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 
 # ── Result tracking ──────────────────────────────────────────────────
@@ -832,6 +833,29 @@ def check_download_urls(base, results):
         item_id = item.get("id", "?")
         if not url:
             results.warn("download-url", f"'{item_id}' has no downloadUrl")
+            continue
+
+        # SSRF prevention: validate scheme and block private/loopback hosts
+        parsed = urlparse(url)
+        if parsed.scheme != "https":
+            results.error("download-url",
+                          f"'{item_id}' downloadUrl scheme {parsed.scheme!r} is not allowed; "
+                          f"only https:// is permitted")
+            continue
+        if not parsed.netloc:
+            results.error("download-url",
+                          f"'{item_id}' downloadUrl has no host: {url!r}")
+            continue
+        _private_prefixes = ("127.", "169.254.", "10.", "192.168.", "localhost", "[::1]", "::1")
+        _host = parsed.hostname or ""
+        if any(_host == p.rstrip(".") or _host.startswith(p) for p in _private_prefixes):
+            results.error("download-url",
+                          f"'{item_id}' downloadUrl resolves to a private address: {_host!r}")
+            continue
+        _parts = _host.split(".")
+        if len(_parts) == 4 and _parts[0] == "172" and _parts[1].isdigit() and 16 <= int(_parts[1]) <= 31:
+            results.error("download-url",
+                          f"'{item_id}' downloadUrl resolves to a private address: {_host!r}")
             continue
 
         try:
