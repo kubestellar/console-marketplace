@@ -330,6 +330,20 @@ These map to existing card components with similar functionality:
 | `security_overview` | `security_issues` |
 | `rbac_summary` | `namespace_rbac` |
 
+## Part of the KubeStellar Ecosystem
+
+This marketplace is one component of the KubeStellar platform. The full ecosystem:
+
+| Repository | Role |
+|------------|------|
+| [kubestellar/kubestellar](https://github.com/kubestellar/kubestellar) | Core multi-cluster orchestration engine (BindingPolicy, WDS, ITS, WEC) |
+| [kubestellar/console](https://github.com/kubestellar/console) | AI-powered web dashboard — hosts the Marketplace UI |
+| **kubestellar/console-marketplace** (this repo) | Community card presets, dashboards, and themes |
+| [kubestellar/console-kb](https://github.com/kubestellar/console-kb) | AI mission knowledge base — community fixes and runbooks |
+| [kubestellar/kubestellar-mcp](https://github.com/kubestellar/kubestellar-mcp) | MCP server — AI agent tooling for Claude, Cursor, Windsurf, VS Code |
+
+> Want to build cards for the marketplace? See [CONTRIBUTING.md](CONTRIBUTING.md). Want to operate multi-cluster infrastructure with AI agents? See [kubestellar-mcp](https://github.com/kubestellar/kubestellar-mcp).
+
 ## License
 
 Apache-2.0 — see [LICENSE](LICENSE).
