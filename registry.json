@@ -9,7 +9,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/sre-overview/dashboard.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/dashboards/sre-overview/dashboard.json",
       "tags": [
         "sre",
         "monitoring",
@@ -25,7 +25,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/security-audit/dashboard.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/dashboards/security-audit/dashboard.json",
       "tags": [
         "security",
         "compliance",
@@ -41,7 +41,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/dashboards/gitops-pipeline/dashboard.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/dashboards/gitops-pipeline/dashboard.json",
       "tags": [
         "gitops",
         "helm",
@@ -60,7 +60,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/pod-health-monitor.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/card-presets/pod-health-monitor.json",
       "tags": [
         "monitoring",
         "pods",
@@ -76,7 +76,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/warning-event-stream.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/card-presets/warning-event-stream.json",
       "tags": [
         "events",
         "monitoring",
@@ -92,7 +92,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/cluster-overview.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/card-presets/cluster-overview.json",
       "tags": [
         "clusters",
         "overview",
@@ -108,7 +108,7 @@
       "author": "kubestellar",
       "authorGithub": "XxSURYANSHxX",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/card-presets/kubeflow-monitoring.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/card-presets/kubeflow-monitoring.json",
       "tags": [
         "kubeflow",
         "ml",
@@ -124,7 +124,7 @@
       "description": "Deep blue theme with navy tones and teal accents — a calmer alternative to the default space theme.",
       "author": "community",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/midnight-blue.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/themes/midnight-blue.json",
       "tags": [
         "dark",
         "blue",
@@ -146,7 +146,7 @@
       "description": "Warm amber and orange tones on a dark background — cozy and easy on the eyes for late-night ops.",
       "author": "community",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/themes/amber-glow.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/themes/amber-glow.json",
       "tags": [
         "dark",
         "warm",
@@ -169,7 +169,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubernetes.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kubernetes.json",
       "tags": [
         "cncf",
         "graduated",
@@ -192,7 +192,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-helm.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-helm.json",
       "tags": [
         "cncf",
         "graduated",
@@ -215,7 +215,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-argo.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-argo.json",
       "tags": [
         "cncf",
         "graduated",
@@ -238,7 +238,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-prometheus.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-prometheus.json",
       "tags": [
         "cncf",
         "graduated",
@@ -261,7 +261,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opa.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-opa.json",
       "tags": [
         "cncf",
         "graduated",
@@ -284,7 +284,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-falco.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-falco.json",
       "tags": [
         "cncf",
         "graduated",
@@ -307,7 +307,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cert-manager.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cert-manager.json",
       "tags": [
         "cncf",
         "graduated",
@@ -330,7 +330,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-istio.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-istio.json",
       "tags": [
         "cncf",
         "graduated",
@@ -353,7 +353,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kyverno.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kyverno.json",
       "tags": [
         "cncf",
         "incubating",
@@ -376,7 +376,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubescape.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kubescape.json",
       "tags": [
         "cncf",
         "incubating",
@@ -399,7 +399,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opencost.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-opencost.json",
       "tags": [
         "cncf",
         "incubating",
@@ -421,7 +421,7 @@
       "description": "Monitor Envoy proxy configurations, listeners, clusters, and traffic routing across your service mesh.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-envoy.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-envoy.json",
       "tags": [
         "cncf",
         "graduated",
@@ -450,7 +450,7 @@
       "description": "Container runtime status, image management, and namespace utilization from containerd.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-containerd.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-containerd.json",
       "tags": [
         "cncf",
         "graduated",
@@ -479,7 +479,7 @@
       "description": "DNS query metrics, cache hit rates, and resolution performance from CoreDNS.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-coredns.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-coredns.json",
       "tags": [
         "cncf",
         "graduated",
@@ -500,7 +500,7 @@
       "description": "etcd cluster health, leader status, key-value store metrics, and WAL performance.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-etcd.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-etcd.json",
       "tags": [
         "cncf",
         "graduated",
@@ -529,7 +529,7 @@
       "description": "Log pipeline status, buffer utilization, and output plugin health from Fluentd.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-fluentd.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-fluentd.json",
       "tags": [
         "cncf",
         "graduated",
@@ -558,7 +558,7 @@
       "description": "gRPC service health, call metrics, and error rates from gRPC reflection endpoints.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-grpc.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-grpc.json",
       "tags": [
         "cncf",
         "graduated",
@@ -587,7 +587,7 @@
       "description": "Distributed trace collection, service dependencies, and latency analysis from Jaeger.",
       "author": "kubestellar",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-jaeger.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-jaeger.json",
       "tags": [
         "cncf",
         "graduated",
@@ -609,7 +609,7 @@
       "description": "Linkerd service mesh metrics, mTLS status, and proxy health across workloads.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-linkerd.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-linkerd.json",
       "tags": [
         "cncf",
         "graduated",
@@ -638,7 +638,7 @@
       "description": "CRI-O container runtime metrics, image pulls, and pod sandbox status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-crio.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-crio.json",
       "tags": [
         "cncf",
         "graduated",
@@ -667,7 +667,7 @@
       "description": "TiKV distributed key-value store metrics, region status, and storage utilization.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-tikv.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-tikv.json",
       "tags": [
         "cncf",
         "graduated",
@@ -696,7 +696,7 @@
       "description": "Vitess database clustering status, tablet health, and query performance via VTAdmin.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-vitess.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-vitess.json",
       "tags": [
         "cncf",
         "graduated",
@@ -725,7 +725,7 @@
       "description": "CloudEvents message flow, event source tracking, and delivery status monitoring.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cloudevents.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cloudevents.json",
       "tags": [
         "cncf",
         "graduated",
@@ -753,7 +753,7 @@
       "description": "The Update Framework metadata status, signature verification, and repository health.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-tuf.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-tuf.json",
       "tags": [
         "cncf",
         "graduated",
@@ -782,7 +782,7 @@
       "author": "kubestellar",
       "authorGithub": "aashu2006",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-harbor.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-harbor.json",
       "tags": [
         "cncf",
         "graduated",
@@ -803,7 +803,7 @@
       "description": "Rook-Ceph cluster health, OSD status, pool utilization, and storage capacity.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-rook.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-rook.json",
       "tags": [
         "cncf",
         "graduated",
@@ -832,7 +832,7 @@
       "description": "SPIFFE identity federation, trust domain status, and workload identity management.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-spiffe.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-spiffe.json",
       "tags": [
         "cncf",
         "graduated",
@@ -861,7 +861,7 @@
       "description": "SPIRE server health, agent registration, and workload attestation status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-spire.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-spire.json",
       "tags": [
         "cncf",
         "graduated",
@@ -891,7 +891,7 @@
       "author": "kubestellar",
       "authorGithub": "aashu2006",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cubefs.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cubefs.json",
       "tags": [
         "cncf",
         "graduated",
@@ -912,7 +912,7 @@
       "description": "Dapr sidecar status, component health, and distributed application building block metrics.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-dapr.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-dapr.json",
       "tags": [
         "cncf",
         "graduated",
@@ -941,7 +941,7 @@
       "description": "Dragonfly P2P image distribution, download progress, and seed peer status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-dragonfly.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-dragonfly.json",
       "tags": [
         "cncf",
         "graduated",
@@ -969,7 +969,7 @@
       "description": "KEDA autoscaler status, scaled object metrics, and trigger queue depths.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keda.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-keda.json",
       "tags": [
         "cncf",
         "graduated",
@@ -999,7 +999,7 @@
       "author": "kubestellar",
       "authorGithub": "aashu2006",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-knative.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-knative.json",
       "tags": [
         "cncf",
         "graduated",
@@ -1021,7 +1021,7 @@
       "author": "Pranjal6955",
       "authorGithub": "Pranjal6955",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cilium.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cilium.json",
       "tags": [
         "cncf",
         "graduated",
@@ -1045,7 +1045,7 @@
       "description": "Crossplane managed resources, composite claims, and cloud provider status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-crossplane.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-crossplane.json",
       "tags": [
         "cncf",
         "graduated",
@@ -1075,7 +1075,7 @@
       "author": "ANAMASGARD",
       "authorGithub": "ANAMASGARD",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flux.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-flux.json",
       "tags": [
         "cncf",
         "graduated",
@@ -1098,7 +1098,7 @@
       "author": "Community",
       "authorGithub": "aashu2006",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-in-toto.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-in-toto.json",
       "tags": [
         "cncf",
         "graduated",
@@ -1119,7 +1119,7 @@
       "description": "OpenTelemetry collector health, pipeline status, and telemetry data flow metrics.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-opentelemetry.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-opentelemetry.json",
       "tags": [
         "cncf",
         "graduated",
@@ -1148,7 +1148,7 @@
       "description": "Backstage developer portal catalog, component health, and plugin status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-backstage.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-backstage.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1177,7 +1177,7 @@
       "description": "Buildpack build status, builder health, and image build history.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-buildpacks.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-buildpacks.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1205,7 +1205,7 @@
       "description": "Cloud Custodian policy execution results, resource compliance, and remediation actions.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cloud-custodian.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cloud-custodian.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1233,7 +1233,7 @@
       "description": "Container Network Interface plugin status, network allocation, and connectivity health.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cni.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cni.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1262,7 +1262,7 @@
       "description": "Contour ingress proxy status, HTTPProxy resources, and Envoy fleet health.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-contour.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-contour.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1283,7 +1283,7 @@
       "description": "Cortex multi-tenant metrics storage, ingester ring status, and query performance.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-cortex.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-cortex.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1312,7 +1312,7 @@
       "description": "Chaos Mesh experiment status, workflow progress, and chaos injection schedules.",
       "author": "KubeStellar Team",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-chaos-mesh.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-chaos-mesh.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1335,7 +1335,7 @@
       "author": "kubestellar",
       "authorGithub": "aashu2006",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-fluid.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-fluid.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1357,7 +1357,7 @@
       "author": "Community",
       "authorGithub": "XxSURYANSHxX",
       "version": "0.1.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kserve.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kserve.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1381,7 +1381,7 @@
       "description": "Karmada multi-cluster resource propagation, override policies, and member cluster status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-karmada.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-karmada.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1411,7 +1411,7 @@
       "author": "Community",
       "authorGithub": "suhaani-agarwal",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keycloak.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-keycloak.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1435,7 +1435,7 @@
       "author": "kubestellar",
       "authorGithub": "XxSURYANSHxX",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubeflow.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kubeflow.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1459,7 +1459,7 @@
       "description": "KubeVirt virtual machine status, migration progress, and virtualization metrics.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubevirt.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kubevirt.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1488,7 +1488,7 @@
       "description": "KubeVela application status, component health, and OAM resource tracking.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubevela.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kubevela.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1517,7 +1517,7 @@
       "description": "Lima virtual machine instances, port forwarding status, and resource usage.",
       "author": "Community",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-lima.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-lima.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1538,7 +1538,7 @@
       "description": "Longhorn distributed storage volumes, replica health, and backup status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-longhorn.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-longhorn.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1567,7 +1567,7 @@
       "description": "NATS messaging server status, JetStream streams, and consumer health.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-nats.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-nats.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1596,7 +1596,7 @@
       "description": "Notary container image signing status, trust policies, and signature verification.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-notary.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-notary.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1624,7 +1624,7 @@
       "description": "OpenFeature flag evaluation status, provider health, and feature flag configurations.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openfeature.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-openfeature.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1652,7 +1652,7 @@
       "description": "OpenFGA authorization model status, relationship tuples, and access check metrics.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openfga.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-openfga.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1682,7 +1682,7 @@
       "author": "Community",
       "authorGithub": "XxSURYANSHxX",
       "version": "0.1.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openkruise.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-openkruise.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1707,7 +1707,7 @@
       "author": "Community",
       "authorGithub": "XxSURYANSHxX",
       "version": "0.1.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-openyurt.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-openyurt.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1731,7 +1731,7 @@
       "description": "OLM operator subscriptions, install plans, and catalog source status.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-operator-framework.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-operator-framework.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1760,7 +1760,7 @@
       "description": "Strimzi Kafka cluster health, topic status, and consumer group lag metrics.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-strimzi.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-strimzi.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1790,7 +1790,7 @@
       "author": "Pranjal6955",
       "authorGithub": "Pranjal6955",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-thanos.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-thanos.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1812,7 +1812,7 @@
       "description": "Volcano batch scheduling queues, job status, and GPU resource allocation.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-volcano.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-volcano.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1842,7 +1842,7 @@
       "author": "Community",
       "version": "1.0.0",
       "authorGithub": "p172913",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-wasmcloud.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-wasmcloud.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1864,7 +1864,7 @@
       "author": "ANAMASGARD",
       "authorGithub": "ANAMASGARD",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-artifact-hub.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-artifact-hub.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1885,7 +1885,7 @@
       "description": "Metal3 bare metal host provisioning and BMC status monitoring.",
       "author": "kubestellar",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-metal3.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-metal3.json",
       "tags": [
         "cncf",
         "incubating",
@@ -1907,7 +1907,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-flatcar.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-flatcar.json",
       "tags": [
         "cncf",
         "incubating",
