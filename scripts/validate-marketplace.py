@@ -23,6 +23,7 @@ import os
 import re
 import sys
 import urllib.request
+from urllib.parse import urlparse
 import urllib.error
 from datetime import datetime, timezone, timedelta
 
@@ -821,8 +822,33 @@ def check_cors_proxy(base, console_path, known_types, results):
 
 # ── Nightly-only checks ─────────────────────────────────────────────
 
+def _is_safe_download_url(url):
+    """Return (ok, reason) — reject non-HTTPS and private/loopback targets (SSRF guard)."""
+    parsed = urlparse(url)
+    if parsed.scheme != "https":
+        return False, f"scheme {parsed.scheme!r} is not allowed; only https:// is permitted"
+    host = parsed.hostname or ""
+    if not host:
+        return False, "URL has no host"
+    # Block loopback and link-local addresses
+    if host in ("localhost", "::1") or host.startswith("127.") or host.startswith("169.254."):
+        return False, f"host {host!r} is a loopback/link-local address"
+    # Block RFC-1918 private ranges: 10.x, 192.168.x, 172.16–31.x
+    if host.startswith("10.") or host.startswith("192.168."):
+        return False, f"host {host!r} is a private address"
+    parts = host.split(".")
+    if len(parts) >= 2 and parts[0] == "172":
+        try:
+            second = int(parts[1])
+            if 16 <= second <= 31:
+                return False, f"host {host!r} is a private address (172.16–31.x)"
+        except ValueError:
+            pass
+    return True, ""
+
+
 def check_download_urls(base, results):
-    """HTTP HEAD to each downloadUrl in registry.json."""
+    """HTTP HEAD to each downloadUrl in registry.json (SSRF-hardened)."""
     data, err = load_json(os.path.join(base, "registry.json"))
     if err:
         return
@@ -832,6 +858,12 @@ def check_download_urls(base, results):
         item_id = item.get("id", "?")
         if not url:
             results.warn("download-url", f"'{item_id}' has no downloadUrl")
+            continue
+
+        ok, reason = _is_safe_download_url(url)
+        if not ok:
+            results.error("download-url",
+                          f"'{item_id}' downloadUrl rejected: {reason}")
             continue
 
         try:
