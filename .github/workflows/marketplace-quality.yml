@@ -12,13 +12,14 @@ on:
       - 'scripts/**'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pull-requests: write
+permissions: read-all  # default read; writes scoped to job below
 
 jobs:
   # ── Fast static validation (~1 min) ──────────────────────────────
   static-validation:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -43,6 +44,9 @@ jobs:
 
   # ── Cross-repo card quality checks (~3 min) ──────────────────────
   card-quality-gate:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
