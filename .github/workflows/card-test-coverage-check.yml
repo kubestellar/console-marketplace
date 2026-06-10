@@ -1,0 +1,82 @@
+name: Card Test Coverage Check
+
+# Informational-only: detects new card components added in a PR without a
+# corresponding test file. Posts a comment listing gaps. Never blocks merge.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/src/components/cards/**'
+      - 'scripts/check-card-test-coverage.sh'
+      - '.github/workflows/card-test-coverage-check.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: card-test-coverage-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  card-test-coverage-check:
+    name: Detect untested cards
+    if: github.repository == 'kubestellar/console-marketplace'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - name: Detect untested card components
+        id: coverage
+        run: |
+          chmod +x scripts/check-card-test-coverage.sh
+          OUTPUT=$(./scripts/check-card-test-coverage.sh origin/main 2>&1)
+          echo "$OUTPUT"
+          GAP_COUNT=$(echo "$OUTPUT" | grep '^gap_count=' | cut -d= -f2 || echo "0")
+          echo "gap_count=${GAP_COUNT}" >> "$GITHUB_OUTPUT"
+          if [ -f /tmp/card-test-coverage-gaps.md ]; then
+            cat /tmp/card-test-coverage-gaps.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Post or update PR comment
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const reportPath = '/tmp/card-test-coverage-gaps.md';
+            if (!fs.existsSync(reportPath)) return;
+
+            const body = `<!-- card-test-coverage-check -->\n${fs.readFileSync(reportPath, 'utf8')}`;
+            const marker = '<!-- card-test-coverage-check -->';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }
