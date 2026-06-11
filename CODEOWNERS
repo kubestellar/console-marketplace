@@ -1,0 +1,8 @@
+# CODEOWNERS — require review for marketplace card definitions
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# All marketplace content requires review from maintainers
+* @clubanderson
+
+# CI/CD workflows
+/.github/ @clubanderson
