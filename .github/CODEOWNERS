@@ -1,0 +1,16 @@
+# Route all repository changes through maintainers so review requests are created
+# automatically once branch protection requires code-owner reviews.
+* @clubanderson @caniszczyk
+
+# Marketplace content and supporting metadata
+/registry.json @clubanderson @caniszczyk
+/dashboards/ @clubanderson @caniszczyk
+/card-presets/ @clubanderson @caniszczyk
+/presets/ @clubanderson @caniszczyk
+/themes/ @clubanderson @caniszczyk
+
+# Repository automation and contribution workflow
+/.github/ @clubanderson @caniszczyk
+/scripts/ @clubanderson @caniszczyk
+/README.md @clubanderson @caniszczyk
+/CONTRIBUTING.md @clubanderson @caniszczyk
