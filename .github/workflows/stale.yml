@@ -10,5 +10,5 @@ permissions:
 
 jobs:
   stale:
-    uses: kubestellar/infra/.github/workflows/reusable-stale.yml@main
+    uses: kubestellar/infra/.github/workflows/reusable-stale.yml@9a15d65135864435badfb9293251e8701b562899  # main
     secrets: inherit

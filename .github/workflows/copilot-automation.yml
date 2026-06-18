@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   copilot-automation:
-    uses: kubestellar/infra/.github/workflows/reusable-copilot-automation.yml@main
+    uses: kubestellar/infra/.github/workflows/reusable-copilot-automation.yml@9a15d65135864435badfb9293251e8701b562899  # main
     with:
       pr_number: ${{ github.event.inputs.pr_number || '' }}
     secrets:
