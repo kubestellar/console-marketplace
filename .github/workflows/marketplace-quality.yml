@@ -12,7 +12,8 @@ on:
       - 'scripts/**'
   workflow_dispatch:
 
-permissions: read-all  # default read; writes scoped to job below
+permissions:
+  contents: read
 
 jobs:
   # ── Fast static validation (~1 min) ──────────────────────────────
