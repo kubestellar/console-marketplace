@@ -236,8 +236,6 @@ export function OpenYurtStatus({ config }: OpenYurtStatusProps = {}) {
     isRefreshing,
     isFailed,
     isDemoFallback,
-    consecutiveFailures,
-    lastRefresh,
   } = useOpenYurtStatus(cluster)
 
   const [search, setSearch] = useState('')
@@ -258,7 +256,7 @@ export function OpenYurtStatus({ config }: OpenYurtStatusProps = {}) {
     gateways.length > 0 ||
     controllerPods.total > 0
 
-  const { showSkeleton, showEmptyState } = useCardLoadingState()
+  const { showSkeleton, showEmptyState } = useCardLoadingState({ isLoading, hasAnyData, isFailed })
 
   const stats = {
     totalPools: nodePools.length,

@@ -59,7 +59,7 @@ export function NotaryStatus({ config: _config }: NotaryStatusProps) {
   const rawData: NotaryDemoData = NOTARY_DEMO_DATA
 
   // --- required hook #1 + pattern #5: wire isDemoData into useCardLoadingState ---
-  const { showSkeleton, showEmptyState } = useCardLoadingState()
+  const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
 
   // Flatten clusters into display rows
   const allRows = useMemo<NotaryDisplayRow[]>(() => {
