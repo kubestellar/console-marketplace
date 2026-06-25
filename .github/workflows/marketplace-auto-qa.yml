@@ -23,8 +23,7 @@ env:
   MAX_ISSUES_PER_RUN: 3
   ISSUE_PREFIX: "[Auto-QA]"
 
-permissions:
-  actions: read   # least-privilege top-level default (writes scoped to job below)
+permissions: read-all
 
 jobs:
   nightly-scan:
