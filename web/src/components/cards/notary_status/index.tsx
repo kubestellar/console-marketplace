@@ -59,14 +59,7 @@ export function NotaryStatus({ config: _config }: NotaryStatusProps) {
   const rawData: NotaryDemoData = NOTARY_DEMO_DATA
 
   // --- required hook #1 + pattern #5: wire isDemoData into useCardLoadingState ---
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading: false,
-    isRefreshing: false,
-    hasAnyData: rawData.clusters.length > 0,
-    isFailed: false,
-    consecutiveFailures: 0,
-    isDemoData,                                      // pattern #5
-  })
+  const { showSkeleton, showEmptyState } = useCardLoadingState()
 
   // Flatten clusters into display rows
   const allRows = useMemo<NotaryDisplayRow[]>(() => {
@@ -97,21 +90,7 @@ export function NotaryStatus({ config: _config }: NotaryStatusProps) {
     needsPagination,
     containerRef,
     containerStyle,
-  } = useCardData<NotaryDisplayRow, 'cluster'>(globalFiltered, {
-    filter: {
-      searchFields: ['cluster'] as (keyof NotaryDisplayRow)[],
-      clusterField: 'cluster' as keyof NotaryDisplayRow,
-      storageKey: 'notary-status',
-    },
-    sort: {
-      defaultField: 'cluster',
-      defaultDirection: 'asc',
-      comparators: {
-        cluster: (a: NotaryDisplayRow, b: NotaryDisplayRow) => a.cluster.localeCompare(b.cluster),
-      },
-    },
-    defaultLimit: 5,
-  })
+  } = useCardData<NotaryDisplayRow, 'cluster'>(globalFiltered)
 
   // Summary totals (computed across the global-filtered set, before pagination)
   const totalSigned   = globalFiltered.reduce((s: number, r: NotaryDisplayRow) => s + r.signedImages,          0)

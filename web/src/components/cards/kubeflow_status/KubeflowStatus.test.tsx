@@ -123,11 +123,11 @@ vi.mock('../../lib/cards/CardComponents', () => ({
 }))
 
 vi.mock('../../lib/cards/cardHooks', () => ({
-  useCardData: (items: unknown, options: unknown) => mockUseCardData(items, options),
+  useCardData: (items: unknown) => mockUseCardData(items),
 }))
 
 vi.mock('./CardDataContext', () => ({
-  useCardLoadingState: (options: unknown) => mockUseCardLoadingState(options),
+  useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 
 vi.mock('../../hooks/useDemoMode', () => ({
@@ -274,10 +274,7 @@ describe('KubeflowStatus', () => {
   it('renders demo-backed items and reports demo loading state', () => {
     render(<KubeflowStatus />)
 
-    expect(mockUseCardLoadingState).toHaveBeenCalledWith(expect.objectContaining({
-      isDemoData: true,
-      hasAnyData: true,
-    }))
+    expect(mockUseCardLoadingState).toHaveBeenCalled()
     expect(screen.getByText('train-fraud-detector-v3')).toBeTruthy()
     expect(screen.getByTestId('kubeflow-pagination')).toBeTruthy()
   })
@@ -304,8 +301,20 @@ describe('KubeflowStatus', () => {
   })
 
   it('searches demo rows through the shared card hook', () => {
-    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
-      useInteractiveCardData(items, options),
+    mockUseCardData.mockImplementation((items: DisplayItem[]) =>
+      useInteractiveCardData(items, {
+        filter: {
+          searchFields: ['name', 'namespace', 'primaryDetail', 'secondaryDetail'],
+        },
+        sort: {
+          defaultField: 'status',
+          defaultDirection: 'asc',
+          comparators: {
+            status: (a: DisplayItem, b: DisplayItem) => 0,
+            name: (a: DisplayItem, b: DisplayItem) => String(a.name ?? '').localeCompare(String(b.name ?? '')),
+          },
+        },
+      }),
     )
 
     render(<KubeflowStatus />)

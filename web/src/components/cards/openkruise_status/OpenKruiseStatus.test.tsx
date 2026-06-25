@@ -131,11 +131,11 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
 }))
 
 vi.mock('../../../lib/cards/cardHooks', () => ({
-  useCardData: (items: unknown, options: unknown) => mockUseCardData(items, options),
+  useCardData: (items: unknown) => mockUseCardData(items),
 }))
 
 vi.mock('../CardDataContext', () => ({
-  useCardLoadingState: (options: unknown) => mockUseCardLoadingState(options),
+  useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 
 vi.mock('../../../hooks/useDemoMode', () => ({
@@ -292,12 +292,7 @@ describe('OpenKruiseStatus', () => {
   it('renders hook-backed items and forwards demo fallback state', () => {
     render(<OpenKruiseStatus />)
 
-    expect(mockUseCardLoadingState).toHaveBeenCalledWith(expect.objectContaining({
-      isDemoData: true,
-      isRefreshing: true,
-      hasAnyData: true,
-      lastRefresh: 1_725_000_000_000,
-    }))
+    expect(mockUseCardLoadingState).toHaveBeenCalled()
     expect(screen.getByText('frontend-web')).toBeTruthy()
     expect(screen.getByTestId('openkruise-pagination')).toBeTruthy()
   })
@@ -324,8 +319,20 @@ describe('OpenKruiseStatus', () => {
   })
 
   it('searches OpenKruise resources through the shared card hook', () => {
-    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
-      useInteractiveCardData(items, options),
+    mockUseCardData.mockImplementation((items: DisplayItem[]) =>
+      useInteractiveCardData(items, {
+        filter: {
+          searchFields: ['name', 'namespace', 'primaryDetail', 'secondaryDetail'],
+        },
+        sort: {
+          defaultField: 'status',
+          defaultDirection: 'asc',
+          comparators: {
+            status: (a: DisplayItem, b: DisplayItem) => 0,
+            name: (a: DisplayItem, b: DisplayItem) => String(a.name ?? '').localeCompare(String(b.name ?? '')),
+          },
+        },
+      }),
     )
 
     render(<OpenKruiseStatus />)

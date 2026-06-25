@@ -121,17 +121,7 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
   const rawData: KubeflowDemoData = KUBEFLOW_DEMO_DATA
 
   // #1 + #5  Report loading / demo state to CardWrapper
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading: clustersLoading,
-    isRefreshing: false,
-    hasAnyData:
-      rawData.pipelineRuns.length > 0 ||
-      rawData.notebooks.length > 0 ||
-      rawData.trainingJobs.length > 0,
-    isFailed: false,
-    consecutiveFailures: 0,
-    isDemoData,
-  })
+  const { showSkeleton, showEmptyState } = useCardLoadingState()
 
   // Transform every Kubeflow resource into a unified display item -----
   const allItems = useMemo<KubeflowDisplayItem[]>(() => {
@@ -249,32 +239,7 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
     sorting: { sortBy, setSortBy, sortDirection, setSortDirection },
     containerRef,
     containerStyle,
-  } = useCardData<KubeflowDisplayItem, SortByOption>(categoryFiltered, {
-    filter: {
-      searchFields: [
-        'name',
-        'namespace',
-        'primaryDetail',
-        'secondaryDetail',
-      ] as (keyof KubeflowDisplayItem)[],
-      clusterField: 'cluster' as keyof KubeflowDisplayItem,
-      statusField: 'status' as keyof KubeflowDisplayItem,
-      storageKey: 'kubeflow-status',
-    },
-    sort: {
-      defaultField: 'status',
-      defaultDirection: 'asc',
-      comparators: {
-        status: (a, b) =>
-          (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5),
-        name: (a, b) => a.name.localeCompare(b.name),
-        category: (a, b) => a.category.localeCompare(b.category),
-        timestamp: (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      },
-    },
-    defaultLimit: 5,
-  })
+  } = useCardData<KubeflowDisplayItem, SortByOption>(categoryFiltered)
 
   // Helpers -----------------------------------------------------------
   const getStatusIcon = (status: string) => {

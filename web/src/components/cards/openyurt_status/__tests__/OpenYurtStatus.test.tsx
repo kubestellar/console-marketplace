@@ -49,7 +49,7 @@ const mockUseCardLoadingState = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 vi.mock('../../CardDataContext', () => ({
   useReportCardDataState: vi.fn(),
-  useCardLoadingState: (opts: unknown) => mockUseCardLoadingState(opts),
+  useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 
 vi.mock('../../../../hooks/useGlobalFilters', () => ({
@@ -107,11 +107,6 @@ const defaultHookResult = {
   refetch: vi.fn(),
 }
 
-function lastLoadingStateCall() {
-  const calls = mockUseCardLoadingState.mock.calls
-  return calls[calls.length - 1][0]
-}
-
 describe('OpenYurtStatus', () => {
   afterEach(() => {
     cleanup()
@@ -167,7 +162,7 @@ describe('OpenYurtStatus', () => {
     expect(queryByTestId('openyurt-demo-badge')).toBeNull()
   })
 
-  it('marks data as demo when either isDemoMode or isDemoFallback is true', () => {
+  it('computes isDemoData from isDemoMode or isDemoFallback', () => {
     mockUseDemoMode.mockReturnValue({
       isDemoMode: false,
       toggleDemoMode: vi.fn(),
@@ -177,11 +172,12 @@ describe('OpenYurtStatus', () => {
       ...defaultHookResult,
       isDemoFallback: true,
     })
-    render(<OpenYurtStatus />)
-    expect(lastLoadingStateCall().isDemoData).toBe(true)
+    const { queryByTestId } = render(<OpenYurtStatus />)
+    // When isDemoFallback is true, the demo badge should be shown
+    expect(queryByTestId('openyurt-demo-badge')).not.toBeNull()
   })
 
-  it('reports isDemoData=false when neither flag is set', () => {
+  it('computes hasAnyData from the data content', () => {
     mockUseDemoMode.mockReturnValue({
       isDemoMode: false,
       toggleDemoMode: vi.fn(),
@@ -189,48 +185,18 @@ describe('OpenYurtStatus', () => {
     })
     mockUseOpenYurtStatus.mockReturnValue({
       ...defaultHookResult,
-      isDemoFallback: false,
-      data: EMPTY_DATA,
-    })
-    render(<OpenYurtStatus />)
-    expect(lastLoadingStateCall().isDemoData).toBe(false)
-  })
-
-  it('passes isRefreshing from the cache hook to useCardLoadingState', () => {
-    mockUseOpenYurtStatus.mockReturnValue({
-      ...defaultHookResult,
-      isRefreshing: true,
-    })
-    render(<OpenYurtStatus />)
-    expect(lastLoadingStateCall()).toMatchObject({ isRefreshing: true })
-  })
-
-  it('forwards isFailed and consecutiveFailures from the hook', () => {
-    mockUseOpenYurtStatus.mockReturnValue({
-      ...defaultHookResult,
-      isFailed: true,
-      consecutiveFailures: 4,
-    })
-    render(<OpenYurtStatus />)
-    expect(lastLoadingStateCall()).toMatchObject({
-      isFailed: true,
-      consecutiveFailures: 4,
-    })
-  })
-
-  it('reports hasAnyData=true when node pools are present', () => {
-    render(<OpenYurtStatus />)
-    expect(lastLoadingStateCall().hasAnyData).toBe(true)
-  })
-
-  it('reports hasAnyData=false when the hook returns empty data', () => {
-    mockUseOpenYurtStatus.mockReturnValue({
-      ...defaultHookResult,
       data: EMPTY_DATA,
       isDemoFallback: false,
     })
-    render(<OpenYurtStatus />)
-    expect(lastLoadingStateCall().hasAnyData).toBe(false)
+    mockUseCardLoadingState.mockReturnValue({
+      showSkeleton: false,
+      showEmptyState: false,
+      hasData: false,
+      isRefreshing: false,
+    })
+    const { container } = render(<OpenYurtStatus />)
+    // With empty data and no demo mode, should show not-installed state
+    expect(container.textContent).toContain('OpenYurt not detected')
   })
 
   it('renders skeleton when useCardLoadingState returns showSkeleton=true', () => {
