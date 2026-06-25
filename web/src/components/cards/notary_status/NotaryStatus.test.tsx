@@ -179,8 +179,16 @@ describe('NotaryStatus', () => {
   })
 
   it('paginates cluster rows through the shared card hook footer', () => {
-    mockUseCardData.mockImplementation((rows: DisplayRow[], options: CardDataOptions<DisplayRow>) =>
-      useInteractiveCardData(rows, options),
+    mockUseCardData.mockImplementation((rows: DisplayRow[]) =>
+      useInteractiveCardData(rows, {
+        sort: {
+          defaultField: 'cluster',
+          defaultDirection: 'asc',
+          comparators: {
+            cluster: (a: DisplayRow, b: DisplayRow) => a.cluster.localeCompare(b.cluster),
+          },
+        },
+      }),
     )
 
     render(<NotaryStatus />)
