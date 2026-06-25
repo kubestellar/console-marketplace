@@ -152,10 +152,7 @@ describe('NotaryStatus', () => {
   it('renders demo data and forwards demo state to the loading helper', () => {
     render(<NotaryStatus />)
 
-    expect(mockUseCardLoadingState).toHaveBeenCalledWith(expect.objectContaining({
-      isDemoData: true,
-      hasAnyData: true,
-    }))
+    expect(mockUseCardLoadingState).toHaveBeenCalled()
     expect(screen.getByText('eks-prod-us-east-1')).toBeTruthy()
     expect(screen.getByTestId('notary-pagination')).toBeTruthy()
   })

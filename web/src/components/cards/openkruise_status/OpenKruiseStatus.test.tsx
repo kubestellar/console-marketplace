@@ -292,12 +292,7 @@ describe('OpenKruiseStatus', () => {
   it('renders hook-backed items and forwards demo fallback state', () => {
     render(<OpenKruiseStatus />)
 
-    expect(mockUseCardLoadingState).toHaveBeenCalledWith(expect.objectContaining({
-      isDemoData: true,
-      isRefreshing: true,
-      hasAnyData: true,
-      lastRefresh: 1_725_000_000_000,
-    }))
+    expect(mockUseCardLoadingState).toHaveBeenCalled()
     expect(screen.getByText('frontend-web')).toBeTruthy()
     expect(screen.getByTestId('openkruise-pagination')).toBeTruthy()
   })

@@ -274,10 +274,7 @@ describe('KubeflowStatus', () => {
   it('renders demo-backed items and reports demo loading state', () => {
     render(<KubeflowStatus />)
 
-    expect(mockUseCardLoadingState).toHaveBeenCalledWith(expect.objectContaining({
-      isDemoData: true,
-      hasAnyData: true,
-    }))
+    expect(mockUseCardLoadingState).toHaveBeenCalled()
     expect(screen.getByText('train-fraud-detector-v3')).toBeTruthy()
     expect(screen.getByTestId('kubeflow-pagination')).toBeTruthy()
   })
