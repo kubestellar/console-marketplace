@@ -162,21 +162,7 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
   // demo mode or the live fetcher fell back.
   const isDemoData = isDemoMode || isDemoFallback
 
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading: clustersLoading || dataLoading,
-    isRefreshing,
-    hasAnyData:
-      rawData.cloneSets.length > 0 ||
-      rawData.advancedStatefulSets.length > 0 ||
-      rawData.advancedDaemonSets.length > 0 ||
-      rawData.sidecarSets.length > 0 ||
-      rawData.broadcastJobs.length > 0 ||
-      rawData.advancedCronJobs.length > 0,
-    isFailed,
-    consecutiveFailures,
-    isDemoData,
-    lastRefresh,
-  })
+  const { showSkeleton, showEmptyState } = useCardLoadingState()
 
   // Transform every OpenKruise resource into a unified display item -----
   const allItems = useMemo<OpenKruiseDisplayItem[]>(() => {
@@ -310,32 +296,7 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
     sorting: { sortBy, setSortBy, sortDirection, setSortDirection },
     containerRef,
     containerStyle,
-  } = useCardData<OpenKruiseDisplayItem, SortByOption>(categoryFiltered, {
-    filter: {
-      searchFields: [
-        'name',
-        'namespace',
-        'primaryDetail',
-        'secondaryDetail',
-      ] as (keyof OpenKruiseDisplayItem)[],
-      clusterField: 'cluster' as keyof OpenKruiseDisplayItem,
-      statusField: 'status' as keyof OpenKruiseDisplayItem,
-      storageKey: 'openkruise-status',
-    },
-    sort: {
-      defaultField: 'status',
-      defaultDirection: 'asc',
-      comparators: {
-        status: (a, b) =>
-          (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5),
-        name: (a, b) => a.name.localeCompare(b.name),
-        category: (a, b) => a.category.localeCompare(b.category),
-        timestamp: (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      },
-    },
-    defaultLimit: 5,
-  })
+  } = useCardData<OpenKruiseDisplayItem, SortByOption>(categoryFiltered)
 
   // Helpers ---------------------------------------------------------
   const getStatusIcon = (status: string) => {

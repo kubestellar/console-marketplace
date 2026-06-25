@@ -123,11 +123,11 @@ vi.mock('../../lib/cards/CardComponents', () => ({
 }))
 
 vi.mock('../../lib/cards/cardHooks', () => ({
-  useCardData: (items: unknown, options: unknown) => mockUseCardData(items, options),
+  useCardData: (items: unknown) => mockUseCardData(items),
 }))
 
 vi.mock('./CardDataContext', () => ({
-  useCardLoadingState: (options: unknown) => mockUseCardLoadingState(options),
+  useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 
 vi.mock('../../hooks/useDemoMode', () => ({
