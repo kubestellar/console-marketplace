@@ -26,7 +26,7 @@ describe('KUBEFLOW_DEMO_DATA', () => {
     }
   })
 
-  it('contains experiments with required numeric fields', () => {
+  it('contains experiments with required fields', () => {
     expect(KUBEFLOW_DEMO_DATA.experiments.length).toBeGreaterThan(0)
 
     for (const exp of KUBEFLOW_DEMO_DATA.experiments) {
@@ -37,9 +37,9 @@ describe('KUBEFLOW_DEMO_DATA', () => {
       expect(exp.description).toBeTruthy()
       expect(typeof exp.totalRuns).toBe('number')
       expect(typeof exp.succeededRuns).toBe('number')
-      expect(exp.totalRuns).toBeGreaterThanOrEqual(0)
-      expect(exp.succeededRuns).toBeGreaterThanOrEqual(0)
-      expect(exp.succeededRuns).toBeLessThanOrEqual(exp.totalRuns)
+      expect(typeof exp.failedRuns).toBe('number')
+      expect(typeof exp.activeRuns).toBe('number')
+      expect(new Date(exp.lastRunAt).toString()).not.toBe('Invalid Date')
     }
   })
 

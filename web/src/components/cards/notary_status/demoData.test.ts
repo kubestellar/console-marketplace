@@ -32,6 +32,13 @@ describe('NOTARY_DEMO_DATA', () => {
     }
   })
 
+  it('includes at least one installed and one not-installed cluster', () => {
+    const installed = NOTARY_DEMO_DATA.clusters.filter(c => c.installed)
+    const notInstalled = NOTARY_DEMO_DATA.clusters.filter(c => !c.installed)
+    expect(installed.length).toBeGreaterThan(0)
+    expect(notInstalled.length).toBeGreaterThan(0)
+  })
+
   it('sets a valid lastCheckTime timestamp', () => {
     expect(new Date(NOTARY_DEMO_DATA.lastCheckTime).toString()).not.toBe('Invalid Date')
   })
