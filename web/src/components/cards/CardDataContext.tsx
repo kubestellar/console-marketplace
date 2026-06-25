@@ -13,7 +13,6 @@ export function useCardLoadingState(opts?: CardLoadingStateOptions) {
     isLoading = false,
     isRefreshing = false,
     hasAnyData = true,
-    isFailed = false,
     isDemoData = false,
   } = opts ?? {}
 

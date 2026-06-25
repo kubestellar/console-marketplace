@@ -16,7 +16,6 @@ import {
   ExternalLink,
   PauseCircle,
 } from 'lucide-react'
-import { useClusters } from '../../../hooks/useMCP'
 import { Skeleton } from '../../ui/Skeleton'
 import { Select } from '../../ui/Select'
 import { ClusterBadge } from '../../ui/ClusterBadge'
@@ -75,20 +74,6 @@ type SortTranslationKey =
   | 'cards:openkruiseStatus.category'
   | 'cards:openkruiseStatus.updated'
 
-const STATUS_ORDER: Record<string, number> = {
-  failed: 0,
-  error: 0,
-  degraded: 1,
-  pending: 2,
-  paused: 2,
-  suspended: 3,
-  updating: 3,
-  running: 4,
-  active: 4,
-  succeeded: 5,
-  healthy: 5,
-}
-
 // Static Tailwind class maps so the JIT can statically detect the classes.
 const ICON_COLOR_CLASS: Record<string, string> = {
   green: 'text-green-400',
@@ -136,7 +121,6 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
   )
 
   // --- Required hooks ---
-  const { isLoading: clustersLoading } = useClusters()
   const { isDemoMode } = useDemoMode()
   const { selectedClusters } = useGlobalFilters()
 
@@ -151,18 +135,14 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
   const {
     data: rawData,
     isLoading: dataLoading,
-    isRefreshing,
-    isFailed,
     isDemoFallback,
-    consecutiveFailures,
-    lastRefresh,
   } = useOpenKruiseStatus()
 
   // isDemoData is true whenever we're showing demo-sourced data — explicit
   // demo mode or the live fetcher fell back.
   const isDemoData = isDemoMode || isDemoFallback
 
-  const { showSkeleton, showEmptyState } = useCardLoadingState()
+  const { showSkeleton, showEmptyState } = useCardLoadingState({ isLoading: dataLoading, isDemoData })
 
   // Transform every OpenKruise resource into a unified display item -----
   const allItems = useMemo<OpenKruiseDisplayItem[]>(() => {

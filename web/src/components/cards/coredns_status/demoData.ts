@@ -10,7 +10,6 @@
 /** Time offsets (in milliseconds) used for relative timestamps. */
 const ONE_MINUTE_MS = 60 * 1000
 const FIVE_MINUTES_MS = 5 * ONE_MINUTE_MS
-const ONE_HOUR_MS = 60 * ONE_MINUTE_MS
 
 export interface CoreDNSDemoServer {
   name: string

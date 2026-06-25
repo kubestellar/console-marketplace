@@ -11,7 +11,6 @@ import {
   BookOpen,
   Cpu,
 } from 'lucide-react'
-import { useClusters } from '../../hooks/useMCP'
 import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import {
@@ -58,25 +57,6 @@ type SortTranslationKey =
   | 'cards:kubeflowStatus.category'
   | 'cards:kubeflowStatus.updated'
 
-const STATUS_ORDER: Record<string, number> = {
-  failed: 0,
-  error: 0,
-  degraded: 1,
-  restarting: 1,
-  pending: 2,
-  created: 2,
-  terminating: 2,
-  suspended: 3,
-  running: 4,
-  active: 4,
-  building: 4,
-  succeeded: 5,
-  healthy: 5,
-  stopped: 6,
-  idle: 6,
-  skipped: 7,
-}
-
 const SORT_OPTIONS_KEYS: ReadonlyArray<{
   value: SortByOption
   labelKey: SortTranslationKey
@@ -104,7 +84,6 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
   // --- 4. useTranslation       (required hook #4, already called above) ---
   // --- 5. isDemoData wiring    (required pattern #5, see below) ---
 
-  const { isLoading: clustersLoading } = useClusters()
   const { isDemoMode } = useDemoMode()
   const { selectedClusters } = useGlobalFilters()
 
@@ -121,7 +100,7 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
   const rawData: KubeflowDemoData = KUBEFLOW_DEMO_DATA
 
   // #1 + #5  Report loading / demo state to CardWrapper
-  const { showSkeleton, showEmptyState } = useCardLoadingState()
+  const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
 
   // Transform every Kubeflow resource into a unified display item -----
   const allItems = useMemo<KubeflowDisplayItem[]>(() => {
