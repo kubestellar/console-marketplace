@@ -18,8 +18,10 @@ interface CardDataOptions {
 
 export function useCardData<T, _SortKey = string>(items: T[], opts?: CardDataOptions) {
   const defaultLimit = opts?.defaultLimit
-  const itemsPerPage = defaultLimit === 'unlimited' ? ('unlimited' as const) : (typeof defaultLimit === 'number' ? defaultLimit : 5)
-  const pageItems = itemsPerPage === 'unlimited' ? items : items.slice(0, itemsPerPage)
+  const itemsPerPage = defaultLimit === 'unlimited'
+    ? ('unlimited' as const)
+    : typeof defaultLimit === 'number' ? defaultLimit : 5
+  const pageItems = itemsPerPage === 'unlimited' ? items : items.slice(0, itemsPerPage as number)
 
   return {
     items: pageItems,
@@ -39,7 +41,7 @@ export function useCardData<T, _SortKey = string>(items: T[], opts?: CardDataOpt
       availableClusters: [] as string[],
       showClusterFilter: false,
       setShowClusterFilter: () => {},
-      clusterFilterRef: { current: null } as React.RefObject<HTMLDivElement | null>,
+      clusterFilterRef: { current: null } as { current: null },
     },
     sorting: {
       sortBy: opts?.sort?.defaultField ?? 'status',
@@ -47,7 +49,7 @@ export function useCardData<T, _SortKey = string>(items: T[], opts?: CardDataOpt
       sortDirection: opts?.sort?.defaultDirection ?? 'asc',
       setSortDirection: () => {},
     },
-    containerRef: { current: null } as React.RefObject<HTMLDivElement | null>,
+    containerRef: { current: null } as { current: null },
     containerStyle: {},
   }
 }
