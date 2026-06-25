@@ -301,8 +301,20 @@ describe('KubeflowStatus', () => {
   })
 
   it('searches demo rows through the shared card hook', () => {
-    mockUseCardData.mockImplementation((items: DisplayItem[], options: CardDataOptions<DisplayItem>) =>
-      useInteractiveCardData(items, options),
+    mockUseCardData.mockImplementation((items: DisplayItem[]) =>
+      useInteractiveCardData(items, {
+        filter: {
+          searchFields: ['name', 'namespace', 'primaryDetail', 'secondaryDetail'],
+        },
+        sort: {
+          defaultField: 'status',
+          defaultDirection: 'asc',
+          comparators: {
+            status: (a: DisplayItem, b: DisplayItem) => 0,
+            name: (a: DisplayItem, b: DisplayItem) => String(a.name ?? '').localeCompare(String(b.name ?? '')),
+          },
+        },
+      }),
     )
 
     render(<KubeflowStatus />)
