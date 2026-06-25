@@ -49,7 +49,7 @@ const mockUseCardLoadingState = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 vi.mock('../../CardDataContext', () => ({
   useReportCardDataState: vi.fn(),
-  useCardLoadingState: (opts: unknown) => mockUseCardLoadingState(opts),
+  useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 
 vi.mock('../../../../hooks/useGlobalFilters', () => ({
@@ -105,11 +105,6 @@ const defaultHookResult = {
   consecutiveFailures: 0,
   lastRefresh: Date.now(),
   refetch: vi.fn(),
-}
-
-function lastLoadingStateCall() {
-  const calls = mockUseCardLoadingState.mock.calls
-  return calls[calls.length - 1][0]
 }
 
 describe('OpenYurtStatus', () => {
