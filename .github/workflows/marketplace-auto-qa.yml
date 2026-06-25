@@ -31,10 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write      # Copilot needs write access to create branches
+      # Required: Copilot needs write access to create branches
+      contents: write
+      # Required: Auto-QA creates and updates issues for findings
       issues: write
-      pull-requests: write # Copilot needs to create PRs
-      actions: read        # Copilot needs to view workflow status
+      # Required: Copilot needs to create PRs to fix issues
+      pull-requests: write
+      # Required: Copilot needs to view workflow status
+      actions: read
     steps:
       - name: Checkout marketplace
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
