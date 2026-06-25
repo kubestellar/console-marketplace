@@ -258,15 +258,7 @@ export function OpenYurtStatus({ config }: OpenYurtStatusProps = {}) {
     gateways.length > 0 ||
     controllerPods.total > 0
 
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading,
-    isRefreshing,
-    hasAnyData,
-    isFailed,
-    consecutiveFailures,
-    isDemoData,
-    lastRefresh,
-  })
+  const { showSkeleton, showEmptyState } = useCardLoadingState()
 
   const stats = {
     totalPools: nodePools.length,
