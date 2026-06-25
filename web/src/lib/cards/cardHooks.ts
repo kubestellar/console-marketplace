@@ -1,31 +1,53 @@
-export function useCardData<T>(items: T[]) {
+interface CardDataFilter {
+  searchFields?: string[]
+  clusterField?: string
+  storageKey?: string
+}
+
+interface CardDataSort {
+  defaultField?: string
+  defaultDirection?: 'asc' | 'desc'
+  comparators?: Record<string, (a: unknown, b: unknown) => number>
+}
+
+interface CardDataOptions {
+  filter?: CardDataFilter
+  sort?: CardDataSort
+  defaultLimit?: number | 'unlimited'
+}
+
+export function useCardData<T, _SortKey = string>(items: T[], opts?: CardDataOptions) {
+  const defaultLimit = opts?.defaultLimit
+  const itemsPerPage = defaultLimit === 'unlimited' ? ('unlimited' as const) : (typeof defaultLimit === 'number' ? defaultLimit : 5)
+  const pageItems = itemsPerPage === 'unlimited' ? items : items.slice(0, itemsPerPage)
+
   return {
-    items,
+    items: pageItems,
     totalItems: items.length,
     currentPage: 1,
-    totalPages: 1,
-    itemsPerPage: 5,
+    totalPages: itemsPerPage === 'unlimited' ? 1 : Math.ceil(items.length / (itemsPerPage as number)),
+    itemsPerPage,
     setItemsPerPage: () => {},
     goToPage: () => {},
-    needsPagination: false,
+    needsPagination: itemsPerPage !== 'unlimited' && items.length > (itemsPerPage as number),
     filters: {
       search: '',
       setSearch: () => {},
-      localClusterFilter: [],
+      localClusterFilter: [] as string[],
       toggleClusterFilter: () => {},
       clearClusterFilter: () => {},
-      availableClusters: [],
+      availableClusters: [] as string[],
       showClusterFilter: false,
       setShowClusterFilter: () => {},
-      clusterFilterRef: { current: null },
+      clusterFilterRef: { current: null } as React.RefObject<HTMLDivElement | null>,
     },
     sorting: {
-      sortBy: 'status',
+      sortBy: opts?.sort?.defaultField ?? 'status',
       setSortBy: () => {},
-      sortDirection: 'asc',
+      sortDirection: opts?.sort?.defaultDirection ?? 'asc',
       setSortDirection: () => {},
     },
-    containerRef: { current: null },
+    containerRef: { current: null } as React.RefObject<HTMLDivElement | null>,
     containerStyle: {},
   }
 }
