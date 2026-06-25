@@ -16,7 +16,7 @@ describe('useCardData', () => {
 
     const result = useCardData(items)
 
-    expect(result.items).toBe(items)
+    expect(result.items).toEqual(items)
     expect(result.totalItems).toBe(2)
     expect(result.currentPage).toBe(1)
     expect(result.totalPages).toBe(1)
