@@ -4,11 +4,19 @@ on:
   pull_request_target:
     types: [opened, edited, synchronize, reopened]
 
-permissions:
-  checks: write
-  pull-requests: read
+permissions: read-all
 
 jobs:
-  verify:
-    uses: kubestellar/infra/.github/workflows/reusable-pr-verifier.yml@main
-    secrets: inherit
+  verify-pr-title:
+    name: Verify PR Title
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    steps:
+      - name: Validate PR title (Conventional Commits)
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
