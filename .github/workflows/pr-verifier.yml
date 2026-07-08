@@ -18,5 +18,13 @@ jobs:
     steps:
       - name: Validate PR title (Conventional Commits)
         uses: amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825 # v5
+        with:
+          # Allow optional [scanner], [agent], [ci-maintainer], [quality], [sec-check] prefix
+          # before the conventional commit type for automated PRs
+          subjectPattern: ^(\[(scanner|agent|ci-maintainer|quality|sec-check)\]\s+)?(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?:.+
+          subjectPatternError: |
+            The PR title must follow Conventional Commits format.
+            Automated PRs may use an optional prefix like [scanner] or [agent].
+            Examples: "fix: correct typo", "[scanner] fix: pin SHA"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
