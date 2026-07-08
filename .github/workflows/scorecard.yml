@@ -11,9 +11,12 @@ permissions:
   security-events: write
   contents: read
   actions: read
-  id-token: write
+  # id-token: write removed — reusable-scorecard.yml uses publish_results: false
+  # and does not perform OIDC token operations
 
 jobs:
   analysis:
-    uses: kubestellar/infra/.github/workflows/reusable-scorecard.yml@main
-    secrets: inherit
+    # pinned to kubestellar/infra main @ 2026-06-19 (supply-chain fix #374, #375)
+    uses: kubestellar/infra/.github/workflows/reusable-scorecard.yml@1a04a3fd17771e78e5cf6d42a3fda84e3ba478f3
+    # secrets: inherit removed — reusable-scorecard.yml declares no secret inputs
+    # and does not reference any secrets in its steps

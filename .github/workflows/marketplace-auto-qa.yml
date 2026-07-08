@@ -30,13 +30,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      # Required: Copilot needs write access to create branches
-      contents: write
-      # Required: Auto-QA creates and updates issues for findings
+      # Checkout only needs read; write ops use CONSOLE_AUTO PAT (#373)
+      contents: read
+      # Required: fallback token for creating/updating Auto-QA issues when
+      # CONSOLE_AUTO secret is not set; prefer setting CONSOLE_AUTO (#373)
       issues: write
-      # Required: Copilot needs to create PRs to fix issues
-      pull-requests: write
-      # Required: Copilot needs to view workflow status
+      # pull-requests: write removed — this job creates issues, not PRs;
+      # Copilot agent uses its own token for branch/PR operations (#373)
+      # Required: read workflow run URLs for issue bodies
       actions: read
     steps:
       - name: Checkout marketplace

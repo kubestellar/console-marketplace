@@ -10,5 +10,6 @@ permissions:
 
 jobs:
   feedback:
-    uses: kubestellar/infra/.github/workflows/reusable-feedback.yml@main
-    secrets: inherit
+    # pinned to kubestellar/infra main @ 2026-06-19 (supply-chain fix #374)
+    uses: kubestellar/infra/.github/workflows/reusable-feedback.yml@1a04a3fd17771e78e5cf6d42a3fda84e3ba478f3
+    # secrets: inherit removed — reusable-feedback.yml declares no secret inputs
