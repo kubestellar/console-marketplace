@@ -20,3 +20,9 @@ jobs:
         uses: amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825 # v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allow optional [actor] prefix used by automated agents before the type token.
+          # Accepted prefixes: [scanner], [ci-maintainer], [quality], [sec-check]
+          # Standard conventional commits (without a prefix) continue to work unchanged.
+          headerPattern: '^(?:\[(?:scanner|ci-maintainer|quality|sec-check)\] )?(\w+)(\([\w$.\-* ]*\))?: (\S.+)$'
+          headerPatternCorrespondence: 'type, scope, subject'
