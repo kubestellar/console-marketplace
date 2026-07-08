@@ -1,0 +1,40 @@
+name: PR Verifier
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Title
+        uses: amannn/action-semantic-pull-request@v5
+        with:
+          # Allow scanner/agent PRs with [scanner] or [agent] prefix
+          # e.g., "[scanner] fix: update dependency versions"
+          # e.g., "[agent] feat: add new scanner rule"
+          wip: true
+          # Custom regex to allow optional [scanner] or [agent] prefix
+          # before the conventional commit type
+          subjectPattern: ^(\[scanner\]|\[agent\])?\s*(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .+
+          subjectPatternError: |
+            The PR title must follow conventional commit format.
+            Examples:
+            - "fix: correct typo in README"
+            - "[scanner] feat: add new dependency scanner"
+            - "[agent] fix: resolve timeout issue"
+            
+            Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+            
+            The optional [scanner] or [agent] prefix is allowed for automated PRs.
+          # Validate that the PR title starts with a valid conventional commit
+          # or with [scanner]/[agent] prefix
+          validateSingleCommit: false
+          # Allow merge commits and other non-conventional commit messages
+          ignoreLabels: |
+            bot
+            automated
+            dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
