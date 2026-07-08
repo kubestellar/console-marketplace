@@ -2,11 +2,16 @@ name: Marketplace Auto-QA
 # Nightly quality scan with per-category issue creation.
 # Mirrors the issue creation logic from kubestellar/console auto-qa.yml.
 #
-# IMPORTANT: The CONSOLE_AUTO secret (PAT) must have these permissions:
+# IMPORTANT: The CONSOLE_AUTO secret (PAT) is REQUIRED for this workflow.
+# It must have these permissions:
 #   - repo (full control) - for contents, issues, pull requests
 #   - workflow - for actions access
 #   Or use a Fine-Grained PAT with: Contents (read/write), Issues (read/write),
 #   Pull requests (read/write), Actions (read), Metadata (read)
+#
+# All write operations (issue creation, label creation, Copilot assignment)
+# use the CONSOLE_AUTO PAT exclusively. The workflow-level GITHUB_TOKEN is
+# kept read-only to satisfy OpenSSF Scorecard Token-Permissions (check #73).
 
 on:
   schedule:
@@ -30,14 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      # Required: Copilot needs write access to create branches
-      contents: write
-      # Required: Auto-QA creates and updates issues for findings
-      issues: write
-      # Required: Copilot needs to create PRs to fix issues
-      pull-requests: write
-      # Required: Copilot needs to view workflow status
-      actions: read
+      # Read-only GITHUB_TOKEN: all write operations use the CONSOLE_AUTO PAT
+      # (see workflow header). Keeps Scorecard Token-Permissions check happy.
+      contents: read
     steps:
       - name: Checkout marketplace
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
@@ -129,7 +129,7 @@ jobs:
       - name: Ensure labels exist
         if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.CONSOLE_AUTO || github.token }}
+          GH_TOKEN: ${{ secrets.CONSOLE_AUTO }}
         run: |
           LABELS=(
             "auto-qa|0E8A16|Automated quality assurance finding"
@@ -157,7 +157,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          github-token: ${{ secrets.CONSOLE_AUTO || github.token }}
+          github-token: ${{ secrets.CONSOLE_AUTO }}
           script: |
             const fs = require('fs');
             const prefix = process.env.ISSUE_PREFIX;
