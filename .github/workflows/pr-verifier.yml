@@ -4,8 +4,7 @@ on:
   pull_request_target:
     types: [opened, edited, synchronize, reopened]
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   verify-pr-title:
