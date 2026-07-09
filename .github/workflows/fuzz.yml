@@ -1,0 +1,36 @@
+name: Fuzzing
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzzing:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '20'
+
+      - name: ClusterFuzzLite batch fuzzing
+        uses: google/clusterfuzzlite/actions/run_fuzzers@8d6f94c1619c787f1ccf6c40ed5e32ec10e0930c # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          language: javascript
+          fuzz-seconds: 300
+          mode: 'batch'
+          sanitizer: 'address'
