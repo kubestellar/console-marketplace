@@ -16,11 +16,22 @@ interface CardDataOptions {
   defaultLimit?: number | 'unlimited'
 }
 
+const DEFAULT_ITEMS_PER_PAGE = 5
+
+function resolveItemsPerPage(defaultLimit?: number | 'unlimited') {
+  if (defaultLimit === 'unlimited') {
+    return 'unlimited' as const
+  }
+
+  if (typeof defaultLimit === 'number' && Number.isInteger(defaultLimit) && defaultLimit > 0) {
+    return defaultLimit
+  }
+
+  return DEFAULT_ITEMS_PER_PAGE
+}
+
 export function useCardData<T, _SortKey = string>(items: T[], opts?: CardDataOptions) {
-  const defaultLimit = opts?.defaultLimit
-  const itemsPerPage = defaultLimit === 'unlimited'
-    ? ('unlimited' as const)
-    : typeof defaultLimit === 'number' ? defaultLimit : 5
+  const itemsPerPage = resolveItemsPerPage(opts?.defaultLimit)
   const pageItems = itemsPerPage === 'unlimited' ? items : items.slice(0, itemsPerPage as number)
 
   return {
