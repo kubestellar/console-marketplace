@@ -5,10 +5,50 @@ on:
     types: [opened, edited, synchronize, reopened]
 
 permissions:
+  contents: read
   checks: write
   pull-requests: read
 
 jobs:
   verify:
-    uses: kubestellar/infra/.github/workflows/reusable-pr-verifier.yml@main
-    secrets: inherit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: read
+    steps:
+      - name: Check PR title format
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const validPrefixes = ['✨', '🐛', '📖', '📝', '⚠️', '🌱'];
+            const hasValidPrefix = validPrefixes.some(prefix => title.startsWith(prefix));
+            
+            if (!hasValidPrefix) {
+              core.setFailed(`PR title must start with one of: ${validPrefixes.join(', ')}`);
+            } else {
+              core.info('✓ PR title has valid emoji prefix');
+            }
+      
+      - name: Check DCO signoff
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const commits = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+            
+            const unsignedCommits = commits.data.filter(commit => {
+              const message = commit.commit.message;
+              return !message.includes('Signed-off-by:');
+            });
+            
+            if (unsignedCommits.length > 0) {
+              const commitList = unsignedCommits.map(c => `- ${c.sha.substring(0, 7)}: ${c.commit.message.split('\n')[0]}`).join('\n');
+              core.setFailed(`The following commits are missing DCO signoff:\n${commitList}\n\nPlease add signoff with: git commit --amend --signoff && git push --force`);
+            } else {
+              core.info('✓ All commits have DCO signoff');
+            }
