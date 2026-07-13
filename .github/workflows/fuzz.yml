@@ -32,7 +32,7 @@ jobs:
       - name: Install fuzzing dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install atheris jsonschema pytest
+          pip install atheris==2.3.0 jsonschema==4.23.0 pytest==8.3.4
 
       - name: Create fuzz target
         run: |
