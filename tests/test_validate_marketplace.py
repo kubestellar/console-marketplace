@@ -101,6 +101,52 @@ class TestLoopbackRejection:
         assert "loopback" in reason
 
     @pytest.mark.parametrize("url", [
+        "https://[::ffff:127.0.0.1]/file",       # IPv4-mapped loopback
+        "https://[::ffff:127.1.2.3]/file",
+    ])
+    def test_ipv4_mapped_loopback_rejected(self, url):
+        ok, reason = _is_safe(url)
+        assert not ok, f"{url!r} should be rejected"
+        assert "loopback" in reason
+
+    @pytest.mark.parametrize("url", [
+        "https://[fc00::1]/file",   # ULA
+        "https://[fd00::1]/file",   # ULA
+    ])
+    def test_ipv6_ula_rejected(self, url):
+        ok, reason = _is_safe(url)
+        assert not ok, f"{url!r} should be rejected"
+        assert "private" in reason
+
+    def test_ipv6_link_local_rejected(self):
+        ok, reason = _is_safe("https://[fe80::1]/file")
+        assert not ok
+        assert "link-local" in reason
+
+    def test_ipv6_unspecified_rejected(self):
+        ok, reason = _is_safe("https://[::]/file")
+        assert not ok
+        # ipaddress marks :: as unspecified and also is_private on newer Python.
+        assert any(k in reason for k in ("unspecified", "reserved", "private"))
+
+    def test_ipv4_unspecified_rejected(self):
+        ok, reason = _is_safe("https://0.0.0.0/file")
+        assert not ok
+        # 0.0.0.0 is unspecified (v4). ipaddress marks it is_unspecified.
+        assert "unspecified" in reason or "reserved" in reason or "private" in reason
+
+    @pytest.mark.parametrize("url", [
+        "https://metadata.google.internal/computeMetadata/v1/",
+        "https://Metadata.Google.Internal/latest/",  # case-insensitive
+        "https://metadata.azure.com/",
+        "https://metadata.oraclecloud.com/",
+    ])
+    def test_metadata_hostnames_rejected(self, url):
+        ok, reason = _is_safe(url)
+        assert not ok, f"{url!r} should be rejected"
+        assert "metadata" in reason
+
+    @pytest.mark.parametrize("url", [
         "https://169.254.0.1/file",
         "https://169.254.169.254/latest/meta-data/",  # AWS metadata endpoint
         "https://169.254.169.254:80/computeMetadata/",  # GCP metadata endpoint
