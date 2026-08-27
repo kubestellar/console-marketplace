@@ -13,7 +13,25 @@ test files run to completion. These are:
    key" errors — the file is simply skipped, and a separate JSON-syntax
    check (``check_json_syntax``) reports the parse failure.
 
+3. The skip-root-``cardRegistry.ts`` guard in
+   ``parse_sub_registry_categories`` (line 224). The ``cardRegistry.*.ts``
+   glob does not actually match the root file today, but the explicit
+   basename check is defensive — this test locks in the guarantee that
+   dropping a literal ``cardRegistry.ts`` next to sub-registries never
+   pollutes the returned set.
+
+4. The unmapped-card-type ``continue`` at the top of
+   ``check_is_demo_data_wiring`` (line 649). ``check_consecutive_failures``
+   has a dedicated test for the same guard, but its
+   ``check_is_demo_data_wiring`` sibling was uncovered.
+
 Together these move ``validate-marketplace.py`` coverage from 96% → 99%+.
+The two lines that remain uncovered (224, 914) are defensive branches
+that are unreachable through the public API today — the ``cardRegistry.*.ts``
+glob cannot match ``cardRegistry.ts`` (empty ``*`` still leaves two adjacent
+dots), and every ``is_unspecified`` address classifies as ``is_private=True``
+first on modern CPython so the ``is_unspecified`` return is dead. They are
+kept in the source as future-proofing.
 """
 from __future__ import annotations
 
@@ -253,6 +271,95 @@ def _iter_all_findings(results):
             else:
                 cat, msg = "", str(entry)
             yield sev, cat, msg
+
+
+# ── parse_sub_registry_categories: skip root cardRegistry.ts (line 224) ─
+
+class TestParseSubRegistryCategoriesSkipsRoot(unittest.TestCase):
+    """The glob ``cardRegistry.*.ts`` also matches the root ``cardRegistry.ts``
+    (because ``*`` matches an empty sequence in some POSIX implementations —
+    it does **not** in Python's ``glob``, but ``cardRegistry.ts.ts`` etc.
+    would slip through). The parser guards against processing the root file
+    by checking ``os.path.basename(path) == "cardRegistry.ts"`` and
+    ``continue``-ing (line 224).
+
+    The pre-existing ``TestParseSubRegistryCategoriesCoverage`` suite exercises
+    the OSError branch (228-229) and the brace-depth walker, but never drops
+    a literal ``cardRegistry.ts`` in the scanned directory, so the skip-root
+    ``continue`` at line 224 is uncovered.
+    """
+
+    def test_root_cardregistry_file_is_skipped(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards_dir = Path(d)
+            # Root file — must be skipped even though it also matches the
+            # ``cardRegistry.*.ts`` glob pattern. If the parser did NOT
+            # skip it, it would extract ``root_only`` and pollute the
+            # returned set.
+            (cards_dir / "cardRegistry.ts").write_text(
+                "const cat = {\n"
+                "  components: {\n"
+                "    root_only: LazyRootOnly,\n"
+                "  },\n"
+                "}\n"
+            )
+            # Sibling sub-registry — the ONLY entry the parser should
+            # actually surface.
+            (cards_dir / "cardRegistry.observability.ts").write_text(
+                "const cat = {\n"
+                "  components: {\n"
+                "    obs_summary: LazyObsSummary,\n"
+                "  },\n"
+                "}\n"
+            )
+            result = _mod.parse_sub_registry_categories(str(cards_dir))
+            self.assertIn("obs_summary", result)
+            self.assertNotIn(
+                "root_only", result,
+                msg="root cardRegistry.ts must be skipped by line 224",
+            )
+
+
+# ── check_is_demo_data_wiring: unmapped card type (line 649) ────────
+
+class TestCheckIsDemoDataWiringUnmappedCard(unittest.TestCase):
+    """``check_is_demo_data_wiring`` iterates ``known_types`` and looks each
+    one up in ``parse_card_type_to_component``. Types with no registry entry
+    ``continue`` at line 649. The sibling ``check_consecutive_failures`` has
+    a dedicated coverage test for the same guard
+    (``test_unmapped_card_type_is_skipped``); this test covers the
+    ``check_is_demo_data_wiring`` copy of the guard, which is a separate
+    physical branch and therefore counted separately by coverage.py.
+    """
+
+    def _make_console_no_registry(self, tmp_path):
+        console = tmp_path / "console"
+        cards_dir = console / "web/src/components/cards"
+        cards_dir.mkdir(parents=True)
+        # Empty RAW_CARD_COMPONENTS registry: no card_type -> component
+        # mapping, so every known_type will fail the ``comp_name`` lookup.
+        (cards_dir / "cardRegistry.ts").write_text(
+            "export const RAW_CARD_COMPONENTS = {}\n"
+        )
+        return console
+
+    def test_unmapped_card_type_is_skipped(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            console = self._make_console_no_registry(tmp)
+            base = tmp / "marketplace"
+            base.mkdir()
+            r = Results()
+            # ``unregistered_card`` is not in RAW_CARD_COMPONENTS, so
+            # ``comp_name`` is None on line 648 and line 649 continues.
+            # The function must return cleanly with no warnings.
+            _mod.check_is_demo_data_wiring(
+                str(base), str(console), {"unregistered_card"}, r,
+            )
+            self.assertEqual(
+                r.warnings, [],
+                msg="unmapped card type must be silently skipped at line 649",
+            )
 
 
 class TestResultsHelperShapeIsStable(unittest.TestCase):
