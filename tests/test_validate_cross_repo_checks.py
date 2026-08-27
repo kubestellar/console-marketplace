@@ -598,3 +598,186 @@ class TestMain:
         assert "Marketplace Quality" in text
         # Cross-repo table is appended when console_path is provided.
         assert "Card Quality Matrix" in text
+
+
+# ── Coverage-gap regression tests ──────────────────────────────────
+#
+# The tests below close small but real gaps in ``validate-marketplace.py``
+# reported by ``coverage report -m``:
+#
+#   - parse_sub_registry_categories: nested-brace depth tracking, and the
+#     OSError branch guarding a sub-registry read.
+#   - check_is_demo_data_wiring: skip of ``.test.tsx`` / ``demoData.tsx``
+#     files during main-file scan, and the OSError read guard.
+#   - check_consecutive_failures: early ``continue`` when the card_type
+#     has no registry mapping, plus the same skip/OSError guards inside
+#     the main-file loop.
+#   - check_cors_proxy: OSError while reading a marketplace hook file.
+#
+# All are test-only additions.
+
+
+class TestParseSubRegistryCategoriesCoverage:
+    def test_nested_braces_do_not_close_components_block_early(self, tmp_path):
+        # A safeLazy() options object inside the components map has nested
+        # ``{ ... }`` — the parser must track brace depth so keys after the
+        # nested object are still recognized. Without depth tracking the
+        # parser would stop at the first ``}`` and miss ``pod_issues``.
+        (tmp_path / "cardRegistry.mixed.ts").write_text(
+            "const cat = {\n"
+            "  components: {\n"
+            "    cluster_health: safeLazy(() => import('./ClusterHealth'), { fallback: LoadingCard }),\n"
+            "    pod_issues: LazyPodIssues,\n"
+            "  },\n"
+            "}\n"
+        )
+        result = _mod.parse_sub_registry_categories(str(tmp_path))
+        assert {"cluster_health", "pod_issues"} <= result
+
+    def test_oserror_on_sub_file_is_swallowed(self, tmp_path, monkeypatch):
+        (tmp_path / "cardRegistry.observability.ts").write_text(
+            "const cat = { components: { obs_summary: LazyObsSummary } }\n"
+        )
+        real_open = _mod.open if hasattr(_mod, "open") else open
+        import builtins
+
+        def fake_open(path, *a, **kw):
+            if "cardRegistry.observability.ts" in str(path):
+                raise OSError("permission denied")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        # OSError branch must swallow the failure and return an empty set
+        # for the unreadable file — no exception propagates.
+        assert _mod.parse_sub_registry_categories(str(tmp_path)) == set()
+
+
+class TestCheckIsDemoDataWiringCoverage:
+    def test_test_and_demodata_files_are_skipped(self, tmp_path):
+        # Main-file loop must skip ``*.test.tsx`` and ``demoData.tsx`` so
+        # a ``useCardLoadingState`` mention inside a test fixture never
+        # triggers a false "does not pass isDemoData" warning.
+        console = _make_console(
+            tmp_path,
+            card_types=["cluster_health"],
+            extra_component_bodies={"cluster_health": "// no hook here\n"},
+        )
+        comp_dir = console / "web/src/components/cards/ClusterHealth"
+        (comp_dir / "ClusterHealth.test.tsx").write_text(
+            "useCardLoadingState(x); // not isDemoData\n"
+        )
+        (comp_dir / "demoData.tsx").write_text(
+            "useCardLoadingState(x); // not isDemoData\n"
+        )
+        base = _make_marketplace(tmp_path)
+        r = Results()
+        _mod.check_is_demo_data_wiring(str(base), str(console),
+                                       {"cluster_health"}, r)
+        # No warning because the only mentions live in skipped files.
+        assert not r.warnings
+
+    def test_unreadable_component_file_is_swallowed(self, tmp_path, monkeypatch):
+        console = _make_console(
+            tmp_path,
+            card_types=["cluster_health"],
+            extra_component_bodies={"cluster_health": "useCardLoadingState(x);\n"},
+        )
+        base = _make_marketplace(tmp_path)
+        target = str(console / "web/src/components/cards/ClusterHealth/ClusterHealth.tsx")
+
+        import builtins
+        real_open = builtins.open
+
+        def fake_open(path, *a, **kw):
+            if str(path) == target:
+                raise OSError("boom")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        r = Results()
+        # The OSError branch must swallow the failure. No hook was
+        # observed (because the file couldn't be read) so no warning
+        # is emitted.
+        _mod.check_is_demo_data_wiring(str(base), str(console),
+                                       {"cluster_health"}, r)
+        assert not r.warnings
+
+
+class TestCheckConsecutiveFailuresCoverage:
+    def test_unmapped_card_type_is_skipped(self, tmp_path):
+        # A card type present in known_types but absent from the registry
+        # (no RAW_CARD_COMPONENTS entry) must be skipped without warning
+        # or error — this is the ``comp_name`` guard at the top of the loop.
+        console = _make_console(tmp_path, card_types=[])  # empty registry
+        base = _make_marketplace(tmp_path)
+        r = Results()
+        _mod.check_consecutive_failures(str(base), str(console),
+                                        {"unregistered_card"}, r)
+        assert not r.warnings
+
+    def test_test_and_demodata_files_are_skipped(self, tmp_path):
+        console = _make_console(
+            tmp_path,
+            card_types=["cluster_health"],
+            extra_component_bodies={"cluster_health": "// no hook here\n"},
+        )
+        comp_dir = console / "web/src/components/cards/ClusterHealth"
+        (comp_dir / "ClusterHealth.test.ts").write_text("useCachedClusters();\n")
+        (comp_dir / "demoData.ts").write_text("useCachedClusters();\n")
+        base = _make_marketplace(tmp_path)
+        r = Results()
+        _mod.check_consecutive_failures(str(base), str(console),
+                                        {"cluster_health"}, r)
+        # No warning because ``useCached*`` only appears in skipped files.
+        assert not r.warnings
+
+    def test_unreadable_component_file_is_swallowed(self, tmp_path, monkeypatch):
+        console = _make_console(
+            tmp_path,
+            card_types=["cluster_health"],
+            extra_component_bodies={"cluster_health": "useCachedClusters();\n"},
+        )
+        base = _make_marketplace(tmp_path)
+        target = str(console / "web/src/components/cards/ClusterHealth/ClusterHealth.tsx")
+
+        import builtins
+        real_open = builtins.open
+
+        def fake_open(path, *a, **kw):
+            if str(path) == target:
+                raise OSError("boom")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        r = Results()
+        _mod.check_consecutive_failures(str(base), str(console),
+                                        {"cluster_health"}, r)
+        # OSError swallowed → uses_cached stays False → no warning.
+        assert not r.warnings
+
+
+class TestCheckCorsProxyCoverage:
+    def test_unreadable_hook_file_is_swallowed(self, tmp_path, monkeypatch):
+        # A marketplace hook with a fetch() call would normally trigger a
+        # CORS warning; if the file can't be read, the OSError branch must
+        # swallow the failure without warning or crash.
+        console = _make_console(tmp_path, card_types=[])
+        base = _make_marketplace(
+            tmp_path,
+            hooks={"useThing.ts": "fetch('https://direct.example.com/api')\n"},
+        )
+        target = str(base / "web/src/hooks/useThing.ts")
+
+        import builtins
+        real_open = builtins.open
+
+        def fake_open(path, *a, **kw):
+            if str(path) == target:
+                raise OSError("boom")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        r = Results()
+        _mod.check_cors_proxy(str(base), str(console), set(), r)
+        # No CORS warning because the file couldn't be scanned.
+        assert not any("cors" in cat for cat, _ in r.warnings)
