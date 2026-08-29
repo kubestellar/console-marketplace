@@ -1,1 +1,1 @@
-export * from '../../CardDataContext'
+export * from '../CardDataContext'
