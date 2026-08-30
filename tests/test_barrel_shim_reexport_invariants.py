@@ -18,11 +18,13 @@ This module walks ``web/src/``, finds every single-line
 own directory, and asserts that a concrete ``.ts`` / ``.tsx`` /
 ``/index.ts`` / ``/index.tsx`` file exists on disk.
 
-Two shims are currently known-broken and are pinned with
-``expectedFailure`` referencing the tracking issue. When that issue
-is fixed, those subtests will start passing and the ``expectedFailure``
-decorator will need to come off — which is exactly the "unexpected
-pass" signal you want.
+Originally two shims (buildpacks-status/ and coredns_status/) were
+known-broken and were pinned with ``expectedFailure`` referencing
+tracking issue kubestellar/console-marketplace#494. Both have since
+been fixed and the pin has been removed; the invariant is now a
+plain positive test with an empty ``KNOWN_BROKEN`` allowlist retained
+so future drift discoveries have a documented on-ramp for the same
+self-clearing pattern.
 """
 
 from __future__ import annotations
@@ -46,17 +48,18 @@ SHIM_RE = re.compile(
 # Vite / Node resolver behaviour for relative specifiers.
 RESOLVE_SUFFIXES = (".ts", ".tsx", "/index.ts", "/index.tsx")
 
-# Shims whose relative spec is currently broken. Pinned here (rather
-# than being silently skipped) so that the moment the production fix
-# lands, the corresponding subtest starts passing and pytest reports
-# an unexpected pass — a signal to update this list and delete the
-# ``expectedFailure`` decorator.
+# Shims whose relative spec is known-broken and are excluded from the
+# invariant walk. Kept as an intentional on-ramp for the self-clearing
+# pattern: a new drift discovery goes in here alongside its tracking
+# issue, and the paired ``@unittest.expectedFailure`` guard below
+# flips to an unexpected-success signal the moment the production
+# fix lands.
 #
-# Tracked in kubestellar/console-marketplace#494.
-KNOWN_BROKEN = frozenset({
-    "web/src/components/cards/buildpacks-status/CardDataContext.tsx",
-    "web/src/components/cards/coredns_status/CardDataContext.tsx",
-})
+# The set is currently empty — the two shims originally listed here
+# (buildpacks-status/CardDataContext.tsx and
+# coredns_status/CardDataContext.tsx) were fixed under
+# kubestellar/console-marketplace#494 and both now resolve.
+KNOWN_BROKEN: frozenset[str] = frozenset()
 
 
 def _first_code_line(text: str) -> str | None:
@@ -185,32 +188,38 @@ class ShimReExportInvariants(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_known_broken_shims_still_broken(self):
-        """Pinned to fail today: two shims under buildpacks-status/
-        and coredns_status/ re-export from ``'../../CardDataContext'``,
-        which resolves to ``web/src/components/CardDataContext`` — a
-        file that does not exist. The canonical CardDataContext lives
-        at ``web/src/components/cards/CardDataContext.tsx``, one level
-        up from the card subdir, so the correct spec is
-        ``'../CardDataContext'`` (as used by the kubeflow_status/ and
-        notary_status/ sibling shims).
+        """Placeholder guarding the self-clearing pattern.
 
-        This test is marked ``expectedFailure`` deliberately: once the
-        two shims are fixed, this test will start passing and unittest
-        will report an unexpected success, which is the signal to
-        delete both this decorator and the entry from KNOWN_BROKEN.
+        When ``KNOWN_BROKEN`` is empty (steady state), this test
+        deliberately raises so that the ``expectedFailure`` decorator
+        keeps the whole suite green. The moment a future maintainer
+        adds an entry to ``KNOWN_BROKEN`` alongside a new tracking
+        issue, this test will start failing "for real" via the
+        ``assertIsNone`` on the newly-added broken shim; and once
+        that shim is fixed, unittest will report an unexpected
+        success — the signal to remove both the ``KNOWN_BROKEN``
+        entry and (if it was the last one) this decorator.
 
-        The vitest suite is silent on this bug because each card's
-        component test uses ``vi.mock('./CardDataContext', ...)`` to
-        replace the module before the broken re-export ever executes.
-        Tracked in kubestellar/console-marketplace#494.
+        Historical context: originally pinned two shims fixed under
+        kubestellar/console-marketplace#494.
         """
+        if not KNOWN_BROKEN:
+            # Steady state: no broken shims to guard. Raise so the
+            # expectedFailure decorator can keep the suite green
+            # without silently pretending the guard fired.
+            raise self.failureException(
+                "KNOWN_BROKEN is empty — no broken shims to pin. "
+                "This is the steady-state placeholder; the "
+                "expectedFailure decorator absorbs this raise."
+            )
         for rel, spec in self.shims:
             if rel not in KNOWN_BROKEN:
                 continue
             resolved = _resolves(REPO_ROOT / rel, spec)
-            self.assertIsNotNone(
+            self.assertIsNone(
                 resolved,
-                f"{rel}: spec {spec!r} still does not resolve",
+                f"{rel}: spec {spec!r} now resolves — remove it from "
+                f"KNOWN_BROKEN and update the tracking-issue reference.",
             )
 
 
