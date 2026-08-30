@@ -150,3 +150,84 @@ def test_asset_json_files_end_with_single_newline_and_have_no_bom():
             f"{f.relative_to(REPO_ROOT)}: file ends with more than one "
             "trailing newline"
         )
+
+
+# ─── Placeholder/help-wanted pairing ───────────────────────────────────────
+#
+# The 34 CNCF placeholder presets under ``presets/cncf-*.json`` carry a
+# paired metadata block:
+#
+#     "_placeholder": true,
+#     "_help_wanted": "This card preset is a placeholder. …"
+#
+# These two keys are semantically joined: ``_placeholder`` marks the card
+# as awaiting implementation and ``_help_wanted`` supplies the user-visible
+# banner text explaining why the card looks empty in the marketplace UI.
+# A codegen or hand-edit that strips one while leaving the other would
+# silently misrepresent the implementation status of the card — either
+# the UI would render an unimplemented card without the help-wanted banner
+# (looks broken), or an implemented card would still nag users about being
+# unfinished. See tracking issue kubestellar/console-marketplace#499.
+
+def test_preset_placeholder_and_help_wanted_appear_together():
+    """A preset may declare neither key or both, never exactly one — they
+    describe the same placeholder-card contract."""
+    for f in CARD_PRESETS + PRESETS:
+        d = _load(f)
+        has_plc = "_placeholder" in d
+        has_help = "_help_wanted" in d
+        assert has_plc == has_help, (
+            f"{f.relative_to(REPO_ROOT)}: _placeholder and _help_wanted "
+            f"must appear together (both or neither); "
+            f"got _placeholder={has_plc}, _help_wanted={has_help}"
+        )
+
+
+def test_preset_placeholder_value_is_boolean_true_when_present():
+    """The placeholder flag is a gate the marketplace UI checks with
+    ``preset._placeholder === true``; anything truthy-but-not-true (the
+    string ``"true"``, integer ``1``, list, etc.) would slip past the
+    strict-equality check and render the card as if it were implemented."""
+    for f in CARD_PRESETS + PRESETS:
+        d = _load(f)
+        if "_placeholder" not in d:
+            continue
+        v = d["_placeholder"]
+        assert v is True, (
+            f"{f.relative_to(REPO_ROOT)}: _placeholder={v!r} must be "
+            f"the boolean True (not a truthy string/int)"
+        )
+
+
+def test_preset_help_wanted_value_is_nonempty_string_when_present():
+    """An empty string would render the help-wanted banner as a blank
+    stripe with no explanation."""
+    for f in CARD_PRESETS + PRESETS:
+        d = _load(f)
+        if "_help_wanted" not in d:
+            continue
+        v = d["_help_wanted"]
+        assert isinstance(v, str) and v.strip(), (
+            f"{f.relative_to(REPO_ROOT)}: _help_wanted={v!r} must be "
+            f"a non-empty string"
+        )
+
+
+def test_placeholder_presets_use_status_suffixed_card_type():
+    """Every placeholder-marked preset today uses a ``<project>_status``
+    card_type — the CNCF placeholder-card dispatch contract. A
+    ``_placeholder: true`` preset whose card_type did NOT end in ``_status``
+    would either mean the placeholder flag is stale (the card was
+    implemented under a fresh card_type but the flag was left behind), or
+    the CNCF placeholder pattern was silently broken."""
+    for f in CARD_PRESETS + PRESETS:
+        d = _load(f)
+        if not d.get("_placeholder"):
+            continue
+        ct = d.get("card_type", "")
+        assert isinstance(ct, str) and ct.endswith("_status"), (
+            f"{f.relative_to(REPO_ROOT)}: _placeholder=true but "
+            f"card_type={ct!r} does not end with '_status' — either "
+            f"the placeholder flag is stale or the CNCF placeholder "
+            f"dispatch contract is broken"
+        )
