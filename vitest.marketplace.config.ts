@@ -22,6 +22,9 @@ export default {
       ],
       thresholds: {
         lines: COVERAGE_THRESHOLD,
+        statements: COVERAGE_THRESHOLD,
+        functions: COVERAGE_THRESHOLD,
+        branches: COVERAGE_THRESHOLD,
       },
     },
   },
