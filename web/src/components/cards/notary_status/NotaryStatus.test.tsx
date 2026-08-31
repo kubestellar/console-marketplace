@@ -231,4 +231,31 @@ describe('NotaryStatus', () => {
 
     expect(screen.getByText('notaryStatus.notInstalled')).toBeTruthy()
   })
+
+  it('renders the skeleton branch when the loading helper reports showSkeleton=true', () => {
+    // The skeleton return at index.tsx:106 is a separate code path from
+    // the normal render and the empty-state render. The pre-existing
+    // tests only exercise showSkeleton=false, so the skeleton return
+    // was never entered — a refactor that broke it (e.g. removed the
+    // early return, or forgot to render placeholders while data loads)
+    // would ship silently. Lock the arm.
+    mockUseCardLoadingState.mockReturnValue({
+      showSkeleton: true,
+      showEmptyState: false,
+    })
+
+    render(<NotaryStatus />)
+
+    // The mocked Skeleton renders as <div data-testid="notary-skeleton" />;
+    // the skeleton return path renders several of them (title, badge,
+    // 3 metric tiles, and per-row rectangles). Assert at least one is
+    // present AND that neither the normal-render aggregates nor the
+    // empty-state key are visible.
+    expect(screen.getAllByTestId('notary-skeleton').length).toBeGreaterThan(0)
+    // Normal-render aggregate (60 signed images) must not appear in
+    // the skeleton branch.
+    expect(screen.queryByText('60')).toBeNull()
+    // Empty-state i18n key must not appear either.
+    expect(screen.queryByText('notaryStatus.notInstalled')).toBeNull()
+  })
 })
