@@ -376,4 +376,27 @@ describe('KubeflowStatus', () => {
 
     expect(screen.getAllByTestId('kubeflow-skeleton').length).toBeGreaterThan(0)
   })
+
+  it('renders the empty state when the loading helper requests it', () => {
+    mockUseCardLoadingState.mockReturnValue({
+      showSkeleton: false,
+      showEmptyState: true,
+    })
+
+    render(<KubeflowStatus />)
+
+    expect(screen.getByText('kubeflowStatus.noResources')).toBeTruthy()
+  })
+
+  it('renders training-job rows with the training icon and label', () => {
+    render(<KubeflowStatus />)
+
+    fireEvent.change(screen.getByTitle('kubeflowStatus.filterByResource'), {
+      target: { value: 'training' },
+    })
+
+    expect(screen.getByText('fraud-detector-distributed')).toBeTruthy()
+    expect(screen.getAllByText('kubeflowStatus.trainingJob').length).toBeGreaterThan(0)
+    expect(screen.queryByText('fraud-research-notebook')).toBeNull()
+  })
 })
