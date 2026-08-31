@@ -303,4 +303,69 @@ describe('OpenYurtStatus', () => {
 
     expect(mockUseOpenYurtStatus).toHaveBeenCalledWith('edge-shenzhen')
   })
+
+  // ─── useFormatRelativeTime branches (index.tsx:92-100) ─────────────────
+  // The hook fans out into 5 arms depending on the age of data.lastCheckTime.
+  // Existing tests only render with a static demo fixture, which hits either
+  // one arm or the isNaN guard depending on Date.now() at run time. These
+  // subtests pin Date.now() with fake timers and drive each arm deterministically.
+
+  describe('useFormatRelativeTime arms (rendered via lastCheckTime)', () => {
+    const FIXED_NOW = new Date('2026-01-15T12:00:00Z').getTime()
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(FIXED_NOW)
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    function renderAt(lastCheckOffsetMs: number | 'invalid' | 'future') {
+      let lastCheckTime: string
+      if (lastCheckOffsetMs === 'invalid') {
+        lastCheckTime = 'not-a-real-timestamp'
+      } else if (lastCheckOffsetMs === 'future') {
+        lastCheckTime = new Date(FIXED_NOW + 60_000).toISOString()
+      } else {
+        lastCheckTime = new Date(FIXED_NOW - lastCheckOffsetMs).toISOString()
+      }
+      mockUseOpenYurtStatus.mockReturnValue({
+        ...defaultHookResult,
+        data: { ...OPENYURT_DEMO_DATA, lastCheckTime },
+      })
+      return render(<OpenYurtStatus />)
+    }
+
+    it('renders syncedJustNow when the parsed date is NaN (isNaN(diff) arm)', () => {
+      const { container } = renderAt('invalid')
+      expect(container.textContent).toContain('openyurt.syncedJustNow')
+    })
+
+    it('renders syncedJustNow when the last check is in the future (diff < 0 arm)', () => {
+      const { container } = renderAt('future')
+      expect(container.textContent).toContain('openyurt.syncedJustNow')
+    })
+
+    it('renders syncedJustNow when the last check is <1 minute old (diff < minute arm)', () => {
+      const { container } = renderAt(30_000)
+      expect(container.textContent).toContain('openyurt.syncedJustNow')
+    })
+
+    it('renders syncedMinutesAgo when the last check is <1 hour old', () => {
+      const { container } = renderAt(5 * 60_000)
+      expect(container.textContent).toContain('openyurt.syncedMinutesAgo')
+    })
+
+    it('renders syncedHoursAgo when the last check is <1 day old', () => {
+      const { container } = renderAt(3 * 60 * 60_000)
+      expect(container.textContent).toContain('openyurt.syncedHoursAgo')
+    })
+
+    it('renders syncedDaysAgo when the last check is ≥1 day old (final return arm)', () => {
+      const { container } = renderAt(3 * 24 * 60 * 60_000)
+      expect(container.textContent).toContain('openyurt.syncedDaysAgo')
+    })
+  })
 })
