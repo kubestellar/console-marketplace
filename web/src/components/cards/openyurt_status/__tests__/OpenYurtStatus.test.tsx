@@ -368,4 +368,146 @@ describe('OpenYurtStatus', () => {
       expect(container.textContent).toContain('openyurt.syncedDaysAgo')
     })
   })
+
+  // ------------------------------------------------------------------
+  // Soft-error banner in the main (hasData=true) render path
+  // ------------------------------------------------------------------
+  //
+  // The existing fetchError tests target the empty-state error card
+  // (`openyurt-error`), which is rendered when `showEmptyState` is
+  // true and we have no data. A second, separate banner lives inside
+  // the main hasData render at index.tsx:372-394. It fires only when
+  // `!isDemoMode && fetchError` and has three separate `t(...)` arms
+  // keyed on `fetchError.resource` — one each for `nodepools`,
+  // `gateways`, and `pods`. Coverage before these tests: index.tsx
+  // branch 77.27%, uncovered lines 375-394 (the whole banner block)
+  // + 443-447 (empty search results). Adding these subtests exercises
+  // every branch of the banner plus the "search returns no matches"
+  // arm, closing the last v8-reported gaps in this file.
+  describe('main-render soft-error banner (hasData=true, !isDemoMode)', () => {
+    const hasDataState = {
+      showSkeleton: false,
+      showEmptyState: false,
+      hasData: true,
+      isRefreshing: false,
+    }
+
+    const withFetchError = (resource: 'nodepools' | 'gateways' | 'pods') => ({
+      ...OPENYURT_DEMO_DATA,
+      fetchError: { resource, message: 'HTTP 403 Forbidden' },
+    })
+
+    beforeEach(() => {
+      mockUseDemoMode.mockReturnValue({
+        isDemoMode: false,
+        toggleDemoMode: vi.fn(),
+        setDemoMode: vi.fn(),
+      })
+      mockUseCardLoadingState.mockReturnValue(hasDataState)
+    })
+
+    it('renders the nodepools RBAC banner atop the main render', () => {
+      mockUseOpenYurtStatus.mockReturnValue({
+        ...defaultHookResult,
+        isDemoFallback: false,
+        data: withFetchError('nodepools'),
+      })
+      const { container } = render(<OpenYurtStatus />)
+      // Main card container must be present (proves we're in the
+      // hasData render, NOT the empty-state error card).
+      expect(container.querySelector('[data-testid="openyurt-card"]'))
+        .not.toBeNull()
+      expect(container.textContent).toContain('nodepools.apps.openyurt.io')
+    })
+
+    it('renders the gateways RBAC banner atop the main render', () => {
+      mockUseOpenYurtStatus.mockReturnValue({
+        ...defaultHookResult,
+        isDemoFallback: false,
+        data: withFetchError('gateways'),
+      })
+      const { container } = render(<OpenYurtStatus />)
+      expect(container.querySelector('[data-testid="openyurt-card"]'))
+        .not.toBeNull()
+      expect(container.textContent).toContain('gateways.raven.openyurt.io')
+    })
+
+    it('renders the pods RBAC banner atop the main render (previously uncovered arm)', () => {
+      // This is the arm the existing test file never exercised — the
+      // hook can surface `fetchError.resource === 'pods'` when the
+      // OpenYurt controller-pods list call fails but the CRD calls
+      // succeed. If the banner regressed to drop this branch we would
+      // silently omit the diagnostic.
+      mockUseOpenYurtStatus.mockReturnValue({
+        ...defaultHookResult,
+        isDemoFallback: false,
+        data: withFetchError('pods'),
+      })
+      const { container } = render(<OpenYurtStatus />)
+      expect(container.querySelector('[data-testid="openyurt-card"]'))
+        .not.toBeNull()
+      expect(container.textContent).toContain('Failed to fetch OpenYurt pods')
+    })
+
+    it('suppresses the banner when isDemoMode is true even if fetchError is set', () => {
+      // Guard the `!isDemoMode && fetchError` short-circuit: if the
+      // user has demo mode on, the banner is noise and must not show
+      // even when the hook still surfaced a partial fetchError.
+      mockUseDemoMode.mockReturnValue({
+        isDemoMode: true,
+        toggleDemoMode: vi.fn(),
+        setDemoMode: vi.fn(),
+      })
+      mockUseOpenYurtStatus.mockReturnValue({
+        ...defaultHookResult,
+        isDemoFallback: false,
+        data: withFetchError('pods'),
+      })
+      const { container } = render(<OpenYurtStatus />)
+      expect(container.textContent).not.toContain('Failed to fetch OpenYurt pods')
+      expect(container.textContent).not.toContain('nodepools.apps.openyurt.io')
+      expect(container.textContent).not.toContain('gateways.raven.openyurt.io')
+    })
+  })
+
+  // ------------------------------------------------------------------
+  // Search returns no matches (index.tsx:443-447)
+  // ------------------------------------------------------------------
+  //
+  // The empty-list arm is already tested (nodePools.length === 0 →
+  // "Controller running / NodePool data requires the OpenYurt CRD API").
+  // The distinct "we have node pools, but the search filter zeroes
+  // them out" arm was uncovered; it lives inside a ternary chain and
+  // is what users see when they type into the search box.
+  it('renders the no-search-results state when the search filter zeroes out non-empty nodePools', () => {
+    mockUseDemoMode.mockReturnValue({
+      isDemoMode: false,
+      toggleDemoMode: vi.fn(),
+      setDemoMode: vi.fn(),
+    })
+    mockUseCardLoadingState.mockReturnValue({
+      showSkeleton: false,
+      showEmptyState: false,
+      hasData: true,
+      isRefreshing: false,
+    })
+    mockUseOpenYurtStatus.mockReturnValue({
+      ...defaultHookResult,
+      isDemoFallback: false,
+      // OPENYURT_DEMO_DATA has non-empty nodePools, so nodePools.length > 0.
+      data: OPENYURT_DEMO_DATA,
+    })
+    const { getByTestId, container } = render(<OpenYurtStatus />)
+
+    // Type a nonsense token into the search box — the filter must
+    // reduce filteredPools to [] while nodePools.length stays > 0,
+    // taking the final `else` arm of the ternary at index.tsx:443.
+    const input = getByTestId('card-search')
+    fireEvent.change(input, { target: { value: '__no-such-pool__' } })
+
+    expect(container.textContent).toContain('No node pools match your search')
+    // Sanity: the empty-list "Controller running" copy from the OTHER
+    // ternary arm must NOT be present — otherwise both arms rendered.
+    expect(container.textContent).not.toContain('Controller running')
+  })
 })
