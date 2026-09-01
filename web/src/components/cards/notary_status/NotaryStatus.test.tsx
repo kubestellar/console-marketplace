@@ -258,4 +258,69 @@ describe('NotaryStatus', () => {
     // Empty-state i18n key must not appear either.
     expect(screen.queryByText('notaryStatus.notInstalled')).toBeNull()
   })
+
+  it("renders the 'morePolicies' overflow chip when an installed cluster has more than 2 trust policies", () => {
+    // No cluster in NOTARY_DEMO_DATA has >2 trust policies, so the
+    // `slice(0, 2)` cap and the overflow chip at index.tsx:224-232 are
+    // unreachable through the demo fixture. Inject a synthetic row via
+    // mockUseCardData to exercise the >2 branch and lock the
+    // `length - 2` count arithmetic.
+    const overflowRow = {
+      id: 'overflow-cluster',
+      cluster: 'overflow-cluster',
+      installed: true,
+      signedImages: 5,
+      unsignedImages: 0,
+      trustPolicies: [
+        { name: 'policy-a', registryScopes: ['r.io/a/*'], signatureVerification: 'strict' as const },
+        { name: 'policy-b', registryScopes: ['r.io/b/*'], signatureVerification: 'strict' as const },
+        { name: 'policy-c', registryScopes: ['r.io/c/*'], signatureVerification: 'strict' as const },
+        { name: 'policy-d', registryScopes: ['r.io/d/*'], signatureVerification: 'strict' as const },
+        { name: 'policy-e', registryScopes: ['r.io/e/*'], signatureVerification: 'strict' as const },
+      ],
+    }
+    mockUseCardData.mockImplementation(() => createCardDataResult([overflowRow]))
+
+    render(<NotaryStatus />)
+
+    // First two policy chips render.
+    expect(screen.getByText('policy-a')).toBeTruthy()
+    expect(screen.getByText('policy-b')).toBeTruthy()
+    // Third+ policy names must NOT render as chips — the cap is
+    // supposed to keep only the first two.
+    expect(screen.queryByText('policy-c')).toBeNull()
+    expect(screen.queryByText('policy-d')).toBeNull()
+    expect(screen.queryByText('policy-e')).toBeNull()
+    // The overflow i18n key renders — implicitly guards `length - 2`
+    // (t() is mocked to echo the key, so an incorrect count parameter
+    // would not show up in the DOM text, but the key's presence
+    // proves the `length > 2` branch fired at all).
+    expect(screen.getByText('notaryStatus.morePolicies')).toBeTruthy()
+  })
+
+  it('renders the empty-policies message for an installed cluster with zero trust policies', () => {
+    // The empty-policies message at index.tsx:233-237 is nested inside
+    // the outer `{row.installed && (...)}` conditional. In the fixture
+    // only aks-dev-eu has trustPolicies=[], but it is installed=false,
+    // so the outer conditional short-circuits and this branch is
+    // unreachable. Inject a synthetic installed+empty row to lock the
+    // arm.
+    const installedNoPoliciesRow = {
+      id: 'zero-policies-cluster',
+      cluster: 'zero-policies-cluster',
+      installed: true,
+      signedImages: 3,
+      unsignedImages: 1,
+      trustPolicies: [],
+    }
+    mockUseCardData.mockImplementation(() => createCardDataResult([installedNoPoliciesRow]))
+
+    render(<NotaryStatus />)
+
+    // The empty-policies message renders.
+    expect(screen.getByText('notaryStatus.trustPolicyCount')).toBeTruthy()
+    // The "not installed" short badge must NOT render — the row is
+    // installed, so we should be inside the `installed && (...)` arm.
+    expect(screen.queryByText('notaryStatus.notInstalledShort')).toBeNull()
+  })
 })
