@@ -22,6 +22,7 @@ import glob
 import os
 import re
 import sys
+import time
 import urllib.request
 from urllib.parse import urlparse
 import urllib.error
@@ -37,6 +38,11 @@ class Results:
         self.warnings = []
         self.info = []
         self.passes = []
+        # Bounded set of named section timings (e.g. "static", "cross-repo",
+        # "nightly"). Section names are fixed constants defined in main(),
+        # never derived from file paths or user input, so this list stays
+        # small regardless of registry size.
+        self.timings = []
 
     def error(self, category, msg):
         self.errors.append((category, msg))
@@ -49,6 +55,13 @@ class Results:
 
     def ok(self, category, msg):
         self.passes.append((category, msg))
+
+    def record_timing(self, section, seconds):
+        self.timings.append((section, seconds))
+
+    @property
+    def total_duration(self):
+        return sum(seconds for _, seconds in self.timings)
 
     @property
     def exit_code(self):
@@ -79,6 +92,12 @@ class Results:
             for cat, msg in self.info:
                 lines.append(f"- **[{cat}]** {msg}")
             lines.append("")
+        if self.timings:
+            lines.append("#### Timing")
+            for section, seconds in self.timings:
+                lines.append(f"- `{section}`: {seconds:.2f}s")
+            lines.append(f"- **total**: {self.total_duration:.2f}s")
+            lines.append("")
         return "\n".join(lines)
 
     def print_summary(self):
@@ -93,6 +112,9 @@ class Results:
         print()
         print(f"Result: {len(self.errors)} error(s), {len(self.warnings)} warning(s), "
               f"{len(self.passes)} passed")
+        if self.timings:
+            timing_str = ", ".join(f"{s}={t:.2f}s" for s, t in self.timings)
+            print(f"Timing: {timing_str}, total={self.total_duration:.2f}s")
 
     def to_json(self):
         return {
@@ -100,6 +122,8 @@ class Results:
             "warnings": [{"category": c, "message": m} for c, m in self.warnings],
             "info": [{"category": c, "message": m} for c, m in self.info],
             "passes": [{"category": c, "message": m} for c, m in self.passes],
+            "timings": [{"section": s, "seconds": round(t, 3)} for s, t in self.timings],
+            "total_duration_seconds": round(self.total_duration, 3),
             "exit_code": self.exit_code,
         }
 
@@ -1166,32 +1190,38 @@ def main():
 
     # ── Static checks (all modes) ──
     log("=== Static Validation ===")
+    _t0 = time.perf_counter()
     check_json_syntax(base, results)
     check_preset_schema(base, results)
     check_dashboard_schema(base, results)
     check_theme_schema(base, results)
     check_naming_conventions(base, results)
     check_registry_consistency(base, results)
+    results.record_timing("static", time.perf_counter() - _t0)
 
     # ── Cross-repo checks ──
     known_types = set()
     if args.mode in ("cross-repo", "full") and console_path:
         log("\n=== Cross-Repo Quality Checks ===")
+        _t0 = time.perf_counter()
         known_types = check_card_type_existence(base, console_path, results)
         check_demo_data(base, console_path, known_types, results)
         check_is_demo_data_wiring(base, console_path, known_types, results)
         check_consecutive_failures(base, console_path, known_types, results)
         check_i18n_keys(base, console_path, known_types, results)
         check_cors_proxy(base, console_path, known_types, results)
+        results.record_timing("cross-repo", time.perf_counter() - _t0)
 
     # ── Nightly-only checks ──
     if args.mode == "full":
         log("\n=== Nightly Checks ===")
+        _t0 = time.perf_counter()
         check_download_urls(base, results)
         check_registry_staleness(base, results)
         check_theme_consistency(base, results)
         if console_path:
             check_cncf_coverage(base, console_path, results)
+        results.record_timing("nightly", time.perf_counter() - _t0)
 
     # ── Output ──
     if args.json:
