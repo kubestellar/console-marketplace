@@ -19,6 +19,11 @@
 
 ## When to Use This Runbook
 
+> **Not seeing content findings, just no `[Auto-QA]` issues at all for several nights?**
+> See [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) instead — this
+> runbook covers *content* incidents (a bad change reaching `main`), not the nightly
+> scan pipeline itself failing to run.
+
 `registry.json` (and the dashboard/preset/card-preset/theme files it points at) is fetched
 directly by KubeStellar Console's Marketplace UI. There is no build step or deploy between a
 merge to `main` and a user seeing the result. Use this runbook when any of the following is true:
