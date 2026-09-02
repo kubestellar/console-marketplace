@@ -18,23 +18,41 @@ and filed a legitimate `[Auto-QA]` finding, use `registry-incident-response.md` 
 
 ## Table of Contents
 
-1. [When to Use This Runbook](#when-to-use-this-runbook)
-2. [Why This Can Happen Silently](#why-this-can-happen-silently)
-3. [Detecting a Pipeline Failure](#detecting-a-pipeline-failure)
-4. [Triage](#triage)
-5. [Recovery](#recovery)
-6. [Verifying Recovery](#verifying-recovery)
+1. [Current Status](#current-status)
+2. [When to Use This Runbook](#when-to-use-this-runbook)
+3. [Why This Can Happen Silently](#why-this-can-happen-silently)
+4. [Detecting a Pipeline Failure](#detecting-a-pipeline-failure)
+5. [Triage](#triage)
+6. [Recovery](#recovery)
+7. [Verifying Recovery](#verifying-recovery)
 
 ---
 
+## Current Status
+
+> **The companion `Alert on scan pipeline failure` workflow step described below has
+> not been merged into `marketplace-auto-qa.yml`.** A prior automated PR (#550) could
+> only land this runbook: the agent token used to open that PR lacks the `workflows`
+> GitHub App permission required to create or update any file under
+> `.github/workflows/`, so pushes touching `marketplace-auto-qa.yml` are rejected by
+> GitHub before a PR can even be opened. Until a maintainer with `workflows`
+> permission applies the step manually (see [tracking issue
+> #545](https://github.com/kubestellar/console-marketplace/issues/545) for the
+> suggested diff), a crash in the `Run full quality scan` step still produces a
+> **green** run with **zero** `[Auto-QA]` findings and no alert of any kind. Use the
+> "Missing findings pattern" signal below as the only currently-working detection
+> method.
+
 ## When to Use This Runbook
 
-- An issue titled `[Auto-QA] Nightly scan pipeline failed — detection degraded`
-  (label `auto-qa:pipeline-failure`) is opened or updated by
-  `marketplace-auto-qa.yml`.
-- You notice several consecutive nights with no `[Auto-QA]` findings at all, which is
-  unusual given the repo's typical finding rate, and want to rule out a silent
-  detection failure rather than assume the marketplace is simply clean.
+- (Once the companion workflow step lands) An issue titled `[Auto-QA] Nightly scan
+  pipeline failed — detection degraded` (label `auto-qa:pipeline-failure`) is opened
+  or updated by `marketplace-auto-qa.yml`.
+- **Today, before that step lands:** you notice several consecutive nights with no
+  `[Auto-QA]` findings at all, which is unusual given the repo's typical finding
+  rate, and want to rule out a silent detection failure rather than assume the
+  marketplace is simply clean. This is currently the *only* way to detect the
+  failure mode this runbook covers.
 
 ## Why This Can Happen Silently
 
@@ -49,18 +67,19 @@ before valid JSON is produced means:
 - This is visually indistinguishable, from the Issues tab, from a clean scan that
   found no problems.
 
-The `Alert on scan pipeline failure` step (added directly after the scan step) closes
-this gap: it runs `if: always() && steps.scan.outcome == 'failure'` and files/updates
-a dedicated issue labeled `auto-qa:pipeline-failure` whenever the scan step itself
-fails, so a crash is never silent.
+A proposed `Alert on scan pipeline failure` step (added directly after the scan
+step) would close this gap: it would run `if: always() && steps.scan.outcome ==
+'failure'` and file/update a dedicated issue labeled `auto-qa:pipeline-failure`
+whenever the scan step itself fails, so a crash is never silent. **This step is not
+yet merged** — see [Current Status](#current-status) above.
 
 ## Detecting a Pipeline Failure
 
-| Signal | Where to look |
-|---|---|
-| Dedicated alert issue | Issues labeled `auto-qa:pipeline-failure` |
-| Workflow run log | Actions → `Marketplace Auto-QA` → the failed run's `Run full quality scan` step |
-| Missing findings pattern | No `[Auto-QA]` issues for several nights despite known outstanding registry drift |
+| Signal | Where to look | Status |
+|---|---|---|
+| Dedicated alert issue | Issues labeled `auto-qa:pipeline-failure` | Not yet available — see [Current Status](#current-status) |
+| Workflow run log | Actions → `Marketplace Auto-QA` → the failed run's `Run full quality scan` step | Works today, but requires manually checking every run |
+| Missing findings pattern | No `[Auto-QA]` issues for several nights despite known outstanding registry drift | The only reliable signal today |
 
 ## Triage
 
