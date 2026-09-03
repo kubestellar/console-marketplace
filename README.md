@@ -54,6 +54,9 @@ scan that stopped producing findings, start here:
 | A bad `registry.json`/preset/dashboard/theme change reached `main` and broke the Console Marketplace UI | [`runbooks/registry-incident-response.md`](./runbooks/registry-incident-response.md) |
 | The nightly Auto-QA scan itself crashed or stopped filing findings (no red run, no `[Auto-QA]` issues) | [`runbooks/auto-qa-pipeline-failure.md`](./runbooks/auto-qa-pipeline-failure.md) |
 
+Once triage/recovery is done, file an [Incident Report](./.github/ISSUE_TEMPLATE/incident-report.md)
+to capture the timeline, root cause, and follow-up actions.
+
 ## Registry Format
 
 The `registry.json` file is the source of truth for the marketplace UI. Each entry contains:

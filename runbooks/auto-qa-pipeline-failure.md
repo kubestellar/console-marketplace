@@ -118,3 +118,9 @@ yet merged** — see [Current Status](#current-status) above.
   `Run full quality scan` step without failing, and that `error_count`/`warn_count`
   outputs are set.
 - Confirm no new `auto-qa:pipeline-failure` issue/comment is created on that run.
+
+## Recording the Incident
+
+Use the [Incident Report issue template](../.github/ISSUE_TEMPLATE/incident-report.md) (labeled
+`incident`) to capture the timeline, impact, root cause, and follow-up actions once the pipeline
+is confirmed healthy again.
