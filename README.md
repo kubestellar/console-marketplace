@@ -53,6 +53,7 @@ scan that stopped producing findings, start here:
 |-----------|---------|
 | A bad `registry.json`/preset/dashboard/theme change reached `main` and broke the Console Marketplace UI | [`runbooks/registry-incident-response.md`](./runbooks/registry-incident-response.md) |
 | The nightly Auto-QA scan itself crashed or stopped filing findings (no red run, no `[Auto-QA]` issues) | [`runbooks/auto-qa-pipeline-failure.md`](./runbooks/auto-qa-pipeline-failure.md) |
+| The weekly `fuzz.yml`/`codeql.yml`/`scorecard.yml` scans stop completing | **Not yet covered** — see [`runbooks/SLO.md`](./runbooks/SLO.md#slis-and-slos) and [issue #565](https://github.com/kubestellar/console-marketplace/issues/565); no failure alert or runbook exists for these three workflows today |
 
 See [`runbooks/SLO.md`](./runbooks/SLO.md) for the detection/response targets these runbooks
 are measured against, including which targets are currently unmet and why.
