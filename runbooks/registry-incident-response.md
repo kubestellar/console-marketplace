@@ -124,6 +124,12 @@ python3 scripts/validate-marketplace.py --mode full --console-path ../console
 Confirm the specific `id` that was broken now resolves correctly, and re-run (or wait for) the
 nightly Auto-QA scan to confirm the corresponding issue can be closed.
 
+## Recording the Incident
+
+Use the [Incident Report issue template](../.github/ISSUE_TEMPLATE/incident-report.md) (labeled
+`incident`) to capture the timeline, impact, root cause, and follow-up actions once the immediate
+rollback is verified.
+
 ---
 
 ## Communicating to Users
