@@ -127,8 +127,9 @@ nightly Auto-QA scan to confirm the corresponding issue can be closed.
 ## Recording the Incident
 
 Use the [Incident Report issue template](../.github/ISSUE_TEMPLATE/incident-report.md) (labeled
-`incident`) to capture the timeline, impact, root cause, and follow-up actions once the immediate
-rollback is verified.
+`incident, lifecycle/frozen` — the latter so the stale-bot in `.github/workflows/stale.yml` never
+auto-closes an open incident tracking issue) to capture the timeline, impact, root cause, and
+follow-up actions once the immediate rollback is verified.
 
 ---
 

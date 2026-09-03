@@ -2,7 +2,7 @@
 name: Incident Report
 about: Record a production or pipeline incident (broken registry/content, or a silent detection/alerting pipeline failure)
 title: '[Incident] '
-labels: incident
+labels: incident, lifecycle/frozen
 assignees: ''
 ---
 
