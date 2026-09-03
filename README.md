@@ -35,11 +35,24 @@ console-marketplace/
 ├── themes/                    # Custom themes
 │   ├── midnight-blue.json
 │   └── ...
+├── runbooks/                  # Incident response & pipeline-failure runbooks
+│   ├── registry-incident-response.md
+│   └── auto-qa-pipeline-failure.md
 ├── CONTRIBUTING.md
 └── .github/
     └── ISSUE_TEMPLATE/
         └── new-dashboard.md
 ```
+
+## Operational Runbooks
+
+If you're triaging a broken Marketplace item, a `[Auto-QA]` finding, or a nightly
+scan that stopped producing findings, start here:
+
+| Situation | Runbook |
+|-----------|---------|
+| A bad `registry.json`/preset/dashboard/theme change reached `main` and broke the Console Marketplace UI | [`runbooks/registry-incident-response.md`](./runbooks/registry-incident-response.md) |
+| The nightly Auto-QA scan itself crashed or stopped filing findings (no red run, no `[Auto-QA]` issues) | [`runbooks/auto-qa-pipeline-failure.md`](./runbooks/auto-qa-pipeline-failure.md) |
 
 ## Registry Format
 
