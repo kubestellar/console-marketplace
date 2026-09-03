@@ -238,7 +238,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-prometheus.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-prometheus.json",
       "tags": [
         "cncf",
         "graduated",
@@ -376,7 +376,7 @@
       "author": "kubestellar",
       "authorGithub": "clubanderson",
       "version": "1.0.0",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-kubescape.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-kubescape.json",
       "tags": [
         "cncf",
         "incubating",
@@ -969,7 +969,7 @@
       "description": "KEDA autoscaler status, scaled object metrics, and trigger queue depths.",
       "author": "Community",
       "version": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/main/presets/cncf-keda.json",
+      "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/presets/cncf-keda.json",
       "tags": [
         "cncf",
         "graduated",

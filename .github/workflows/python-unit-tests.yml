@@ -40,8 +40,8 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          python -m coverage run --source=scripts -m pytest tests/ -v
+          python -m coverage run --branch --source=scripts -m pytest tests/ -v
 
       - name: Check coverage threshold
         run: |
-          python -m coverage report --fail-under=90 --include='scripts/validate-marketplace.py'
+          python -m coverage report --fail-under=100 --include='scripts/validate-marketplace.py'
