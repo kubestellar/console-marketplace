@@ -109,9 +109,9 @@ If only `registry.json` needs to change (e.g., a bad `downloadUrl` was added but
 file is fine), a targeted fix in the same PR is acceptable in place of a full revert — but default
 to revert-first when in doubt, then follow up with a corrected re-submission.
 
-Since PR-time checks may not be merge-blocking, ask a maintainer (`@clubanderson` or
-`@caniszczyk`, per `CODEOWNERS`) to merge the rollback PR as soon as it's opened rather than
-waiting for the normal review cadence.
+Since PR-time checks may not be merge-blocking, ask a maintainer (`@clubanderson`, the sole
+approver/reviewer in `CODEOWNERS` and `OWNERS`) to merge the rollback PR as soon as it's
+opened rather than waiting for the normal review cadence.
 
 ---
 
