@@ -18,9 +18,9 @@ should be detected and resolved, not any request-latency/availability target.
 | 2 | Time from a PR-time check failure (`Validate JSON` / `Marketplace Quality Gate`) to that PR being blocked from merging | 0 (should never merge with failing checks) | PR status checks | [`registry-incident-response.md`](./registry-incident-response.md) — **not yet met**: checks are not merge-blocking today (see [issue #560](https://github.com/kubestellar/console-marketplace/issues/560)) |
 | 3 | Time from the nightly Auto-QA *pipeline itself* crashing (not a content finding) to an alert | ≤ 24h | Proposed `Alert on scan pipeline failure` step | [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) — **not yet met**: the step is not merged (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545)); today this failure mode is silent and only detectable by noticing an unusual gap in `[Auto-QA]` findings |
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
-| 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert or dedicated runbook exists for these three workflows | **None yet** — see [issue #565](https://github.com/kubestellar/console-marketplace/issues/565) |
+| 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert or dedicated runbook exists for these three workflows | **None yet** — see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
 
-## Why SLOs 2 and 3 Are Reported as Unmet
+## Why SLOs 2, 3, and 5 Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -40,7 +40,9 @@ aspirational, already-healthy state:
   weekly `schedule:`-triggered workflows with no companion failure alert and no runbook,
   so a silent failure in any of them (infra flake, dependency break, action version bump)
   is only visible as a red run in the Actions tab — see
-  [issue #565](https://github.com/kubestellar/console-marketplace/issues/565). `fuzz.yml`
+  [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) (the
+  documentation gap for this was closed via #565/#566, but the underlying mechanism gap
+  has its own tracking item in #573). `fuzz.yml`
   additionally masks real Atheris-detected crashes with `|| true` after its fuzz-run step,
   so even a genuine crash produces a green run today.
 
