@@ -38,4 +38,5 @@ assignees: ''
 <!-- Action items to prevent recurrence (link any follow-up issues/PRs) -->
 
 ## Postmortem
-<!-- Link a postmortem doc/PR if this incident warrants one, or note "not required" -->
+<!-- Link a postmortem doc/PR if this incident warrants one, or note "not required".
+     Use ../../runbooks/postmortem-template.md as the starting point. -->

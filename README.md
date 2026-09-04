@@ -59,7 +59,8 @@ See [`runbooks/SLO.md`](./runbooks/SLO.md) for the detection/response targets th
 are measured against, including which targets are currently unmet and why.
 
 Once triage/recovery is done, file an [Incident Report](./.github/ISSUE_TEMPLATE/incident-report.md)
-to capture the timeline, root cause, and follow-up actions.
+to capture the timeline, root cause, and follow-up actions. If the incident warrants a
+retrospective, write one up using [`runbooks/postmortem-template.md`](./runbooks/postmortem-template.md).
 
 ## Registry Format
 
