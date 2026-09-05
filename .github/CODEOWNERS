@@ -10,7 +10,11 @@
 /themes/ @clubanderson @caniszczyk
 
 # Repository automation and contribution workflow
-/.github/ @clubanderson @caniszczyk
 /scripts/ @clubanderson @caniszczyk
 /README.md @clubanderson @caniszczyk
 /CONTRIBUTING.md @clubanderson @caniszczyk
+
+# CI/CD workflows — require @clubanderson specifically, preserving the historical
+# root CODEOWNERS rule this file supersedes (#585). This more specific path rule
+# overrides the "*" default above.
+/.github/ @clubanderson
