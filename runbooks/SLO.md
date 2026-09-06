@@ -19,8 +19,9 @@ should be detected and resolved, not any request-latency/availability target.
 | 3 | Time from the nightly Auto-QA *pipeline itself* crashing (not a content finding) to an alert | ≤ 24h | Proposed `Alert on scan pipeline failure` step | [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) — **not yet met**: the step is not merged (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545)); today this failure mode is silent and only detectable by noticing an unusual gap in `[Auto-QA]` findings |
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for these three workflows | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **not yet met**: documents manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
+| 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap as SLO 5; see [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) |
 
-## Why SLOs 2, 3, and 5 Are Reported as Unmet
+## Why SLOs 2, 3, 5, and 6 Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -45,6 +46,12 @@ aspirational, already-healthy state:
   [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md). `fuzz.yml`
   additionally masks real Atheris-detected crashes with `|| true` after its fuzz-run step,
   so even a genuine crash produces a green run today.
+- **SLO 6** is the same undocumented-gap situation as SLO 5, for a different scheduled
+  workflow: `stale.yml` runs daily via
+  `kubestellar/infra/.github/workflows/reusable-stale.yml` with no `workflow_run` alert,
+  issue-filing step, or other notification on failure — see
+  [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) and
+  [`scheduled-scan-alert-gap.md#stale-issues-workflow`](./scheduled-scan-alert-gap.md#stale-issues-workflow).
 
 ## Reviewing These SLOs
 
@@ -53,6 +60,6 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2 or SLO 3 as met until the corresponding gap above is actually closed —
-verify by re-reading the referenced workflow/settings, not by assuming a linked issue was
-resolved.
+Do not mark SLO 2, SLO 3, SLO 5, or SLO 6 as met until the corresponding gap above is
+actually closed — verify by re-reading the referenced workflow/settings, not by assuming
+a linked issue was resolved.
