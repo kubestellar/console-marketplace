@@ -30,6 +30,11 @@ import ipaddress
 import socket
 from datetime import datetime, timezone, timedelta
 
+# Prefix for the machine-readable CI summary line (see Results.summary_line()).
+# Grep this marker in CI logs to get a structured pass/fail count without
+# parsing the free-text ERROR/WARN/OK lines or invoking --json mode.
+SUMMARY_PREFIX = "MARKETPLACE_QUALITY_SUMMARY:"
+
 # ── Result tracking ──────────────────────────────────────────────────
 
 class Results:
@@ -126,6 +131,23 @@ class Results:
             "total_duration_seconds": round(self.total_duration, 3),
             "exit_code": self.exit_code,
         }
+
+    def summary_line(self, mode):
+        """Return a single-line, bounded, machine-readable summary for CI-log
+        observability. Fields are fixed counts/enums only (no free-text
+        messages), so the line stays grep-able and constant-size regardless
+        of registry size. Stdout-only — no exporter, no external data flow.
+        """
+        summary = {
+            "mode": mode,
+            "error_count": len(self.errors),
+            "warning_count": len(self.warnings),
+            "info_count": len(self.info),
+            "pass_count": len(self.passes),
+            "total_duration_seconds": round(self.total_duration, 3),
+            "exit_code": self.exit_code,
+        }
+        return f"{SUMMARY_PREFIX} {json.dumps(summary, sort_keys=True)}"
 
 
 # ── JSON file loaders ────────────────────────────────────────────────
@@ -1226,8 +1248,12 @@ def main():
     # ── Output ──
     if args.json:
         print(json.dumps(results.to_json(), indent=2))
+        # Keep stdout clean JSON; the grep-able summary line goes to stderr
+        # alongside the other --json-mode progress logs (see `log` above).
+        print(results.summary_line(args.mode), file=sys.stderr)
     else:
         results.print_summary()
+        print(results.summary_line(args.mode))
 
     if args.github_summary:
         with open(args.github_summary, "a") as f:
