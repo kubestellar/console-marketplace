@@ -2,18 +2,19 @@
 
 **Repository:** `kubestellar/console-marketplace`
 **Applies to:** `.github/workflows/fuzz.yml`, `.github/workflows/codeql.yml`,
-`.github/workflows/scorecard.yml`
+`.github/workflows/scorecard.yml` (weekly), and `.github/workflows/stale.yml` (daily)
 
 ---
 
 ## Scope Note
 
-This runbook covers the three **weekly `schedule:`-triggered** workflows that have no
-failure alert of any kind today. It is distinct from
+This runbook covers **`schedule:`-triggered** workflows that have no failure alert of
+any kind today: the three weekly scans (SLI/SLO 5) plus the daily `stale.yml` run
+(SLI/SLO 6). It is distinct from
 [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md), which covers the
 *nightly* `marketplace-auto-qa.yml` scan, and from
 [`registry-incident-response.md`](./registry-incident-response.md), which covers
-content incidents. This is SLI/SLO 5 in [`SLO.md`](./SLO.md#slis-and-slos).
+content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 
 ## Current Status
 
@@ -88,6 +89,23 @@ or whenever a security/quality question needs the freshest scan result.
 
 - Confirm the next scheduled run of the affected workflow completes green and, for
   `fuzz.yml`, that the log shows no Atheris crash output above the completion message.
+
+## Stale Issues Workflow
+
+`.github/workflows/stale.yml` has the same undocumented gap as the three workflows
+above, tracked separately in
+[issue #598](https://github.com/kubestellar/console-marketplace/issues/598) and
+SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos):
+
+| Workflow | Schedule (UTC) | Signal | Where to look |
+|---|---|---|---|
+| `stale.yml` | Daily 00:00 | Run status only — it calls `kubestellar/infra`'s `reusable-stale.yml` with no failure notification | Actions → `Stale Issues` → confirm the latest scheduled run is green; a red run has no other notification |
+
+A silent daily failure here means stale issues/PRs stop being triaged with no signal
+beyond noticing the backlog is not shrinking as expected. Triage and recovery follow the
+same pattern as `codeql.yml`/`scorecard.yml` above: open the failed run's log, identify
+the cause (usually a reusable-workflow break or a permissions change), fix it, and
+confirm the next scheduled or `workflow_dispatch`-triggered run is green.
 
 ## Recording the Incident
 
