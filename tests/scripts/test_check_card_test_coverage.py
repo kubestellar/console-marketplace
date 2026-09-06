@@ -176,6 +176,35 @@ class TestCheckCardTestCoverage(unittest.TestCase):
         self.assertIn("card-b", body)
         self.assertIn("card-c", body)
         self.assertNotIn("| `web/src/components/cards/card-d/`", body)
+        # CARD_TEST_COVERAGE_SUMMARY: 4 changed cards (a, b, c, d), 3 gaps.
+        self.assertIn(
+            'CARD_TEST_COVERAGE_SUMMARY: {"changed_card_count":4,"gap_count":3,"exit_code":0}',
+            result.stdout,
+        )
+
+    # --- CI-observability summary line --------------------------------------
+
+    def test_summary_line_present_with_no_changes(self) -> None:
+        result = self.harness.run_script(report_path=str(self.report))
+        self.assertEqual(result.returncode, 0)
+        self.assertIn(
+            'CARD_TEST_COVERAGE_SUMMARY: {"changed_card_count":0,"gap_count":0,"exit_code":0}',
+            result.stdout,
+        )
+
+    def test_summary_line_counts_changed_cards_including_passing_ones(self) -> None:
+        self.harness.add_head_files({
+            "web/src/components/cards/lonely-card/index.tsx": INDEX_TSX,
+            "web/src/components/cards/happy-card/index.tsx": INDEX_TSX,
+            "web/src/components/cards/happy-card/HappyCard.test.tsx": TEST_TSX,
+        })
+        result = self.harness.run_script(report_path=str(self.report))
+        self.assertEqual(result.returncode, 0)
+        # 2 changed cards total, only 1 gap (lonely-card lacks a test).
+        self.assertIn(
+            'CARD_TEST_COVERAGE_SUMMARY: {"changed_card_count":2,"gap_count":1,"exit_code":0}',
+            result.stdout,
+        )
 
     # --- boundary cases -----------------------------------------------------
 
