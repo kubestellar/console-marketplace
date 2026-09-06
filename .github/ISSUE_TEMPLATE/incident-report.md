@@ -12,7 +12,8 @@ assignees: ''
 ## Incident Type
 <!-- Pick one, and follow the linked runbook for triage/recovery steps -->
 - [ ] Content incident (bad `registry.json`/preset/dashboard/theme reached `main`) — see [`runbooks/registry-incident-response.md`](../../runbooks/registry-incident-response.md)
-- [ ] Pipeline incident (a scheduled/unattended workflow crashed or stopped alerting) — see [`runbooks/auto-qa-pipeline-failure.md`](../../runbooks/auto-qa-pipeline-failure.md)
+- [ ] Auto-QA pipeline incident (`marketplace-auto-qa.yml` crashed or stopped filing findings) — see [`runbooks/auto-qa-pipeline-failure.md`](../../runbooks/auto-qa-pipeline-failure.md)
+- [ ] Scheduled scan/workflow alert gap (`fuzz.yml`/`codeql.yml`/`scorecard.yml`/`stale.yml` failed with no alert) — see [`runbooks/scheduled-scan-alert-gap.md`](../../runbooks/scheduled-scan-alert-gap.md)
 - [ ] Other (describe below)
 
 ## Timeline
