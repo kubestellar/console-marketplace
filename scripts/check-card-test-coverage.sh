@@ -11,6 +11,11 @@
 # Output:
 #   /tmp/card-test-coverage-gaps.md — markdown report
 #   stdout                          — gap_count=N
+#                                     CARD_TEST_COVERAGE_SUMMARY: {...} (bounded,
+#                                     grep-able JSON record: changed_card_count,
+#                                     gap_count, exit_code — fixed counts only,
+#                                     no free text, safe to grep regardless of
+#                                     registry size)
 #   Exit code: 0 always — informational only, never blocks CI.
 
 set -euo pipefail
@@ -37,6 +42,7 @@ has_test() {
 }
 
 GAP_COUNT=0
+CHANGED_CARD_COUNT=0
 GAPS=""
 
 # Find new index.tsx files in cards subdirectories
@@ -45,6 +51,7 @@ while IFS= read -r f; do
   if [[ "$f" =~ ^web/src/components/cards/([^/]+)/index\.tsx$ ]]; then
     card_name="${BASH_REMATCH[1]}"
     card_dir="web/src/components/cards/${card_name}"
+    CHANGED_CARD_COUNT=$((CHANGED_CARD_COUNT + 1))
     if ! has_test "$card_dir"; then
       GAP_COUNT=$((GAP_COUNT + 1))
       GAPS="${GAPS}\n| \`${card_dir}/\` | Missing test file |"
@@ -73,4 +80,5 @@ done <<< "$CHANGED"
 
 cat "$REPORT"
 echo "gap_count=${GAP_COUNT}"
+echo "CARD_TEST_COVERAGE_SUMMARY: {\"changed_card_count\":${CHANGED_CARD_COUNT},\"gap_count\":${GAP_COUNT},\"exit_code\":0}"
 exit 0
