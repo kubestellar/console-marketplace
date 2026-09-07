@@ -101,6 +101,24 @@ class TestResults:
         out = capsys.readouterr().out
         assert "ERROR" in out and "WARN" in out and "INFO" in out and "OK" in out
 
+    def test_print_summary_emits_structured_summary_line(self, capsys):
+        r = Results()
+        r.error("cat", "boom")
+        r.warn("cat", "meh")
+        r.ok("cat", "yay")
+        r.record_timing("static", 0.5)
+        r.print_summary()
+        out = capsys.readouterr().out
+        line = next(l for l in out.splitlines() if l.startswith("MARKETPLACE_QUALITY_SUMMARY: "))
+        payload = json.loads(line[len("MARKETPLACE_QUALITY_SUMMARY: "):])
+        assert payload == {
+            "errors": 1,
+            "warnings": 1,
+            "passes": 1,
+            "total_duration_seconds": 0.5,
+            "exit_code": 1,
+        }
+
 
 # ── load_json / find_json_files ────────────────────────────────────
 

@@ -115,6 +115,19 @@ class Results:
         if self.timings:
             timing_str = ", ".join(f"{s}={t:.2f}s" for s, t in self.timings)
             print(f"Timing: {timing_str}, total={self.total_duration:.2f}s")
+        # Fixed-shape, grep-able record for CI observability (mirrors the same
+        # pattern already used by CARD_TEST_COVERAGE_SUMMARY in
+        # check-card-test-coverage.sh). Only bounded aggregate counts —
+        # no free text, no per-item fields — so it stays constant-size
+        # regardless of registry size.
+        summary = {
+            "errors": len(self.errors),
+            "warnings": len(self.warnings),
+            "passes": len(self.passes),
+            "total_duration_seconds": round(self.total_duration, 3),
+            "exit_code": self.exit_code,
+        }
+        print(f"MARKETPLACE_QUALITY_SUMMARY: {json.dumps(summary)}")
 
     def to_json(self):
         return {
