@@ -38,6 +38,21 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 > (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545) for
 > the same constraint on a sibling gap). Until a maintainer applies the proposed diff
 > in #573, use the manual detection steps below.
+>
+> **This gap is now confirmed active, not just theoretical.** As of 2026-09-07,
+> `OpenSSF Scorecard` has failed on every run (both `push` and the weekly `schedule`
+> trigger) since 2026-09-02T12:22:31Z — 20+ consecutive red runs, last success
+> 2026-08-31T18:13:01Z — with zero notification of any kind, because the alert gap
+> this runbook describes means nothing observes the run status. Root cause per the job
+> log (e.g.
+> [run 34089835030](https://github.com/kubestellar/console-marketplace/actions/runs/34089835030)):
+> `docker pull gcr.io/openssf/scorecard-action:v2.4.0` is rejected with
+> `denied: This API method requires billing to be enabled` — an upstream GCR billing
+> gate on the public `ossf/scorecard-action` image used by
+> `kubestellar/infra/.github/workflows/reusable-scorecard.yml`. This is **not** a bug in
+> this repo's workflow YAML or a locally fixable regression; see
+> [Detecting a Failure Today](#detecting-a-failure-today) and
+> [Triage](#triage) below before assuming a local cause.
 
 ## When to Use This Runbook
 
@@ -71,6 +86,16 @@ or whenever a security/quality question needs the freshest scan result.
    Actions runner image change, or a pinned-action version bump; re-run via
    `workflow_dispatch` (`scorecard.yml`) or push a trivial `main` commit
    (`codeql.yml`, which also triggers on `push`) to confirm whether it reproduces.
+4. For `scorecard.yml` specifically: check the "Pull down action image" step log first.
+   A `docker pull gcr.io/openssf/scorecard-action:...` failure with
+   `denied: This API method requires billing to be enabled` (the confirmed cause of the
+   ongoing failures since 2026-09-02, see [Current Status](#current-status)) is an
+   upstream GCR/vendor billing issue, not something this repo or
+   `kubestellar/infra`'s `reusable-scorecard.yml` can fix directly — do not spend time
+   re-pinning the action version. Confirm by checking whether other
+   `kubestellar/*` repos using the same reusable workflow show the identical pull
+   error at the same time; if so, escalate upstream (ossf/scorecard-action) rather than
+   treating it as repo-local.
 
 ## Recovery
 
