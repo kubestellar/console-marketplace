@@ -45,7 +45,13 @@ aspirational, already-healthy state:
   manual detection steps in
   [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md). `fuzz.yml`
   additionally masks real Atheris-detected crashes with `|| true` after its fuzz-run step,
-  so even a genuine crash produces a green run today.
+  so even a genuine crash produces a green run today. **This gap is confirmed active, not
+  hypothetical:** as of 2026-09-07, `scorecard.yml` has failed on every run since
+  2026-09-02T12:22:31Z (20+ consecutive red runs, last success 2026-08-31T18:13:01Z) due
+  to an upstream GCR billing gate on the `ossf/scorecard-action` image, with zero
+  notification of the 6-day outage — see the
+  [Current Status](./scheduled-scan-alert-gap.md#current-status) update in
+  `scheduled-scan-alert-gap.md`.
 - **SLO 6** is the same undocumented-gap situation as SLO 5, for a different scheduled
   workflow: `stale.yml` runs daily via
   `kubestellar/infra/.github/workflows/reusable-stale.yml` with no `workflow_run` alert,
