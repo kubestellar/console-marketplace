@@ -115,6 +115,19 @@ class Results:
         if self.timings:
             timing_str = ", ".join(f"{s}={t:.2f}s" for s, t in self.timings)
             print(f"Timing: {timing_str}, total={self.total_duration:.2f}s")
+        # Single-line, grep-friendly JSON record for CI-log tooling. Only
+        # bounded counts/status go here (never raw error/warning messages,
+        # which are free-text and unbounded) so this stays a fixed-size
+        # record regardless of registry size or failure volume.
+        summary_record = {
+            "error_count": len(self.errors),
+            "warning_count": len(self.warnings),
+            "info_count": len(self.info),
+            "pass_count": len(self.passes),
+            "total_duration_seconds": round(self.total_duration, 3),
+            "exit_code": self.exit_code,
+        }
+        print(f"MARKETPLACE_QUALITY_SUMMARY: {json.dumps(summary_record)}")
 
     def to_json(self):
         return {
