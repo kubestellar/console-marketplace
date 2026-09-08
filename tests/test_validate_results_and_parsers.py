@@ -11,6 +11,7 @@ Each parser test writes minimal TypeScript-ish fixture content to a tmp file
 so the tests are hermetic (no dependency on console/ layout).
 """
 import importlib.util
+import json
 import os
 import textwrap
 
@@ -102,6 +103,32 @@ class TestResults:
         assert "INFO  [info] ctx" in out
         assert "OK    [schema] valid" in out
         assert "1 error(s), 1 warning(s), 1 passed" in out
+
+    def test_print_summary_emits_grep_friendly_json_record(self, capsys):
+        """print_summary() must also emit a single-line, bounded JSON
+        record (MARKETPLACE_QUALITY_SUMMARY: {...}) so CI log tooling can
+        grep for leveled counts without parsing the free-text summary."""
+        r = _mod.Results()
+        r.error("json", "bad")
+        r.warn("naming", "meh")
+        r.note("info", "ctx")
+        r.ok("schema", "valid")
+        r.record_timing("static", 1.5)
+        r.print_summary()
+        out = capsys.readouterr().out
+        summary_line = next(
+            line for line in out.splitlines()
+            if line.startswith("MARKETPLACE_QUALITY_SUMMARY: ")
+        )
+        record = json.loads(summary_line[len("MARKETPLACE_QUALITY_SUMMARY: "):])
+        assert record == {
+            "error_count": 1,
+            "warning_count": 1,
+            "info_count": 1,
+            "pass_count": 1,
+            "total_duration_seconds": 1.5,
+            "exit_code": 1,
+        }
 
     def test_to_json_shape(self):
         r = _mod.Results()
