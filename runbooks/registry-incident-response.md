@@ -150,19 +150,13 @@ install), comment on the triggering issue (or open one if a user reported it dir
 ## Postmortem Template
 
 Use this for any incident that reached `main` and was user-visible for more than a few hours
-(i.e., caught by the nightly scan rather than PR checks):
+(i.e., caught by the nightly scan rather than PR checks).
 
-```markdown
-### Incident: <short title>
-
-- **Detected:** <date/time>, via <Auto-QA issue # / user report / manual check>
-- **Offending commit:** <sha>, merged <date>
-- **User impact:** <what broke, for how long, estimated affected users if known>
-- **Root cause:** <why the PR-time checks didn't catch it, or why it was merged anyway>
-- **Resolution:** <revert commit/PR link>
-- **Follow-up actions:**
-  - [ ] Confirm whether `required_status_checks` should be enabled for `Validate JSON` /
-        `Marketplace Quality Gate` (see `.github/branch-protection-policy.md`)
-  - [ ] Any additional validation needed in `validate-marketplace.py` to catch this class of issue
-        earlier (static/cross-repo mode instead of relying on the nightly full scan)
-```
+Do not draft an ad-hoc postmortem — use the single source of truth,
+[`postmortem-template.md`](./postmortem-template.md), and file the completed copy at
+`runbooks/postmortems/YYYY-MM-DD-<short-title>.md` per its instructions. That template's
+**Follow-up actions** section should reference, at minimum:
+- Whether `required_status_checks` should be enabled for `Validate JSON` /
+  `Marketplace Quality Gate` (see `.github/branch-protection-policy.md`)
+- Any additional validation needed in `validate-marketplace.py` to catch this class of issue
+  earlier (static/cross-repo mode instead of relying on the nightly full scan)
