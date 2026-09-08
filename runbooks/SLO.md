@@ -20,8 +20,9 @@ should be detected and resolved, not any request-latency/availability target.
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for these three workflows | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **not yet met**: documents manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
 | 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap as SLO 5; see [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) |
+| 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
 
-## Why SLOs 2, 3, 5, and 6 Are Reported as Unmet
+## Why SLOs 2, 3, 5, 6, and 7 Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -58,6 +59,12 @@ aspirational, already-healthy state:
   issue-filing step, or other notification on failure — see
   [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) and
   [`scheduled-scan-alert-gap.md#stale-issues-workflow`](./scheduled-scan-alert-gap.md#stale-issues-workflow).
+- **SLO 7** depends on the same class of workflow-file change as SLO 3: a validated
+  diff exists (adding a final `if: always()` summary step to `fuzz.yml`'s `fuzz-json`
+  job) but eight prior automated attempts to push it were all rejected by GitHub for
+  lacking the `workflows` App permission — see
+  [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) for the preserved,
+  ready-to-apply diff and [issue #597](https://github.com/kubestellar/console-marketplace/issues/597).
 
 ## Reviewing These SLOs
 
@@ -66,6 +73,6 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2, SLO 3, SLO 5, or SLO 6 as met until the corresponding gap above is
+Do not mark SLO 2, SLO 3, SLO 5, SLO 6, or SLO 7 as met until the corresponding gap above is
 actually closed — verify by re-reading the referenced workflow/settings, not by assuming
 a linked issue was resolved.
