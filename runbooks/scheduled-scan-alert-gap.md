@@ -36,8 +36,15 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 > Both fixes require editing files under `.github/workflows/`, which needs the
 > `workflows` GitHub App permission that automated PRs from this project do not carry
 > (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545) for
-> the same constraint on a sibling gap). Until a maintainer applies the proposed diff
-> in #573, use the manual detection steps below.
+> the same constraint on a sibling gap; confirmed again for this gap when a push
+> touching `.github/workflows/fuzz.yml` was rejected with `refusing to allow a GitHub
+> App to create or update workflow ... without workflows permission`). A validated,
+> actionlint-clean, ready-to-apply diff for both fixes — including a new
+> `workflow-failure-issue.yml` that also covers `stale.yml` (closing #607 in the same
+> change) — is posted on
+> [issue #573](https://github.com/kubestellar/console-marketplace/issues/573#issuecomment-5578394201)
+> for a maintainer with `workflows` permission to apply directly. Until it is applied,
+> use the manual detection steps below.
 >
 > **This gap is now confirmed active, not just theoretical.** As of 2026-09-07,
 > `OpenSSF Scorecard` has failed on every run (both `push` and the weekly `schedule`
