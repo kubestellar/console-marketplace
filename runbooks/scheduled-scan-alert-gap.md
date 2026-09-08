@@ -113,9 +113,11 @@ or whenever a security/quality question needs the freshest scan result.
   version bump, permission change, etc.) and confirm the next scheduled or manually
   dispatched run is green.
 - Once a maintainer applies the `workflows`-permission-gated fix in
-  [#573](https://github.com/kubestellar/console-marketplace/issues/573), update the
-  "Current Status" section above and SLO 5 in [`SLO.md`](./SLO.md#slis-and-slos) to
-  reflect the mechanism is live, and add the new alert issue label to the table above.
+  [#573](https://github.com/kubestellar/console-marketplace/issues/573) (which also
+  closes [#607](https://github.com/kubestellar/console-marketplace/issues/607) for
+  `stale.yml`), update the "Current Status" section above and SLO 5/6 in
+  [`SLO.md`](./SLO.md#slis-and-slos) to reflect the mechanism is live, and add the new
+  alert issue label to the table above.
 
 ## Verifying Recovery
 
@@ -125,8 +127,10 @@ or whenever a security/quality question needs the freshest scan result.
 ## Stale Issues Workflow
 
 `.github/workflows/stale.yml` has the same undocumented gap as the three workflows
-above, tracked separately in
-[issue #598](https://github.com/kubestellar/console-marketplace/issues/598) and
+above, first documented in
+[issue #598](https://github.com/kubestellar/console-marketplace/issues/598) (closed as a
+doc-only fix) and now tracked by its mechanism follow-up,
+[issue #607](https://github.com/kubestellar/console-marketplace/issues/607), and
 SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos):
 
 | Workflow | Schedule (UTC) | Signal | Where to look |
