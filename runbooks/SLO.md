@@ -21,8 +21,9 @@ should be detected and resolved, not any request-latency/availability target.
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for these three workflows | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **not yet met**: documents manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
 | 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap as SLO 5; see [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) |
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
+| 8 | Whether a completed `validate-json.yml` run left a bounded, machine-readable record of what it checked (registry/dashboard files checked, invalid/format-error counts, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo`/`print` lines in the raw step log, and an early failure aborts the job before later steps report anything | [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3 and SLO 7; see [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
 
-## Why SLOs 2, 3, 5, 6, and 7 Are Reported as Unmet
+## Why SLOs 2, 3, 5, 6, 7, and 8 Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -65,6 +66,12 @@ aspirational, already-healthy state:
   lacking the `workflows` App permission — see
   [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) for the preserved,
   ready-to-apply diff and [issue #597](https://github.com/kubestellar/console-marketplace/issues/597).
+- **SLO 8** is the same blocked-fix situation as SLO 7, for `validate-json.yml`: a
+  validated diff exists (adding step `id`s/outputs to the three existing steps and
+  a final `if: always()` summary step to the `validate` job) but automation cannot
+  push it for the same `workflows` App permission reason — see
+  [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) for the
+  preserved, ready-to-apply diff and [issue #621](https://github.com/kubestellar/console-marketplace/issues/621).
 
 ## Reviewing These SLOs
 
@@ -73,6 +80,7 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2, SLO 3, SLO 5, SLO 6, or SLO 7 as met until the corresponding gap above is
-actually closed — verify by re-reading the referenced workflow/settings, not by assuming
-a linked issue was resolved.
+Do not mark SLO 2, SLO 3, SLO 5, SLO 6, SLO 7, or SLO 8 as met until the corresponding
+gap above is actually closed — verify by re-reading the referenced workflow/settings,
+not by assuming a linked issue was resolved.
+
