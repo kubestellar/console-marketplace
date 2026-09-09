@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { BUILDPACKS_DEMO_DATA } from './buildpacks-status/demoData'
 import { COREDNS_DEMO_DATA } from './coredns_status/demoData'
 import { KUBEFLOW_DEMO_DATA } from './kubeflow_status/demoData'
 import { NOTARY_DEMO_DATA } from './notary_status/demoData'
@@ -13,6 +14,27 @@ function expectStringFields(record: Record<string, unknown>, fields: readonly st
 }
 
 describe('card demo data shapes', () => {
+  it('includes the required Buildpacks image fields and enumerated status values', () => {
+    expect(BUILDPACKS_DEMO_DATA.images.length).toBeGreaterThan(0)
+    expectStringFields(BUILDPACKS_DEMO_DATA.images[0] as Record<string, unknown>, [
+      'name',
+      'namespace',
+      'builder',
+      'image',
+      'status',
+      'updated',
+      'cluster',
+    ])
+    const allowedStatuses = new Set(['succeeded', 'failed', 'building', 'unknown'])
+    for (const image of BUILDPACKS_DEMO_DATA.images) {
+      expect(allowedStatuses.has(image.status)).toBe(true)
+      // updated timestamp must round-trip through Date without becoming NaN.
+      expect(Number.isNaN(Date.parse(image.updated))).toBe(false)
+    }
+    expect(BUILDPACKS_DEMO_DATA.lastCheckTime).toEqual(expect.any(String))
+    expect(Number.isNaN(Date.parse(BUILDPACKS_DEMO_DATA.lastCheckTime))).toBe(false)
+  })
+
   it('includes the required CoreDNS server and zone fields', () => {
     expect(COREDNS_DEMO_DATA.servers.length).toBeGreaterThan(0)
     expect(COREDNS_DEMO_DATA.zones.length).toBeGreaterThan(0)
