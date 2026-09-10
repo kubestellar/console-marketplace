@@ -13,6 +13,7 @@ assignees: ''
 <!-- Pick one, and follow the linked runbook for triage/recovery steps -->
 - [ ] Content incident (bad `registry.json`/preset/dashboard/theme reached `main`) — see [`runbooks/registry-incident-response.md`](../../runbooks/registry-incident-response.md)
 - [ ] Pipeline incident (a scheduled/unattended workflow crashed or stopped alerting) — see [`runbooks/auto-qa-pipeline-failure.md`](../../runbooks/auto-qa-pipeline-failure.md)
+- [ ] Scheduled scan/triage silent failure (`fuzz.yml`, `codeql.yml`, `scorecard.yml`, or `stale.yml` crashed or stopped alerting with no notification) — see [`runbooks/scheduled-scan-alert-gap.md`](../../runbooks/scheduled-scan-alert-gap.md)
 - [ ] Other (describe below)
 
 ## Timeline
