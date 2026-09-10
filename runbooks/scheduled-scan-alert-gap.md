@@ -126,7 +126,7 @@ or whenever a security/quality question needs the freshest scan result.
 
 `.github/workflows/stale.yml` has the same undocumented gap as the three workflows
 above, tracked separately in
-[issue #598](https://github.com/kubestellar/console-marketplace/issues/598) and
+[issue #607](https://github.com/kubestellar/console-marketplace/issues/607) and
 SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos):
 
 | Workflow | Schedule (UTC) | Signal | Where to look |

@@ -19,7 +19,7 @@ should be detected and resolved, not any request-latency/availability target.
 | 3 | Time from the nightly Auto-QA *pipeline itself* crashing (not a content finding) to an alert | ≤ 24h | Proposed `Alert on scan pipeline failure` step | [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) — **not yet met**: the step is not merged (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545)); today this failure mode is silent and only detectable by noticing an unusual gap in `[Auto-QA]` findings |
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for these three workflows | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **not yet met**: documents manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
-| 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap as SLO 5; see [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) |
+| 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap as SLO 5; see [issue #607](https://github.com/kubestellar/console-marketplace/issues/607) |
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
 
 ## Why SLOs 2, 3, 5, 6, and 7 Are Reported as Unmet
@@ -57,7 +57,7 @@ aspirational, already-healthy state:
   workflow: `stale.yml` runs daily via
   `kubestellar/infra/.github/workflows/reusable-stale.yml` with no `workflow_run` alert,
   issue-filing step, or other notification on failure — see
-  [issue #598](https://github.com/kubestellar/console-marketplace/issues/598) and
+  [issue #607](https://github.com/kubestellar/console-marketplace/issues/607) and
   [`scheduled-scan-alert-gap.md#stale-issues-workflow`](./scheduled-scan-alert-gap.md#stale-issues-workflow).
 - **SLO 7** depends on the same class of workflow-file change as SLO 3: a validated
   diff exists (adding a final `if: always()` summary step to `fuzz.yml`'s `fuzz-json`
