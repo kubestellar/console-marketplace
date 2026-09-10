@@ -46,10 +46,12 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 > for a maintainer with `workflows` permission to apply directly. Until it is applied,
 > use the manual detection steps below.
 >
-> **This gap is now confirmed active, not just theoretical.** As of 2026-09-07,
+> **This gap is now confirmed active, not just theoretical.** As of 2026-09-10,
 > `OpenSSF Scorecard` has failed on every run (both `push` and the weekly `schedule`
-> trigger) since 2026-09-02T12:22:31Z — 20+ consecutive red runs, last success
-> 2026-08-31T18:13:01Z — with zero notification of any kind, because the alert gap
+> trigger) since 2026-08-31T18:13:01Z (last success) — 45 consecutive red runs across
+> ~9.4 days, most recently
+> [run 34430605494](https://github.com/kubestellar/console-marketplace/actions/runs/34430605494)
+> (2026-09-10T02:44:14Z) — with zero notification of any kind, because the alert gap
 > this runbook describes means nothing observes the run status. Root cause per the job
 > log (e.g.
 > [run 34089835030](https://github.com/kubestellar/console-marketplace/actions/runs/34089835030)):
