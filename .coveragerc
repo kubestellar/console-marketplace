@@ -1,0 +1,15 @@
+[report]
+# Suppress partial-branch reports for lines that are provably unreachable
+# from any CLI invocation, so `coverage report --fail-under=100` (see
+# .github/workflows/python-unit-tests.yml) accurately reflects the tested
+# surface. See tracking issue #631.
+#
+# The `if console_path:` guard at scripts/validate-marketplace.py:1235
+# sits inside the `if args.mode == "full":` block, but `full` mode already
+# calls `sys.exit(1)` at line 1197 when `--console-path` is missing —
+# so the false arm is defensive-in-depth and structurally unreachable
+# from the current CLI contract. coverage.py flags it as a partial
+# branch even though no test can legitimately cover it.
+partial_branches =
+    pragma: no branch
+    if console_path:
