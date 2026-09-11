@@ -40,6 +40,8 @@ console-marketplace/
 │   ├── auto-qa-pipeline-failure.md
 │   ├── scheduled-scan-alert-gap.md
 │   ├── fuzz-yml-ci-summary-gap.md
+│   ├── validate-json-yml-ci-summary-gap.md
+│   ├── python-ts-unit-tests-ci-summary-gap.md
 │   ├── postmortem-template.md
 │   ├── postmortems/
 │   └── SLO.md
@@ -60,6 +62,9 @@ scan that stopped producing findings, start here:
 | The nightly Auto-QA scan itself crashed or stopped filing findings (no red run, no `[Auto-QA]` issues) | [`runbooks/auto-qa-pipeline-failure.md`](./runbooks/auto-qa-pipeline-failure.md) |
 | The weekly `fuzz.yml`/`codeql.yml`/`scorecard.yml` scans stop completing (or `fuzz.yml` masks a real crash) | [`runbooks/scheduled-scan-alert-gap.md`](./runbooks/scheduled-scan-alert-gap.md) — no automated alert exists yet, manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
 | The daily `stale.yml` run stops completing (stale issue/PR triage silently halts) | [`runbooks/scheduled-scan-alert-gap.md#stale-issues-workflow`](./runbooks/scheduled-scan-alert-gap.md#stale-issues-workflow) — no automated alert exists yet, manual detection only; tracked under [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) (the doc-only tracking issue #598 for this specific workflow was closed once this row and the runbook section above were added) |
+| A completed `fuzz.yml` run has no structured pass/fail record (only free-text log lines) | [`runbooks/fuzz-yml-ci-summary-gap.md`](./runbooks/fuzz-yml-ci-summary-gap.md) — no `$GITHUB_STEP_SUMMARY` record exists yet; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
+| A completed `validate-json.yml` run has no structured pass/fail record (only free-text log lines) | [`runbooks/validate-json-yml-ci-summary-gap.md`](./runbooks/validate-json-yml-ci-summary-gap.md) — no `$GITHUB_STEP_SUMMARY` record exists yet; see [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
+| A completed `python-unit-tests.yml` or `ts-unit-tests.yml` run has no structured pass/fail record (only raw pytest/coverage/vitest output) | [`runbooks/python-ts-unit-tests-ci-summary-gap.md`](./runbooks/python-ts-unit-tests-ci-summary-gap.md) — no `$GITHUB_STEP_SUMMARY` record exists yet; see [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) |
 
 See [`runbooks/SLO.md`](./runbooks/SLO.md) for the detection/response targets these runbooks
 are measured against, including which targets are currently unmet and why.
