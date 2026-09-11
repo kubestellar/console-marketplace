@@ -115,9 +115,11 @@ or whenever a security/quality question needs the freshest scan result.
   version bump, permission change, etc.) and confirm the next scheduled or manually
   dispatched run is green.
 - Once a maintainer applies the `workflows`-permission-gated fix in
-  [#573](https://github.com/kubestellar/console-marketplace/issues/573), update the
-  "Current Status" section above and SLO 5 in [`SLO.md`](./SLO.md#slis-and-slos) to
-  reflect the mechanism is live, and add the new alert issue label to the table above.
+  [#573](https://github.com/kubestellar/console-marketplace/issues/573) (which also
+  closes [#607](https://github.com/kubestellar/console-marketplace/issues/607) via the
+  same `workflow-failure-issue.yml` addition), update the "Current Status" section
+  above and SLO 5 **and** SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos) to reflect the
+  mechanism is live, and add the new alert issue label to the table above.
 
 ## Verifying Recovery
 
@@ -127,12 +129,12 @@ or whenever a security/quality question needs the freshest scan result.
 ## Stale Issues Workflow
 
 `.github/workflows/stale.yml` has the same undocumented gap as the three workflows
-above. The mechanism gap is tracked in
-[issue #607](https://github.com/kubestellar/console-marketplace/issues/607) and
-SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos) — the earlier
-[issue #598](https://github.com/kubestellar/console-marketplace/issues/598) is now
-**closed** (it was a doc-only tracker that was resolved once this section and the SLO
-row were added; the underlying alert mechanism remains open under #607):
+above. The doc-only tracking issue [#598](https://github.com/kubestellar/console-marketplace/issues/598)
+was closed once this section and SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos) were added;
+the underlying mechanism gap is now tracked in its own dedicated issue,
+[#607](https://github.com/kubestellar/console-marketplace/issues/607) (distinct from
+[#573](https://github.com/kubestellar/console-marketplace/issues/573), which covers only
+`fuzz.yml`/`codeql.yml`/`scorecard.yml`):
 
 | Workflow | Schedule (UTC) | Signal | Where to look |
 |---|---|---|---|
