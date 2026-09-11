@@ -21,8 +21,9 @@ should be detected and resolved, not any request-latency/availability target.
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for these three workflows | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **not yet met**: documents manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
 | 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap as SLO 5, tracked as part of the mechanism fix in [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) (the doc-only tracking issue #598 for this specific workflow was closed once this runbook section and row were added; the underlying alert gap itself is still open) |
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
+| 8 | Whether a completed `python-unit-tests.yml` or `ts-unit-tests.yml` run left a bounded, machine-readable record of what it checked (pass/fail counts, coverage percentage) | Every run's Summary tab shows this record | None today — only tool-native pytest/coverage/vitest console output | [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md) — **not yet met**: the parsing/rendering logic is extracted into tested, standalone scripts, but wiring them into either workflow is blocked on the same `workflows` permission gap as SLO 3/7; see [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) |
 
-## Why SLOs 2, 3, 5, 6, and 7 Are Reported as Unmet
+## Why SLOs 2, 3, 5, 6, 7, and 8 Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -67,6 +68,17 @@ aspirational, already-healthy state:
   lacking the `workflows` App permission — see
   [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) for the preserved,
   ready-to-apply diff and [issue #597](https://github.com/kubestellar/console-marketplace/issues/597).
+- **SLO 8** is the same class of gap as SLO 7, for `python-unit-tests.yml` and
+  `ts-unit-tests.yml` instead of `fuzz.yml`: the check-output parsing/rendering
+  logic has been extracted into tested, standalone scripts
+  (`scripts/python_unit_tests_summary.py`, `scripts/ts_unit_tests_summary.py`,
+  with unit tests in `tests/test_python_unit_tests_summary.py` and
+  `tests/test_ts_unit_tests_summary.py`), but wiring a call to either into its
+  workflow needs the same `workflows` App permission automated PRs from this
+  project do not carry — see
+  [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md)
+  for the ready-to-apply step and
+  [issue #636](https://github.com/kubestellar/console-marketplace/issues/636).
 
 ## Reviewing These SLOs
 
@@ -75,6 +87,6 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2, SLO 3, SLO 5, SLO 6, or SLO 7 as met until the corresponding gap above is
-actually closed — verify by re-reading the referenced workflow/settings, not by assuming
-a linked issue was resolved.
+Do not mark SLO 2, SLO 3, SLO 5, SLO 6, SLO 7, or SLO 8 as met until the corresponding
+gap above is actually closed — verify by re-reading the referenced workflow/settings,
+not by assuming a linked issue was resolved.
