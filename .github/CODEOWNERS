@@ -10,7 +10,9 @@
 /themes/ @clubanderson @caniszczyk
 
 # Repository automation and contribution workflow
-/.github/ @clubanderson @caniszczyk
+# More specific than the top-level rule: CI/CD workflow review is restricted to
+# @clubanderson only (preserved from the now-removed root CODEOWNERS override).
+/.github/ @clubanderson
 /scripts/ @clubanderson @caniszczyk
 /README.md @clubanderson @caniszczyk
 /CONTRIBUTING.md @clubanderson @caniszczyk
