@@ -11,7 +11,7 @@
 This runbook covers the **missing structured pass/fail summary** in both unit-test
 workflows — the same gap class already documented for `fuzz.yml`
 ([`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md)) and `validate-json.yml`
-([`validate-json-yml-ci-summary-gap.md`](./validate-json-yml-ci-summary-gap.md)).
+([`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md)).
 `python-unit-tests.yml`'s "Run tests with coverage" and "Check coverage threshold"
 steps, and `ts-unit-tests.yml`'s "Run vitest with coverage gate" step, only emit raw
 pytest/coverage/vitest tool output. No step in either workflow writes to
