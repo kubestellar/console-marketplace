@@ -22,33 +22,41 @@ original finding.
 
 ## Current Status
 
-> **No mechanism fix exists yet.** Validated, ready-to-apply diffs (below) give each
-> test-running step an `id`, add `if: always()` where a later step needs to run
-> regardless of an earlier failure, parse each tool's own bounded final summary line
-> (pytest's `"<N> passed, ... in <T>s"`, vitest's `"Tests  <N> passed (<N>)"`), and
-> add a final `if: always()` step per workflow that writes a markdown table to
-> `$GITHUB_STEP_SUMMARY` plus a single-line `PYTHON_UNIT_TESTS_SUMMARY: {...}` /
-> `TS_UNIT_TESTS_SUMMARY: {...}` JSON record to stdout.
+> **Python side: fixed, no workflow edit needed.** A root-level `conftest.py` now
+> hooks `pytest_terminal_summary`/`pytest_sessionfinish` to emit a
+> `PYTHON_UNIT_TESTS_SUMMARY: {...}` JSON line and a `$GITHUB_STEP_SUMMARY` Markdown
+> table for every `pytest tests/` run — including the exact
+> `python -m coverage run --branch --source=scripts -m pytest tests/ -v` invocation
+> `python-unit-tests.yml`'s "Run tests with coverage" step already uses. This
+> sidesteps the `workflows` permission blocker entirely: `$GITHUB_STEP_SUMMARY` is a
+> runner-provided env var present in every Actions job step regardless of workflow
+> wiring, and pytest auto-loads a root `conftest.py` with no workflow change
+> required. See `conftest.py` and `tests/test_conftest_summary.py` (unit tests for
+> the bounded record/markdown builders) and verification notes in
+> [issue #636](https://github.com/kubestellar/console-marketplace/issues/636).
 >
-> The pytest summary-line parser was dry-run tested against this repo's actual test
-> suite at commit `212a551` (427 passed, 0 failed, 99% coverage on
-> `scripts/validate-marketplace.py`) and specifically checked against both the
-> plain and `=`-padded banner forms pytest emits, so it can't mis-parse an unrelated
-> `"N subtests passed"` fragment on the same line. No exporter, metrics backend, or
-> external data flow: stdout/step-summary only, and all counts are bounded by each
-> tool's own fixed pass/fail/coverage-percentage output (never populated from
-> unbounded user input).
+> Bounded, stdout/step-summary-only output: fixed integer fields (passed/failed/
+> skipped/errors/xfailed/xpassed/total, exit_status, overall_status) — no per-test
+> names, no exporter, no external data flow. The separate "Check coverage
+> threshold" step (a plain `coverage report` invocation, not itself a pytest run)
+> is unaffected and out of scope here; its own gate is tracked by
+> [issue #620](https://github.com/kubestellar/console-marketplace/issues/620) /
+> [issue #631](https://github.com/kubestellar/console-marketplace/issues/631).
 >
-> Both fixes require editing files under `.github/workflows/`. The hive's GitHub App
-> installation lacks the `workflows` permission scope, so an automated agent PR
-> touching this path is rejected by GitHub before it can even be opened (the same
-> blocker already documented for
+> **TypeScript side (`ts-unit-tests.yml`): still blocked.** Unlike the Python fix,
+> a no-workflow-edit path for vitest wasn't pursued this round because
+> `ts-unit-tests.yml` sparse-checks out `web/src/test/setup.ts` from
+> `kubestellar/console` at run time and links that repo's `node_modules` — wiring a
+> custom vitest reporter through that cross-repo setup safely needs local
+> validation against the real linked `node_modules` this environment doesn't have,
+> and it isn't worth risking on an unverified guess. The ready-to-apply
+> `ts-unit-tests.yml` diff below is preserved for a maintainer with `workflows`
+> permission, or for a future session that can validate a reporter-based fix
+> end-to-end. This half of the same blocker is already documented for
 > [issue #545](https://github.com/kubestellar/console-marketplace/issues/545),
 > [issue #573](https://github.com/kubestellar/console-marketplace/issues/573),
 > [issue #597](https://github.com/kubestellar/console-marketplace/issues/597), and
-> [issue #621](https://github.com/kubestellar/console-marketplace/issues/621)).
-> This runbook exists so the validated diffs are preserved in a file automation
-> *can* land, instead of being re-derived on every future audit pass.
+> [issue #621](https://github.com/kubestellar/console-marketplace/issues/621).
 
 ## When to Use This Runbook
 
@@ -59,8 +67,12 @@ original finding.
   [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) and
   want the exact diffs to apply, without waiting on another automated attempt.
 
-## Ready-to-Apply Diff: `python-unit-tests.yml`
+## Ready-to-Apply Diff: `python-unit-tests.yml` (optional — superseded by `conftest.py`)
 
+**Superseded.** The `conftest.py` fix above already gives this workflow a
+structured summary without any workflow edit. This diff is kept only in case a
+maintainer later prefers a workflow-level implementation instead (e.g. to also
+cover the separate coverage-threshold step's outcome in the same JSON record).
 Validated against `.github/workflows/python-unit-tests.yml` at commit `212a551`.
 
 <details>
@@ -216,16 +228,20 @@ index e54d6b4..c93fb6e 100644
 
 ## Applying the Fix
 
-1. Apply both diffs above to their respective workflow files (a maintainer with the
-   `workflows` GitHub App permission, or a local PAT-based push, can do this
-   directly — automation cannot).
-2. Trigger each workflow via a PR that touches its watched paths, or
-   `workflow_dispatch` for `python-unit-tests.yml`.
-3. Confirm each run's **Summary** tab shows the respective summary table, and the
-   final step's log contains a `PYTHON_UNIT_TESTS_SUMMARY: {...}` /
-   `TS_UNIT_TESTS_SUMMARY: {...}` line.
-4. Close [issue #636](https://github.com/kubestellar/console-marketplace/issues/636)
-   once both are confirmed.
+- **Python side:** already applied via `conftest.py` — no further action needed.
+  Confirm on the next `python-unit-tests.yml` run that the "Run tests with
+  coverage" step's log contains a `PYTHON_UNIT_TESTS_SUMMARY: {...}` line and the
+  job's **Summary** tab shows the "Python Unit Tests Summary" table.
+- **TypeScript side:** still requires the diff below.
+  1. Apply the `ts-unit-tests.yml` diff (a maintainer with the `workflows` GitHub
+     App permission, or a local PAT-based push, can do this directly —
+     automation cannot).
+  2. Trigger the workflow via a PR that touches its watched paths.
+  3. Confirm the run's **Summary** tab shows the "TypeScript Unit Test Summary"
+     table, and the final step's log contains a `TS_UNIT_TESTS_SUMMARY: {...}`
+     line.
+  4. Close [issue #636](https://github.com/kubestellar/console-marketplace/issues/636)
+     once the TypeScript side is confirmed (Python side already closes its half).
 
 ## Verifying Recovery
 
