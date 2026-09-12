@@ -149,5 +149,8 @@ confirm the next scheduled or `workflow_dispatch`-triggered run is green.
 ## Recording the Incident
 
 Use the [Incident Report issue template](../.github/ISSUE_TEMPLATE/incident-report.md)
-(labeled `incident, lifecycle/frozen`) to capture the timeline, impact, root cause, and
-follow-up actions for any confirmed crash or missed detection window.
+(applies `lifecycle/frozen`) to capture the timeline, impact, root cause, and follow-up
+actions for any confirmed crash or missed detection window. The template's front matter
+also names an `incident` label, but that label does not exist in this repository, so
+GitHub silently drops it when the issue is created; add it by hand if a maintainer has
+since created it (see #691).
