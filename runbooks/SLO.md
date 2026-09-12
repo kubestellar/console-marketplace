@@ -48,8 +48,8 @@ aspirational, already-healthy state:
   [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md). `fuzz.yml`
   additionally masks real Atheris-detected crashes with `|| true` after its fuzz-run step,
   so even a genuine crash produces a green run today. **This gap is confirmed active, not
-  hypothetical:** as of 2026-09-11, `scorecard.yml` has failed on every run since its
-  last success on 2026-08-31T18:13:01Z (50 consecutive red runs across ~10.6 days) due
+  hypothetical:** as of 2026-09-12, `scorecard.yml` has failed on every run since its
+  last success on 2026-08-31T18:13:01Z (64 consecutive red runs across ~11.5 days) due
   to an upstream GCR billing gate on the `ossf/scorecard-action` image, with zero
   notification of the ongoing outage — see the
   [Current Status](./scheduled-scan-alert-gap.md#current-status) update in
