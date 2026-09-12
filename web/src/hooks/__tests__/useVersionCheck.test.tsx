@@ -82,4 +82,35 @@ describe('useVersionCheck', () => {
     expect(result.current.updateAvailable).toBe(false)
     expect(result.current.error).toBe('Version check failed: Forbidden')
   })
+
+  it('logs a bounded structured record when the version check fails', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockFetch.mockResolvedValueOnce(jsonResponse<JsonResponseBody>({}, { ok: false, statusText: 'Forbidden' }))
+
+    const { result } = renderHook(() => useVersionCheck('v1.4.0'))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('VERSION_CHECK_SUMMARY:', {
+      hook: 'useVersionCheck',
+      status: 'error',
+      reason: 'Version check failed: Forbidden',
+    })
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('does not log anything when the check is aborted on unmount', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockFetch.mockImplementationOnce(() => new Promise(() => {}))
+
+    const { unmount } = renderHook(() => useVersionCheck('v1.4.0'))
+    unmount()
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+
+    consoleErrorSpy.mockRestore()
+  })
 })
