@@ -189,6 +189,34 @@ class TestRegistryEntryConsistency:
         result = _mod.run_validation(root)
         assert any("downloadUrl path" in e for e in result.errors)
 
+    def test_download_url_matching_existing_file_is_accepted(self, tmp_path):
+        # Registry entry with a downloadUrl whose "/main/<path>" tail points to
+        # a file that actually exists in the repo. Hits the previously
+        # uncovered `140->108` branch of _validate_registry_entries — the
+        # happy path where the regex matches AND `os.path.isfile` is True, so
+        # no error is emitted and control returns to the loop head. Without
+        # this test, a refactor that inverts the isfile predicate (e.g.
+        # accidentally swapping `not os.path.isfile` for `os.path.isfile`)
+        # would go undetected: today the negative arm is asserted by
+        # test_download_url_path_mismatch_records_error, but the positive
+        # arm was structurally unexercised.
+        registry = {
+            "items": [
+                {
+                    "id": "widget",
+                    "type": "future-widget-kind",
+                    "downloadUrl": "https://raw.githubusercontent.com/o/r/main/widgets/widget.json",
+                }
+            ],
+            "presets": [],
+        }
+        root = _make_repo(tmp_path, registry)
+        _write(os.path.join(root, "widgets", "widget.json"), "{}")
+        result = _mod.run_validation(root)
+        assert result.status == "pass"
+        assert result.errors == []
+        assert result.registry_entries_checked == 1
+
 
 # ── Summary rendering ──────────────────────────────────────────────────────
 
