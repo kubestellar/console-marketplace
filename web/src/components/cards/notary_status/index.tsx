@@ -19,11 +19,11 @@ import { useDemoMode } from '../../hooks/useDemoMode'    // required hook #2
 import { useGlobalFilters } from '../../hooks/useGlobalFilters' // required hook #3
 import { useTranslation } from 'react-i18next'           // required hook #4
 import {
-  NOTARY_DEMO_DATA,
   type NotaryDemoData,
   type NotaryDemoClusterStatus,
   type NotaryDemoTrustPolicy,
 } from './demoData'
+import { useNotaryStatus } from './useNotaryStatus'
 
 // Re-export types so tree-shaking keeps them
 export type { NotaryDemoData, NotaryDemoClusterStatus, NotaryDemoTrustPolicy }
@@ -54,12 +54,23 @@ export function NotaryStatus({ config: _config }: NotaryStatusProps) {
   // --- required hook #3 ---
   const { selectedClusters } = useGlobalFilters()
 
-  // Data source: use demo data until a real data hook exists (same rationale as KubeflowStatus)
-  const isDemoData = isDemoMode                      // required pattern #5
-  const rawData: NotaryDemoData = NOTARY_DEMO_DATA
+  const {
+    data: rawData,
+    isLoading,
+    isRefreshing,
+    isFailed,
+    isDemoFallback,
+  } = useNotaryStatus()
+  const isDemoData = isDemoMode || isDemoFallback // required pattern #5
 
   // --- required hook #1 + pattern #5: wire isDemoData into useCardLoadingState ---
-  const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
+  const { showSkeleton, showEmptyState } = useCardLoadingState({
+    isLoading,
+    isRefreshing,
+    hasAnyData: rawData.clusters.length > 0,
+    isFailed,
+    isDemoData,
+  })
 
   // Flatten clusters into display rows
   const allRows = useMemo<NotaryDisplayRow[]>(() => {

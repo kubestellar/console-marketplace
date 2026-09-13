@@ -13,6 +13,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { BUILDPACKS_DEMO_DATA } from './demoData'
 
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
@@ -49,6 +50,16 @@ vi.mock('../../lib/cards/cardHooks', () => ({
 
 vi.mock('./CardDataContext', () => ({
   useCardLoadingState: () => mockUseCardLoadingState(),
+}))
+
+vi.mock('./useBuildpacksStatus', () => ({
+  useBuildpacksStatus: () => ({
+    data: BUILDPACKS_DEMO_DATA,
+    isLoading: false,
+    isRefreshing: false,
+    isFailed: false,
+    isDemoFallback: true,
+  }),
 }))
 
 vi.mock('../../hooks/useDemoMode', () => ({

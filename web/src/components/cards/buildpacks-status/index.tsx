@@ -8,7 +8,8 @@ import { useCardLoadingState } from './CardDataContext'
 import { useDemoMode } from '../../hooks/useDemoMode'
 import { useGlobalFilters } from '../../hooks/useGlobalFilters'
 import { useTranslation } from 'react-i18next'
-import { BUILDPACKS_DEMO_DATA, type BuildpacksDemoImage } from './demoData'
+import { type BuildpacksDemoImage } from './demoData'
+import { useBuildpacksStatus } from './useBuildpacksStatus'
 
 export type { BuildpacksDemoImage }
 
@@ -28,10 +29,23 @@ export function BuildpacksStatus() {
   const { isDemoMode } = useDemoMode()
   const { selectedClusters } = useGlobalFilters()
 
-  const isDemoData = isDemoMode
-  const rawImages = BUILDPACKS_DEMO_DATA.images
+  const {
+    data,
+    isLoading,
+    isRefreshing,
+    isFailed,
+    isDemoFallback,
+  } = useBuildpacksStatus()
+  const isDemoData = isDemoMode || isDemoFallback
+  const rawImages = data.images
 
-  const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
+  const { showSkeleton, showEmptyState } = useCardLoadingState({
+    isLoading,
+    isRefreshing,
+    hasAnyData: rawImages.length > 0,
+    isFailed,
+    isDemoData,
+  })
 
   const allRows = useMemo<BuildpacksDisplayRow[]>(
     () => rawImages.map(image => ({ ...image, id: `${image.cluster}/${image.name}` })),
