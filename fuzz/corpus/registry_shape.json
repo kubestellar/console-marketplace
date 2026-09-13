@@ -1,0 +1,7 @@
+{
+  "items": [
+    {"id": "a1", "type": "dashboard", "downloadUrl": "https://example.invalid/a.json"},
+    {"id": "b2", "type": "preset", "downloadUrl": "https://example.invalid/b.json"},
+    {"id": "c3", "type": "card-preset"}
+  ]
+}
