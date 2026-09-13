@@ -22,8 +22,9 @@ should be detected and resolved, not any request-latency/availability target.
 | 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap class as SLO 5, tracked in its own dedicated issue [#607](https://github.com/kubestellar/console-marketplace/issues/607) (the doc-only tracking issue #598 for this specific workflow was closed once this runbook section and row were added; #607 was opened afterward because #573 covers only `fuzz.yml`/`codeql.yml`/`scorecard.yml`, not `stale.yml`; the underlying alert gap itself is still open) |
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
 | 8 | Whether a completed `validate-json.yml` run left a bounded, machine-readable record of what it checked (registry entries checked, dashboards checked, error count, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo`/`print` lines in the raw step log | [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) — **not yet met**: the underlying logic is extracted into a tested, standalone `scripts/validate_json_summary.py`, but wiring it into the workflow is blocked on the same `workflows` permission gap as SLO 3/7; see [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
+| 9 | Whether a completed `python-unit-tests.yml` / `ts-unit-tests.yml` run left a bounded, machine-readable record of pass/fail counts | Every run's Summary tab shows this record | Python: root `conftest.py` `pytest_terminal_summary`/`pytest_sessionfinish` hook (no workflow edit needed). TS: none today | [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md) — **partially met**: Python side closed via merged [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) fix (`conftest.py`); TS side still blocked on the same `workflows` permission gap as SLO 3/7/8 — a ready-to-apply diff for `ts-unit-tests.yml` is preserved in the runbook for a maintainer |
 
-## Why SLOs 2, 3, 5, 6, 7, and 8 Are Reported as Unmet
+## Why SLOs 2, 3, 5, 6, 7, 8, and 9 (TS half) Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -78,6 +79,14 @@ aspirational, already-healthy state:
   automated PRs from this project do not carry — see
   [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) for the
   ready-to-apply step and [issue #621](https://github.com/kubestellar/console-marketplace/issues/621).
+- **SLO 9** is met on its Python half: a merged `conftest.py` hook (closing
+  [issue #636](https://github.com/kubestellar/console-marketplace/issues/636))
+  writes a structured summary for every `python-unit-tests.yml` run with no
+  workflow-file edit required. Its TypeScript half is the same class of gap as
+  SLO 3/7/8: `ts-unit-tests.yml` needs a workflow-file change automated PRs cannot
+  land — see
+  [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md)
+  for the preserved, ready-to-apply diff.
 
 ## Reviewing These SLOs
 
@@ -86,6 +95,6 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2, SLO 3, SLO 5, SLO 6, SLO 7, or SLO 8 as met until the corresponding gap
-above is actually closed — verify by re-reading the referenced workflow/settings, not by
-assuming a linked issue was resolved.
+Do not mark SLO 2, SLO 3, SLO 5, SLO 6, SLO 7, SLO 8, or the TS half of SLO 9 as met until
+the corresponding gap above is actually closed — verify by re-reading the referenced
+workflow/settings, not by assuming a linked issue was resolved.
