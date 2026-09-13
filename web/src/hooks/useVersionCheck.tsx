@@ -66,10 +66,18 @@ export function useVersionCheck(currentVersion: string | null = null): VersionIn
       } catch (err) {
         // AbortError is expected on component unmount — do not update state.
         if ((err as Error).name === 'AbortError') return;
+        const reason = (err as Error).message;
+        // Bounded, fixed-shape record (hook name + failure reason only — no
+        // raw response body or unbounded input) so a proxy outage, GitHub
+        // API rate limit, or malformed JSON response leaves a trace even
+        // though no UI in this repo currently consumes VersionInfo.error.
+        console.error(
+          `VERSION_CHECK_SUMMARY: ${JSON.stringify({ hook: 'useVersionCheck', status: 'failed', reason })}`
+        );
         setState(prev => ({
           ...prev,
           loading: false,
-          error: (err as Error).message,
+          error: reason,
         }));
       }
     };

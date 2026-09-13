@@ -82,4 +82,41 @@ describe('useVersionCheck', () => {
     expect(result.current.updateAvailable).toBe(false)
     expect(result.current.error).toBe('Version check failed: Forbidden')
   })
+
+  it('logs a bounded VERSION_CHECK_SUMMARY record on fetch failure', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockFetch.mockResolvedValueOnce(jsonResponse<JsonResponseBody>({}, { ok: false, statusText: 'Forbidden' }))
+
+    const { result } = renderHook(() => useVersionCheck('v1.4.0'))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'VERSION_CHECK_SUMMARY: {"hook":"useVersionCheck","status":"failed","reason":"Version check failed: Forbidden"}',
+    )
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('does not log VERSION_CHECK_SUMMARY when the AbortError is swallowed', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockFetch.mockImplementationOnce(
+      (_input: RequestInfo, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            const err = new Error('aborted')
+            err.name = 'AbortError'
+            reject(err)
+          })
+        }),
+    )
+
+    const { unmount } = renderHook(() => useVersionCheck('v1.4.0'))
+    unmount()
+    await new Promise((r) => setTimeout(r, 0))
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+    consoleErrorSpy.mockRestore()
+  })
 })
