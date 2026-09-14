@@ -19,7 +19,19 @@ for the original finding.
 
 ## Current Status
 
-> **No mechanism fix exists yet.** A validated, ready-to-apply diff (below) adds a
+> **The corpus-mutation and edge-case testing logic now exists as a standalone,
+> unit-tested script:** [`scripts/fuzz_summary.py`](../scripts/fuzz_summary.py)
+> (tests: [`tests/test_fuzz_summary.py`](../tests/test_fuzz_summary.py)). It
+> re-implements the same fixed-corpus mutation testing and fixed edge-case list
+> `fuzz.yml` already runs, and emits the bounded markdown table + single-line
+> `FUZZ_SUMMARY: {...}` JSON record described below. It does **not** invoke
+> atheris itself — that remains a subprocess step in the workflow — but accepts
+> the atheris exit status via `--fuzzer-status`/`FUZZER_STATUS` so a wired
+> workflow can report on the whole job. This script is pushable today (it lives
+> outside `.github/workflows/`); **only the workflow wiring below still needs a
+> maintainer with the `workflows` GitHub App permission.**
+>
+> A validated, ready-to-apply diff (below) adds a
 > final `if: always()` "Fuzzing observability summary" step to the `fuzz-json` job.
 > It has been implemented and locally validated (YAML parses cleanly; each `run:`
 > block's shell logic was reviewed and dry-run tested) in **eight separate prior
@@ -52,24 +64,29 @@ for the original finding.
 
 ## Ready-to-Apply Diff
 
-Validated against `.github/workflows/fuzz.yml` at commit `7bf6426`. Adds step `id`s,
-bounded output counts (corpus files fuzzed, corpus failures, edge cases tested), and a
-final `if: always()` step that writes a markdown table to `$GITHUB_STEP_SUMMARY` and a
-single-line `FUZZ_SUMMARY: {...}` JSON record to stdout — mirroring the
-`MARKETPLACE_QUALITY_SUMMARY:` pattern already used by `scripts/validate-marketplace.py`.
-No exporter, metrics backend, or external data flow: stdout/step-summary only, and all
-counts are bounded by this repo's own fixed corpus-file list and fixed edge-case list
-(never populated from user input).
+Validated against `.github/workflows/fuzz.yml` at commit `c3d7da5`. Adds a step
+`id`, captures the atheris exit status, and replaces the workflow's duplicated
+inline corpus-mutation/edge-case Python with a single call to
+[`scripts/fuzz_summary.py`](../scripts/fuzz_summary.py) — the standalone,
+unit-tested script that already re-implements that logic (see
+[`tests/test_fuzz_summary.py`](../tests/test_fuzz_summary.py)). The script
+writes a bounded markdown table to `$GITHUB_STEP_SUMMARY` and a single-line
+`FUZZ_SUMMARY: {...}` JSON record to stdout, mirroring the
+`MARKETPLACE_QUALITY_SUMMARY:` pattern already used by
+`scripts/validate-marketplace.py`. No exporter, metrics backend, or external
+data flow: stdout/step-summary only, and all counts are bounded by this
+repo's own fixed corpus-file list and fixed edge-case list (never populated
+from user input).
 
 <details>
 <summary>Diff</summary>
 
 ```diff
 diff --git a/.github/workflows/fuzz.yml b/.github/workflows/fuzz.yml
-index c926327..6a53343 100644
+index c926327..af33ad5 100644
 --- a/.github/workflows/fuzz.yml
 +++ b/.github/workflows/fuzz.yml
-@@ -112,16 +112,25 @@ jobs:
+@@ -112,67 +112,19 @@ jobs:
            chmod +x fuzz/fuzz_json_parser.py
  
        - name: Run fuzzing tests
@@ -81,109 +98,73 @@ index c926327..6a53343 100644
 -          timeout 60s python fuzz_json_parser.py -atheris_runs=100000 || true
 -          
 -          # Test with actual repository files as corpus
-+          timeout 60s python fuzz_json_parser.py -atheris_runs=100000
-+          FUZZER_EXIT=$?
-+
-+          # Test with actual repository files as corpus. This is a fixed,
-+          # bounded list of the repo's known JSON surfaces -- not
-+          # user-supplied input -- so the corpus count stays constant-size
-+          # regardless of registry growth.
-           echo "Testing with real JSON files from repository..."
-+          CORPUS_COUNT=0
-+          CORPUS_FAILED=0
-           for json_file in ../registry.json ../dashboards/*/dashboard.json ../presets/*.json ../card-presets/*.json; do
-             if [ -f "$json_file" ]; then
-               echo "Fuzzing with corpus from: $json_file"
-+              CORPUS_COUNT=$((CORPUS_COUNT + 1))
-               python -c "
-           import json
-           import sys
-@@ -143,16 +152,27 @@ jobs:
-                   try:
-                       json.loads('}' + content)
-                   except: pass
+-          echo "Testing with real JSON files from repository..."
+-          for json_file in ../registry.json ../dashboards/*/dashboard.json ../presets/*.json ../card-presets/*.json; do
+-            if [ -f "$json_file" ]; then
+-              echo "Fuzzing with corpus from: $json_file"
+-              python -c "
+-          import json
+-          import sys
+-          with open('$json_file') as f:
+-              content = f.read()
+-              # Test original
+-              json.loads(content)
+-              # Test with mutations
+-              for i in range(10):
+-                  # Test truncated
+-                  if len(content) > 10:
+-                      try:
+-                          json.loads(content[:-i])
+-                      except: pass
+-                  # Test with extra characters
+-                  try:
+-                      json.loads(content + '{')
+-                  except: pass
+-                  try:
+-                      json.loads('}' + content)
+-                  except: pass
 -          "
-+          " || CORPUS_FAILED=$((CORPUS_FAILED + 1))
-             fi
-           done
+-            fi
+-          done
 -          echo "Fuzzing completed successfully - no crashes detected"
-+
-+          if [ "$FUZZER_EXIT" -eq 0 ] && [ "$CORPUS_FAILED" -eq 0 ]; then
-+            echo "Fuzzing completed successfully - no crashes detected"
++          timeout 60s python fuzz_json_parser.py -atheris_runs=100000
++          if [ $? -eq 0 ]; then
 +            echo "status=pass" >> "$GITHUB_OUTPUT"
 +          else
-+            echo "Fuzzing detected failures (fuzzer_exit=$FUZZER_EXIT, corpus_failed=$CORPUS_FAILED)"
 +            echo "status=fail" >> "$GITHUB_OUTPUT"
 +          fi
-+          echo "corpus_count=$CORPUS_COUNT" >> "$GITHUB_OUTPUT"
-+          echo "corpus_failed=$CORPUS_FAILED" >> "$GITHUB_OUTPUT"
  
-       - name: Test edge cases
-+        id: edge-cases
-         run: |
-           python3 - << 'SCRIPT'
-           import json
--          
-+          import os
-+
-           # Test edge cases that should NOT crash
-           edge_cases = [
-               '{}',
-@@ -165,14 +185,52 @@ jobs:
-               '[' + ','.join(['{}'] * 1000) + ']',
-               '{"key": "' + 'x' * 10000 + '"}',
-           ]
--          
-+
-           print("Testing edge cases...")
-+          failed = 0
-           for i, case in enumerate(edge_cases):
-               try:
-                   json.loads(case)
-                   print(f"✓ Edge case {i+1} parsed successfully")
-               except Exception as e:
-                   print(f"✓ Edge case {i+1} raised expected error: {type(e).__name__}")
--          
-+
-           print("\nAll edge case tests passed!")
-+
-+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-+              fh.write(f"edge_case_count={len(edge_cases)}\n")
-+              fh.write(f"failed={failed}\n")
-           SCRIPT
-+
+-      - name: Test edge cases
 +      - name: Fuzzing observability summary
 +        if: always()
-+        run: |
-+          FUZZ_STATUS="${{ steps.run-fuzzing.outputs.status || 'fail' }}"
-+          CORPUS_COUNT="${{ steps.run-fuzzing.outputs.corpus_count || 0 }}"
-+          CORPUS_FAILED="${{ steps.run-fuzzing.outputs.corpus_failed || 0 }}"
-+          EDGE_CASE_COUNT="${{ steps.edge-cases.outputs.edge_case_count || 0 }}"
-+          EDGE_CASE_FAILED="${{ steps.edge-cases.outputs.failed || 0 }}"
-+
-+          if [ "$FUZZ_STATUS" = "pass" ] && [ "$EDGE_CASE_FAILED" -eq 0 ]; then
-+            OVERALL_STATUS="pass"
-+          else
-+            OVERALL_STATUS="fail"
-+          fi
-+
-+          {
-+            echo "### JSON Fuzzing Summary"
-+            echo ""
-+            echo "| Field | Value |"
-+            echo "|---|---|"
-+            echo "| Corpus files fuzzed | ${CORPUS_COUNT} |"
-+            echo "| Corpus failures | ${CORPUS_FAILED} |"
-+            echo "| Edge cases tested | ${EDGE_CASE_COUNT} |"
-+            echo "| Fuzzer status | ${FUZZ_STATUS} |"
-+            echo "| Overall status | ${OVERALL_STATUS} |"
-+          } >> "$GITHUB_STEP_SUMMARY"
-+
-+          echo "FUZZ_SUMMARY: {\"corpus_count\":${CORPUS_COUNT},\"corpus_failed\":${CORPUS_FAILED},\"edge_case_count\":${EDGE_CASE_COUNT},\"fuzzer_status\":\"${FUZZ_STATUS}\",\"overall_status\":\"${OVERALL_STATUS}\"}"
-+
-+          if [ "$OVERALL_STATUS" != "pass" ]; then
-+            exit 1
-+          fi
+         run: |
+-          python3 - << 'SCRIPT'
+-          import json
+-          
+-          # Test edge cases that should NOT crash
+-          edge_cases = [
+-              '{}',
+-              '[]',
+-              'null',
+-              '""',
+-              '0',
+-              '{"nested": {"deeply": {"very": {"deep": {}}}}}',
+-              '{"array": [[[[[]]]]]}',
+-              '[' + ','.join(['{}'] * 1000) + ']',
+-              '{"key": "' + 'x' * 10000 + '"}',
+-          ]
+-          
+-          print("Testing edge cases...")
+-          for i, case in enumerate(edge_cases):
+-              try:
+-                  json.loads(case)
+-                  print(f"✓ Edge case {i+1} parsed successfully")
+-              except Exception as e:
+-                  print(f"✓ Edge case {i+1} raised expected error: {type(e).__name__}")
+-          
+-          print("\nAll edge case tests passed!")
+-          SCRIPT
++          python3 scripts/fuzz_summary.py --fuzzer-status "${{ steps.run-fuzzing.outputs.status || 'unknown' }}"
 ```
 
 </details>
@@ -206,5 +187,6 @@ index c926327..6a53343 100644
   counts and an explicit `pass`/`fail` overall status — not just the job's own
   green/red indicator.
 - A real Atheris crash (simulate by temporarily reintroducing a parsing bug) causes
-  the final summary step to `exit 1` with `overall_status: fail`, rather than the
-  job passing silently.
+  `scripts/fuzz_summary.py` to exit non-zero with `overall_status: fail` (via its
+  own `--fuzzer-status fail` input), failing the "Fuzzing observability summary"
+  step instead of the job passing silently.
