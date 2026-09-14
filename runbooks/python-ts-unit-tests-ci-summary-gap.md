@@ -39,9 +39,21 @@ original finding.
 > skipped/errors/xfailed/xpassed/total, exit_status, overall_status) — no per-test
 > names, no exporter, no external data flow. The separate "Check coverage
 > threshold" step (a plain `coverage report` invocation, not itself a pytest run)
-> is unaffected and out of scope here; its own gate is tracked by
-> [issue #620](https://github.com/kubestellar/console-marketplace/issues/620) /
-> [issue #631](https://github.com/kubestellar/console-marketplace/issues/631).
+> is unaffected and out of scope here. Its gate previously failed with the
+> unsatisfiable `--fail-under=100` gap first described in
+> [issue #631](https://github.com/kubestellar/console-marketplace/issues/631)
+> (later duplicated by [issue #620](https://github.com/kubestellar/console-marketplace/issues/620),
+> which reproduced the identical failure independently). The underlying gate
+> itself is now **resolved**: `.coveragerc` (merged via
+> [PR #632](https://github.com/kubestellar/console-marketplace/pull/632),
+> closing #631) excludes the one provably-dead partial branch, and
+> `python-unit-tests.yml`'s "Check coverage threshold" step has passed on every
+> `main` run since. Issue #620 remains open on GitHub as a stale duplicate
+> tracker as of this writing — see
+> [issue #693](https://github.com/kubestellar/console-marketplace/issues/693)
+> for the confirmed duplicate-PR/issue analysis — but do not treat the coverage
+> gate itself as an open gap; re-verify against current `main` before assuming
+> otherwise.
 >
 > **TypeScript side (`ts-unit-tests.yml`): still blocked.** Unlike the Python fix,
 > a no-workflow-edit path for vitest wasn't pursued this round because
