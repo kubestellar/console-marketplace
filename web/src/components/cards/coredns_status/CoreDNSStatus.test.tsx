@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { COREDNS_DEMO_DATA } from './demoData'
 
 interface CoreDNSServer extends Record<string, unknown> {
   cluster: string
@@ -77,6 +78,16 @@ vi.mock('../../lib/cards/cardHooks', () => ({
 
 vi.mock('./CardDataContext', () => ({
   useCardLoadingState: () => mockUseCardLoadingState(),
+}))
+
+vi.mock('./useCoreDNSStatus', () => ({
+  useCoreDNSStatus: () => ({
+    data: COREDNS_DEMO_DATA,
+    isLoading: false,
+    isRefreshing: false,
+    isFailed: false,
+    isDemoFallback: true,
+  }),
 }))
 
 vi.mock('../../hooks/useDemoMode', () => ({

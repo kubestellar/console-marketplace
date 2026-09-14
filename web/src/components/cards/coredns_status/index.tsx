@@ -8,7 +8,8 @@ import { useCardLoadingState } from './CardDataContext'
 import { useDemoMode } from '../../hooks/useDemoMode'
 import { useGlobalFilters } from '../../hooks/useGlobalFilters'
 import { useTranslation } from 'react-i18next'
-import { COREDNS_DEMO_DATA, type CoreDNSDemoServer } from './demoData'
+import { type CoreDNSDemoServer } from './demoData'
+import { useCoreDNSStatus } from './useCoreDNSStatus'
 
 export type { CoreDNSDemoServer }
 
@@ -28,10 +29,22 @@ export function CoreDNSStatus() {
   const { isDemoMode } = useDemoMode()
   const { selectedClusters } = useGlobalFilters()
 
-  const isDemoData = isDemoMode
-  const rawData = COREDNS_DEMO_DATA
+  const {
+    data: rawData,
+    isLoading,
+    isRefreshing,
+    isFailed,
+    isDemoFallback,
+  } = useCoreDNSStatus()
+  const isDemoData = isDemoMode || isDemoFallback
 
-  const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
+  const { showSkeleton, showEmptyState } = useCardLoadingState({
+    isLoading,
+    isRefreshing,
+    hasAnyData: rawData.servers.length > 0 || rawData.zones.length > 0,
+    isFailed,
+    isDemoData,
+  })
 
   const allRows = useMemo<CoreDNSDisplayRow[]>(
     () =>

@@ -154,3 +154,16 @@ actions for any confirmed crash or missed detection window. The template's front
 also names an `incident` label, but that label does not exist in this repository, so
 GitHub silently drops it when the issue is created; add it by hand if a maintainer has
 since created it (see #691).
+
+**When to file:** don't wait for a human/agent to notice on their own. File an Incident
+Report as soon as a failure in this runbook's scope (`fuzz.yml`, `codeql.yml`,
+`scorecard.yml`, or `stale.yml`) has **persisted past that workflow's next scheduled
+run without recovering** — i.e., two or more consecutive scheduled failures, not just
+one. A single red run can be a transient infra flake; a second consecutive failure of
+the same scheduled workflow is a confirmed missed-detection-window incident under this
+runbook's own scope and should get a filed Incident Report, updated as the incident
+continues (see [issue #712](https://github.com/kubestellar/console-marketplace/issues/712)
+for the first incident recorded under this guidance — the `scorecard.yml` outage
+described in [Current Status](#current-status) above went 13.5+ days and 70
+consecutive failed runs before an Incident Report was filed for it, which is the gap
+this threshold is meant to close).
