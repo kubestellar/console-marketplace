@@ -2,9 +2,15 @@
 name: Incident Report
 about: Record a production or pipeline incident (broken registry/content, or a silent detection/alerting pipeline failure)
 title: '[Incident] '
-labels: incident, lifecycle/frozen
+labels: lifecycle/frozen
 assignees: ''
 ---
+
+> **Note:** `lifecycle/frozen` (applied automatically, to exempt this issue from
+> `stale.yml` auto-close — see #559) is the only label this template can apply today.
+> An `incident` label was intended alongside it but does not exist in this repository,
+> so GitHub silently drops it at issue-creation time (see #691). If a maintainer has
+> since created the `incident` label, add it to this issue by hand.
 
 ## Summary
 <!-- One or two sentences: what broke, what was the user-visible impact? -->

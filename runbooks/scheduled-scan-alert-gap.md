@@ -149,10 +149,11 @@ confirm the next scheduled or `workflow_dispatch`-triggered run is green.
 ## Recording the Incident
 
 Use the [Incident Report issue template](../.github/ISSUE_TEMPLATE/incident-report.md)
-(labeled `incident, lifecycle/frozen` — note `incident` does not currently exist as a
-repo label, see [issue #691](https://github.com/kubestellar/console-marketplace/issues/691);
-`lifecycle/frozen` alone still applies and works) to capture the timeline, impact, root
-cause, and follow-up actions for any confirmed crash or missed detection window.
+(applies `lifecycle/frozen`) to capture the timeline, impact, root cause, and follow-up
+actions for any confirmed crash or missed detection window. The template's front matter
+also names an `incident` label, but that label does not exist in this repository, so
+GitHub silently drops it when the issue is created; add it by hand if a maintainer has
+since created it (see #691).
 
 **When to file:** don't wait for a human/agent to notice on their own. File an Incident
 Report as soon as a failure in this runbook's scope (`fuzz.yml`, `codeql.yml`,
