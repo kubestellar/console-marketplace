@@ -53,6 +53,20 @@ export interface OpenYurtFetchError {
   message: string
 }
 
+// Bounded, fixed-shape structured record. Never includes the raw response
+// body — only the resource scope and a short failure reason — so a failure
+// here is at least visible in browser/CI console logs, matching the
+// convention already used by useVersionCheck's VERSION_CHECK_SUMMARY record.
+// No exporter, metrics backend, or external data flow: console-only, since
+// this repo has no confirmed observability backend (see runbooks/SLO.md).
+function logFetchError(error: OpenYurtFetchError): void {
+  console.error('OPENYURT_STATUS_FETCH_SUMMARY:', {
+    resource: error.resource,
+    status: 'failed',
+    reason: error.message,
+  })
+}
+
 function appendClusterParam(path: string, cluster?: string): string {
   if (!cluster) return path
   const sep = path.includes('?') ? '&' : '?'
@@ -225,14 +239,16 @@ async function fetchOpenYurtStatus(cluster?: string): Promise<OpenYurtStatus> {
       ? labeledPods.filter(isOpenYurtControllerPod)
       : (await fetchPods(appendClusterParam('/api/mcp/pods', cluster))).filter(isOpenYurtControllerPod)
   } catch (e) {
+    const fetchError: OpenYurtFetchError = {
+      resource: 'pods',
+      message: e instanceof Error ? e.message : String(e),
+    }
+    logFetchError(fetchError)
     return {
       ...INITIAL_DATA,
       health: 'not-installed',
       lastCheckTime: new Date().toISOString(),
-      fetchError: {
-        resource: 'pods',
-        message: e instanceof Error ? e.message : String(e),
-      },
+      fetchError,
     }
   }
 
@@ -265,12 +281,14 @@ async function fetchOpenYurtStatus(cluster?: string): Promise<OpenYurtStatus> {
       resource: 'nodepools',
       message: err instanceof Error ? err.message : String(err),
     }
+    logFetchError(fetchError)
   } else if (gatewayResult.status === 'rejected') {
     const err = gatewayResult.reason
     fetchError = {
       resource: 'gateways',
       message: err instanceof Error ? err.message : String(err),
     }
+    logFetchError(fetchError)
   }
 
   const nodePools = nodePoolItems.map(parseNodePool)
