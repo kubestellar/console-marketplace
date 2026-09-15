@@ -45,7 +45,7 @@ _mod = _load_module()
 
 # Reuse the marketplace fixture helper from the neighbouring test file
 # to keep the layout identical across suites.
-from tests.test_validate_cross_repo_checks import _make_marketplace, _run_main
+from tests.conftest_cross_repo import _make_marketplace, _run_main
 
 
 class TestStaticModeGithubSummary:
