@@ -127,3 +127,15 @@ incident tracking issue — see #559) to capture the timeline, impact, root caus
 actions once the pipeline is confirmed healthy again. The template's front matter also names an
 `incident` label, but that label does not exist in this repository, so GitHub silently drops it
 when the issue is created; add it by hand if a maintainer has since created it (see #691).
+
+**When a postmortem is also required:** if the nightly `marketplace-auto-qa.yml` scan
+pipeline itself (not a content finding) has been failing/silent for **more than 7 days,
+or across 3 or more consecutive nightly runs**, file a postmortem using
+[`postmortem-template.md`](./postmortem-template.md) (saved to
+`runbooks/postmortems/YYYY-MM-DD-<short-title>.md`, linked from the closing comment of
+the Incident Report), in addition to the Incident Report above. This mirrors the
+content-incident threshold already defined in
+[`registry-incident-response.md#postmortem-template`](./registry-incident-response.md#postmortem-template)
+("user-visible for more than a few hours"), scaled to this pipeline's nightly cadence,
+and the equivalent threshold added for scheduled-scan incidents in
+[`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#recording-the-incident).
