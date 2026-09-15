@@ -1,33 +1,26 @@
 import { useState, useMemo } from 'react'
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle,
-  ChevronRight,
-  Server,
-  Play,
-  FlaskConical,
-  BookOpen,
-  Cpu,
-} from 'lucide-react'
+import { Server } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import {
   CardSearchInput,
   CardControlsRow,
   CardPaginationFooter,
-  CardAIActions,
 } from '../../lib/cards/CardComponents'
 import { useCardData } from '../../lib/cards/cardHooks'
 import { useCardLoadingState } from './CardDataContext'
 import { useDemoMode } from '../../hooks/useDemoMode'
 import { useGlobalFilters } from '../../hooks/useGlobalFilters'
 import { useTranslation } from 'react-i18next'
+import { KUBEFLOW_DEMO_DATA, type KubeflowDemoData } from './demoData'
+import { useDisplayItems } from './useDisplayItems'
+import { ItemRow } from './ItemRow'
 import {
-  KUBEFLOW_DEMO_DATA,
-  type KubeflowDemoData,
-} from './demoData'
+  SORT_OPTIONS_KEYS,
+  type CategoryOption,
+  type SortByOption,
+  type KubeflowDisplayItem,
+} from './types'
 
 interface KubeflowStatusProps {
   config?: {
@@ -35,37 +28,6 @@ interface KubeflowStatusProps {
     namespace?: string
   }
 }
-
-/** Unified display item that all four Kubeflow resource types map into. */
-interface KubeflowDisplayItem {
-  id: string
-  name: string
-  namespace: string
-  cluster: string
-  category: 'pipeline' | 'experiment' | 'notebook' | 'training'
-  status: string
-  primaryDetail: string
-  secondaryDetail: string
-  timestamp: string
-}
-
-type CategoryOption = '' | 'pipeline' | 'experiment' | 'notebook' | 'training'
-type SortByOption = 'status' | 'name' | 'category' | 'timestamp'
-type SortTranslationKey =
-  | 'common:common.status'
-  | 'common:common.name'
-  | 'cards:kubeflowStatus.category'
-  | 'cards:kubeflowStatus.updated'
-
-const SORT_OPTIONS_KEYS: ReadonlyArray<{
-  value: SortByOption
-  labelKey: SortTranslationKey
-}> = [
-  { value: 'status', labelKey: 'common:common.status' },
-  { value: 'name', labelKey: 'common:common.name' },
-  { value: 'category', labelKey: 'cards:kubeflowStatus.category' },
-  { value: 'timestamp', labelKey: 'cards:kubeflowStatus.updated' },
-]
 
 export function KubeflowStatus({ config }: KubeflowStatusProps) {
   const { t } = useTranslation(['cards', 'common'])
@@ -102,97 +64,14 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
   // #1 + #5  Report loading / demo state to CardWrapper
   const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
 
-  // Transform every Kubeflow resource into a unified display item -----
-  const allItems = useMemo<KubeflowDisplayItem[]>(() => {
-    const items: KubeflowDisplayItem[] = []
-
-    for (const run of rawData.pipelineRuns) {
-      const metricsStr = Object.entries(run.metrics)
-        .map(([k, v]) =>
-          `${k}: ${typeof v === 'number' && v < 1 ? (v * 100).toFixed(1) + '%' : v}`,
-        )
-        .join(', ')
-      items.push({
-        id: run.id,
-        name: run.name,
-        namespace: run.namespace,
-        cluster: run.cluster,
-        category: 'pipeline',
-        status: run.status,
-        primaryDetail: run.pipelineName,
-        secondaryDetail: metricsStr || run.experiment,
-        timestamp: run.createdAt,
-      })
-    }
-
-    for (const exp of rawData.experiments) {
-      const status =
-        exp.activeRuns > 0
-          ? 'active'
-          : exp.failedRuns > exp.totalRuns * 0.1
-            ? 'degraded'
-            : 'healthy'
-      items.push({
-        id: exp.id,
-        name: exp.name,
-        namespace: exp.namespace,
-        cluster: exp.cluster,
-        category: 'experiment',
-        status,
-        primaryDetail: `${exp.succeededRuns}/${exp.totalRuns} ${t('kubeflowStatus.passed')}`,
-        secondaryDetail: exp.description,
-        timestamp: exp.lastRunAt,
-      })
-    }
-
-    for (const nb of rawData.notebooks) {
-      const gpuStr =
-        nb.gpu > 0 ? `, ${nb.gpu} ${t('kubeflowStatus.gpu')}` : ''
-      items.push({
-        id: `nb-${nb.name}`,
-        name: nb.name,
-        namespace: nb.namespace,
-        cluster: nb.cluster,
-        category: 'notebook',
-        status: nb.status,
-        primaryDetail: `${nb.serverType} \u2022 ${nb.cpu} ${t('kubeflowStatus.cpu')}, ${nb.memory}${gpuStr}`,
-        secondaryDetail: nb.image.split('/').pop() || nb.image,
-        timestamp: nb.lastActivity,
-      })
-    }
-
-    for (const job of rawData.trainingJobs) {
-      const epochStr =
-        job.epoch !== null && job.totalEpochs !== null
-          ? `${t('kubeflowStatus.epoch')} ${job.epoch}/${job.totalEpochs}`
-          : ''
-      items.push({
-        id: `tj-${job.name}`,
-        name: job.name,
-        namespace: job.namespace,
-        cluster: job.cluster,
-        category: 'training',
-        status: job.status,
-        primaryDetail: `${job.framework} \u2022 ${job.workers} ${t('kubeflowStatus.workers')}`,
-        secondaryDetail: epochStr,
-        timestamp: job.createdAt,
-      })
-    }
-
-    return items
-  }, [rawData, t])
-
-  // #3  Respect global cluster filters
-  const globalFiltered = useMemo(() => {
-    if (!selectedClusters || selectedClusters.length === 0) return allItems
-    return allItems.filter(item => selectedClusters.includes(item.cluster))
-  }, [allItems, selectedClusters])
-
-  // Pre-filter by the resource-type selector
-  const categoryFiltered = useMemo(() => {
-    if (!selectedCategory) return globalFiltered
-    return globalFiltered.filter(item => item.category === selectedCategory)
-  }, [globalFiltered, selectedCategory])
+  // #3  Transform every Kubeflow resource into a unified display item,
+  // then apply the global cluster filter and the resource-type selector.
+  const { globalFiltered, categoryFiltered } = useDisplayItems(
+    rawData,
+    t,
+    selectedClusters,
+    selectedCategory,
+  )
 
   // Shared card data hook (filter, sort, paginate) --------------------
   const {
@@ -219,88 +98,6 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
     containerRef,
     containerStyle,
   } = useCardData<KubeflowDisplayItem, SortByOption>(categoryFiltered)
-
-  // Helpers -----------------------------------------------------------
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'succeeded':
-      case 'healthy':
-        return CheckCircle
-      case 'failed':
-      case 'error':
-        return XCircle
-      case 'running':
-      case 'active':
-      case 'building':
-        return Play
-      case 'pending':
-      case 'created':
-        return Clock
-      default:
-        return AlertTriangle
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'succeeded':
-      case 'healthy':
-        return 'green'
-      case 'failed':
-      case 'error':
-        return 'red'
-      case 'running':
-      case 'active':
-      case 'building':
-        return 'blue'
-      case 'pending':
-      case 'created':
-        return 'yellow'
-      default:
-        return 'orange'
-    }
-  }
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'pipeline':
-        return Play
-      case 'experiment':
-        return FlaskConical
-      case 'notebook':
-        return BookOpen
-      case 'training':
-        return Cpu
-      default:
-        return Server
-    }
-  }
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'pipeline':
-        return t('kubeflowStatus.pipelineRun')
-      case 'experiment':
-        return t('kubeflowStatus.experiment')
-      case 'notebook':
-        return t('kubeflowStatus.notebook')
-      case 'training':
-        return t('kubeflowStatus.trainingJob')
-      default:
-        return category
-    }
-  }
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    if (diff < 3600000)
-      return `${Math.max(1, Math.floor(diff / 60000))}m ${t('kubeflowStatus.ago')}`
-    if (diff < 86400000)
-      return `${Math.floor(diff / 3600000)}h ${t('kubeflowStatus.ago')}`
-    return `${Math.floor(diff / 86400000)}d ${t('kubeflowStatus.ago')}`
-  }
 
   // Summary counts (from global+category filtered set, before search)
   const activeCount = globalFiltered.filter(
@@ -484,98 +281,9 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
             className="flex-1 space-y-2 overflow-y-auto"
             style={containerStyle}
           >
-            {displayItems.map(item => {
-              const StatusIcon = getStatusIcon(item.status)
-              const CategoryIcon = getCategoryIcon(item.category)
-              const color = getStatusColor(item.status)
-
-              return (
-                <div
-                  key={item.id}
-                  className={`p-3 rounded-lg ${
-                    item.status === 'failed' || item.status === 'error'
-                      ? 'bg-red-500/10 border border-red-500/20'
-                      : 'bg-secondary/30'
-                  } hover:bg-secondary/50 transition-colors cursor-pointer group`}
-                  title={`${item.name} \u2014 ${getCategoryLabel(item.category)}`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span title={`${t('common:common.status')}: ${item.status}`}>
-                        <StatusIcon
-                          className={`w-4 h-4 text-${color}-400`}
-                        />
-                      </span>
-                      <span
-                        className="text-sm text-foreground font-medium group-hover:text-purple-400"
-                        title={item.name}
-                      >
-                        {item.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {(item.status === 'failed' ||
-                        item.status === 'error' ||
-                        item.status === 'degraded') && (
-                        <CardAIActions
-                          resource={{
-                            kind: getCategoryLabel(item.category),
-                            name: item.name,
-                            namespace: item.namespace,
-                            cluster: item.cluster,
-                            status: item.status,
-                          }}
-                          issues={[
-                            {
-                              name: `${getCategoryLabel(item.category)} ${item.status}`,
-                              message: `Kubeflow ${getCategoryLabel(item.category).toLowerCase()} ${item.name} is in ${item.status} state`,
-                            },
-                          ]}
-                        />
-                      )}
-                      <span
-                        className={`text-xs px-1.5 py-0.5 rounded bg-${color}-500/20 text-${color}-400`}
-                        title={`${t('common:common.status')}: ${item.status}`}
-                      >
-                        {item.status}
-                      </span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 ml-6 text-xs text-muted-foreground min-w-0">
-                    {item.cluster && (
-                      <div className="shrink-0">
-                        <ClusterBadge cluster={item.cluster} size="sm" />
-                      </div>
-                    )}
-                    <span
-                      className="shrink-0"
-                      title={getCategoryLabel(item.category)}
-                    >
-                      <CategoryIcon className="w-3 h-3 inline mr-1" />
-                      {getCategoryLabel(item.category)}
-                    </span>
-                    <span className="truncate" title={item.primaryDetail}>
-                      {item.primaryDetail}
-                    </span>
-                    {item.secondaryDetail && (
-                      <span
-                        className="truncate text-muted-foreground/70"
-                        title={item.secondaryDetail}
-                      >
-                        {item.secondaryDetail}
-                      </span>
-                    )}
-                    <span
-                      className="ml-auto shrink-0 whitespace-nowrap"
-                      title={new Date(item.timestamp).toLocaleString()}
-                    >
-                      {formatTime(item.timestamp)}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
+            {displayItems.map(item => (
+              <ItemRow key={item.id} item={item} />
+            ))}
           </div>
 
           {/* Pagination */}
