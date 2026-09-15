@@ -167,3 +167,19 @@ for the first incident recorded under this guidance — the `scorecard.yml` outa
 described in [Current Status](#current-status) above went 13.5+ days and 70
 consecutive failed runs before an Incident Report was filed for it, which is the gap
 this threshold is meant to close).
+
+**When a postmortem is also required:** file a postmortem (using
+[`postmortem-template.md`](./postmortem-template.md), saved to
+`runbooks/postmortems/YYYY-MM-DD-<short-title>.md` and linked from the closing
+comment of the Incident Report) once a pipeline/scheduled-scan incident under this
+runbook's scope has been open for **more than 7 days, or has produced 3 or more
+consecutive weekly-schedule failures** (for `fuzz.yml`/`codeql.yml`/`scorecard.yml`)
+**or a comparable multi-day streak of daily failures** (for `stale.yml`) — whichever
+threshold the incident crosses first. This mirrors the existing content-incident
+threshold in [`registry-incident-response.md#postmortem-template`](./registry-incident-response.md#postmortem-template)
+("user-visible for more than a few hours"), scaled to this runbook's weekly/daily
+cadence instead of hours, so a long-running silent-alert-gap incident like the one in
+[#712](https://github.com/kubestellar/console-marketplace/issues/712) (14+ days, 79+
+consecutive failed runs as of this writing) gets the same postmortem treatment a
+content incident of comparable duration would receive, rather than being tracked only
+in an ever-growing Incident Report issue with no closing analysis.
