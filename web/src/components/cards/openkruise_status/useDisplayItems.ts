@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import type { useTranslation } from 'react-i18next'
+import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
 import type { OpenKruiseStatus } from './useOpenKruiseStatus'
 import type { OpenKruiseDisplayItem } from './types'
 
@@ -127,10 +128,7 @@ export function useDisplayItems(
     [rawData, t],
   )
 
-  const globalFiltered = useMemo(() => {
-    if (!selectedClusters || selectedClusters.length === 0) return allItems
-    return allItems.filter(item => selectedClusters.includes(item.cluster))
-  }, [allItems, selectedClusters])
+  const globalFiltered = useClusterFilteredRows(allItems, selectedClusters)
 
   const categoryFiltered = useMemo(() => {
     if (!selectedCategory) return globalFiltered

@@ -8,7 +8,7 @@ import {
   CardPaginationFooter,
 } from '../../lib/cards/CardComponents'
 import { useCardData } from '../../lib/cards/cardHooks'
-import { useCardLoadingState } from './CardDataContext'
+import { useCardLoadingState } from '../CardDataContext'
 import { useDemoMode } from '../../hooks/useDemoMode'
 import { useGlobalFilters } from '../../hooks/useGlobalFilters'
 import { useTranslation } from 'react-i18next'

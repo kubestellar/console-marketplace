@@ -14,7 +14,8 @@ import {
   CardPaginationFooter,
 } from '../../lib/cards/CardComponents'
 import { useCardData } from '../../lib/cards/cardHooks'
-import { useCardLoadingState } from './CardDataContext'   // required hook #1
+import { useCardLoadingState } from '../CardDataContext'   // required hook #1
+import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
 import { useDemoMode } from '../../hooks/useDemoMode'    // required hook #2
 import { useGlobalFilters } from '../../hooks/useGlobalFilters' // required hook #3
 import { useTranslation } from 'react-i18next'           // required hook #4
@@ -85,10 +86,7 @@ export function NotaryStatus({ config: _config }: NotaryStatusProps) {
   }, [rawData])
 
   // required hook #3 — filter rows by selectedClusters from global filters
-  const globalFiltered = useMemo(() => {
-    if (!selectedClusters || selectedClusters.length === 0) return allRows
-    return allRows.filter((row: NotaryDisplayRow) => selectedClusters.includes(row.cluster))
-  }, [allRows, selectedClusters])
+  const globalFiltered = useClusterFilteredRows(allRows, selectedClusters)
 
   // Shared card data hook (pagination)
   const {
