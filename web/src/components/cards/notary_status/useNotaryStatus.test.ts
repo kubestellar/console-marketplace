@@ -3,26 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { NOTARY_DEMO_DATA } from './demoData'
 import { EMPTY_NOTARY_DATA, useNotaryStatus, type NotaryStatus } from './useNotaryStatus'
+import { createCacheMocks } from '../../../test/cacheMock'
 
-interface CacheOptions<T> {
-  key: string
-  fetcher: () => Promise<T>
-  demoData: T
-  initialData: T
-  category: string
-  persist: boolean
-  demoWhenEmpty: boolean
-}
-
-const mockUseCache = vi.fn()
+const { mockUseCache, lastCacheOptions } = createCacheMocks<NotaryStatus>()
 
 vi.mock('../../../lib/cache', () => ({
   useCache: (options: unknown) => mockUseCache(options),
 }))
-
-function lastCacheOptions(): CacheOptions<NotaryStatus> {
-  return mockUseCache.mock.calls.at(-1)?.[0] as CacheOptions<NotaryStatus>
-}
 
 describe('useNotaryStatus', () => {
   beforeEach(() => {

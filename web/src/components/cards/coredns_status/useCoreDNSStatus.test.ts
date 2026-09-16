@@ -3,26 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { COREDNS_DEMO_DATA } from './demoData'
 import { EMPTY_COREDNS_DATA, useCoreDNSStatus, type CoreDNSStatus } from './useCoreDNSStatus'
+import { createCacheMocks } from '../../../test/cacheMock'
 
-interface CacheOptions<T> {
-  key: string
-  fetcher: () => Promise<T>
-  demoData: T
-  initialData: T
-  category: string
-  persist: boolean
-  demoWhenEmpty: boolean
-}
-
-const mockUseCache = vi.fn()
+const { mockUseCache, lastCacheOptions } = createCacheMocks<CoreDNSStatus>()
 
 vi.mock('../../../lib/cache', () => ({
   useCache: (options: unknown) => mockUseCache(options),
 }))
-
-function lastCacheOptions(): CacheOptions<CoreDNSStatus> {
-  return mockUseCache.mock.calls.at(-1)?.[0] as CacheOptions<CoreDNSStatus>
-}
 
 describe('useCoreDNSStatus', () => {
   beforeEach(() => {
