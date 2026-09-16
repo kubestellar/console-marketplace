@@ -62,69 +62,12 @@ jobs:
             --console-path ./console \
             --json > /tmp/scan-results.json 2>/tmp/scan-log.txt || true
 
-          # Extract counts for summary
-          ERROR_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['errors']))")
-          WARN_COUNT=$(python3 -c "import json; d=json.load(open('/tmp/scan-results.json')); print(len(d['warnings']))")
-          echo "error_count=$ERROR_COUNT" >> "$GITHUB_OUTPUT"
-          echo "warn_count=$WARN_COUNT" >> "$GITHUB_OUTPUT"
-
-          # Generate grouped markdown for issue bodies
-          python3 - /tmp/scan-results.json << 'PYEOF'
-          import json, sys
-          from collections import defaultdict
-
-          with open(sys.argv[1]) as f:
-              data = json.load(f)
-
-          # Group by category for per-category issue creation
-          groups = defaultdict(lambda: {"errors": [], "warnings": []})
-          for item in data.get("errors", []):
-              groups[item["category"]]["errors"].append(item["message"])
-          for item in data.get("warnings", []):
-              groups[item["category"]]["warnings"].append(item["message"])
-
-          # Write per-category files
-          for cat, items in groups.items():
-              with open(f"/tmp/scan-category-{cat}.md", "w") as f:
-                  for msg in items["errors"][:30]:
-                      f.write(f"- :x: {msg}\n")
-                  for msg in items["warnings"][:30]:
-                      f.write(f"- :warning: {msg}\n")
-                  total = len(items["errors"]) + len(items["warnings"])
-                  shown = min(len(items["errors"]), 30) + min(len(items["warnings"]), 30)
-                  if total > shown:
-                      f.write(f"- ... and {total - shown} more\n")
-
-          # Write combined summary
-          with open("/tmp/scan-grouped.md", "w") as f:
-              for cat in sorted(groups.keys()):
-                  items = groups[cat]
-                  total = len(items["errors"]) + len(items["warnings"])
-                  f.write(f"**{cat}** ({total} finding(s))\n")
-                  for msg in items["errors"][:20]:
-                      f.write(f"- {msg}\n")
-                  for msg in items["warnings"][:20]:
-                      f.write(f"- {msg}\n")
-                  total_shown = min(len(items["errors"]), 20) + min(len(items["warnings"]), 20)
-                  if total > total_shown:
-                      f.write(f"- ... and {total - total_shown} more\n")
-                  f.write("\n")
-
-          # Write category manifest (JSON) for the issue creation step
-          manifest = {}
-          for cat, items in groups.items():
-              manifest[cat] = {
-                  "errors": len(items["errors"]),
-                  "warnings": len(items["warnings"]),
-              }
-          with open("/tmp/scan-categories.json", "w") as f:
-              json.dump(manifest, f)
-          PYEOF
-
-          # Summary
-          echo "### Marketplace Auto-QA: $ERROR_COUNT error(s), $WARN_COUNT warning(s)" >> "$GITHUB_STEP_SUMMARY"
-          echo '' >> "$GITHUB_STEP_SUMMARY"
-          cat /tmp/scan-grouped.md >> "$GITHUB_STEP_SUMMARY"
+          # Counts, per-category/grouped markdown, and the category
+          # manifest for the issue-creation step are all produced by
+          # scripts/auto_qa_report.py (see issue #583). It also appends
+          # error_count/warn_count to $GITHUB_OUTPUT and the grouped
+          # summary to $GITHUB_STEP_SUMMARY.
+          python3 scripts/auto_qa_report.py /tmp/scan-results.json /tmp
 
       - name: Ensure labels exist
         if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
