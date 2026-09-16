@@ -10,26 +10,14 @@ Targets:
 Each parser test writes minimal TypeScript-ish fixture content to a tmp file
 so the tests are hermetic (no dependency on console/ layout).
 """
-import importlib.util
 import json
-import os
 import textwrap
 
 import pytest
 
+from tests.conftest import load_validate_marketplace
 
-def _load_validate_marketplace():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_validate_marketplace()
+_mod = load_validate_marketplace()
 
 
 # ── Results class ────────────────────────────────────────────────────────────

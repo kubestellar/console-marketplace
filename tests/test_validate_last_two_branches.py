@@ -28,22 +28,11 @@ The two remaining uncovered lines were:
 Together these bring scripts/validate-marketplace.py to 100% line
 coverage. Test-only change — no production code touched.
 """
-import importlib.util
 import io
-import os
 import unittest
 from unittest import mock
 
-
-def _load_mod():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
+from tests.conftest import load_validate_marketplace as _load_mod
 
 
 class ParseSubRegistrySkipsRootTest(unittest.TestCase):

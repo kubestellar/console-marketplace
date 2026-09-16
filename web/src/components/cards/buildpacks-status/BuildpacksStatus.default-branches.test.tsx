@@ -14,35 +14,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BUILDPACKS_DEMO_DATA } from './demoData'
+import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
 
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 
-vi.mock('../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="buildpacks-skeleton" />,
-}))
+vi.mock('../ui/Skeleton', () => mockSkeletonModule('buildpacks-skeleton'))
 
-vi.mock('../ui/ClusterBadge', () => ({
-  ClusterBadge: ({ cluster }: { cluster: string }) => <span>{cluster}</span>,
-}))
+vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
-vi.mock('../../lib/cards/CardComponents', () => ({
-  CardSearchInput: ({ value, onChange, placeholder }: {
-    value: string
-    onChange: (value: string) => void
-    placeholder: string
-  }) => (
-    <input
-      data-testid="buildpacks-search"
-      value={value}
-      placeholder={placeholder}
-      onChange={event => onChange(event.target.value)}
-    />
-  ),
-  CardPaginationFooter: () => <div data-testid="buildpacks-pagination" />,
-}))
+vi.mock('../../lib/cards/CardComponents', () => mockCardComponents('buildpacks'))
 
 vi.mock('../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown) => mockUseCardData(items),

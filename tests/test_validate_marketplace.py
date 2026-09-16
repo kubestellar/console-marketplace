@@ -3,26 +3,13 @@
 The function protects the nightly check_download_urls() check from being used
 as an SSRF vector via malicious downloadUrl values in registry.json.
 """
-import importlib.util
-import os
 import sys
 
 import pytest
 
+from tests.conftest import load_validate_marketplace
 
-def _load_validate_marketplace():
-    """Load the validate-marketplace module (hyphenated filename requires importlib)."""
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_validate_marketplace()
+_mod = load_validate_marketplace()
 _is_safe = _mod._is_safe_download_url
 
 

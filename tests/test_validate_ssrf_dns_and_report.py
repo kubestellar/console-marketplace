@@ -4,7 +4,6 @@ branches, and generate_quality_table in scripts/validate-marketplace.py.
 All tests are offline-safe: socket.getaddrinfo and urllib opener are stubbed
 via unittest.mock — no real network calls are made.
 """
-import importlib.util
 import os
 import socket
 import unittest
@@ -13,19 +12,9 @@ import urllib.request
 from io import BytesIO
 from unittest.mock import MagicMock, patch
 
+from tests.conftest import load_validate_marketplace
 
-def _load_mod():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_mod()
+_mod = load_validate_marketplace()
 _is_safe_resolved_host = _mod._is_safe_resolved_host
 _NoRedirectHandler = _mod._NoRedirectHandler
 _no_redirect_opener = _mod._no_redirect_opener

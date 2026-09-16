@@ -3,20 +3,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { OPENKRUISE_DEMO_DATA } from './demoData'
+import type { CardDataOptions } from '../../../test/cardTestHelpers'
+import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
 
 interface DisplayItem extends Record<string, unknown> {
   cluster: string
-}
-
-interface CardDataOptions<T> {
-  filter?: {
-    searchFields?: (keyof T)[]
-  }
-  sort?: {
-    defaultField?: string
-    defaultDirection?: 'asc' | 'desc'
-    comparators?: Record<string, (a: T, b: T) => number>
-  }
 }
 
 const mockUseClusters = vi.fn()
@@ -30,9 +21,7 @@ vi.mock('../../../hooks/useMCP', () => ({
   useClusters: () => mockUseClusters(),
 }))
 
-vi.mock('../../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="openkruise-skeleton" />,
-}))
+vi.mock('../../ui/Skeleton', () => mockSkeletonModule('openkruise-skeleton'))
 
 vi.mock('../../ui/Select', () => ({
   Select: ({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -40,24 +29,10 @@ vi.mock('../../ui/Select', () => ({
   ),
 }))
 
-vi.mock('../../ui/ClusterBadge', () => ({
-  ClusterBadge: ({ cluster }: { cluster: string }) => <span>{cluster}</span>,
-}))
+vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
-  CardSearchInput: ({ value, onChange, placeholder }: {
-    value: string
-    onChange: (value: string) => void
-    placeholder: string
-    className?: string
-  }) => (
-    <input
-      data-testid="openkruise-search"
-      value={value}
-      placeholder={placeholder}
-      onChange={event => onChange(event.target.value)}
-    />
-  ),
+  ...mockCardComponents('openkruise'),
   CardControlsRow: ({
     children,
     cardControls,
@@ -99,32 +74,6 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
         </>
       )}
       {children}
-    </div>
-  ),
-  CardPaginationFooter: ({
-    currentPage,
-    totalPages,
-    onPageChange,
-    needsPagination,
-  }: {
-    currentPage?: number
-    totalPages?: number
-    onPageChange?: (page: number) => void
-    needsPagination?: boolean
-  }) => (
-    <div data-testid="openkruise-pagination">
-      <span data-testid="openkruise-page-indicator">
-        {currentPage}/{totalPages}
-      </span>
-      {needsPagination && onPageChange && (
-        <button
-          data-testid="openkruise-next-page"
-          onClick={() => onPageChange(currentPage === totalPages ? 1 : (currentPage ?? 1) + 1)}
-          type="button"
-        >
-          next page
-        </button>
-      )}
     </div>
   ),
   CardAIActions: () => <div data-testid="openkruise-ai-actions" />,

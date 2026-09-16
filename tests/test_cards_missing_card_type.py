@@ -26,19 +26,14 @@ counted; the scaffold card must be skipped without error.
 
 from __future__ import annotations
 
-import importlib.util
 import json
-import os
 import tempfile
 import unittest
 from pathlib import Path
 
-_script = os.path.join(
-    os.path.dirname(__file__), "..", "scripts", "validate-marketplace.py"
-)
-spec = importlib.util.spec_from_file_location("validate_marketplace", _script)
-_mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(_mod)
+from tests.conftest import load_validate_marketplace
+
+_mod = load_validate_marketplace()
 
 
 def _rmtree(p: Path) -> None:

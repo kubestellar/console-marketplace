@@ -2,20 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { COREDNS_DEMO_DATA } from './demoData'
+import type { CardDataOptions } from '../../../test/cardTestHelpers'
+import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
 
 interface CoreDNSServer extends Record<string, unknown> {
   cluster: string
-}
-
-interface CardDataOptions<T> {
-  filter?: {
-    searchFields?: (keyof T)[]
-  }
-  sort?: {
-    defaultField?: string
-    defaultDirection?: 'asc' | 'desc'
-    comparators?: Record<string, (a: T, b: T) => number>
-  }
 }
 
 const mockUseDemoMode = vi.fn()
@@ -23,54 +14,11 @@ const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 
-vi.mock('../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="coredns-skeleton" />,
-}))
+vi.mock('../ui/Skeleton', () => mockSkeletonModule('coredns-skeleton'))
 
-vi.mock('../ui/ClusterBadge', () => ({
-  ClusterBadge: ({ cluster }: { cluster: string }) => <span>{cluster}</span>,
-}))
+vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
-vi.mock('../../lib/cards/CardComponents', () => ({
-  CardSearchInput: ({ value, onChange, placeholder }: {
-    value: string
-    onChange: (value: string) => void
-    placeholder: string
-  }) => (
-    <input
-      data-testid="coredns-search"
-      value={value}
-      placeholder={placeholder}
-      onChange={event => onChange(event.target.value)}
-    />
-  ),
-  CardPaginationFooter: ({
-    currentPage,
-    totalPages,
-    onPageChange,
-    needsPagination,
-  }: {
-    currentPage?: number
-    totalPages?: number
-    onPageChange?: (page: number) => void
-    needsPagination?: boolean
-  }) => (
-    <div data-testid="coredns-pagination">
-      <span data-testid="coredns-page-indicator">
-        {currentPage}/{totalPages}
-      </span>
-      {needsPagination && onPageChange && (
-        <button
-          data-testid="coredns-next-page"
-          onClick={() => onPageChange(currentPage === totalPages ? 1 : (currentPage ?? 1) + 1)}
-          type="button"
-        >
-          next page
-        </button>
-      )}
-    </div>
-  ),
-}))
+vi.mock('../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
 
 vi.mock('../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown) => mockUseCardData(items),

@@ -35,27 +35,15 @@ kept in the source as future-proofing.
 """
 from __future__ import annotations
 
-import importlib.util
 import json
-import os
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
 
+from tests.conftest import load_validate_marketplace
 
-def _load_mod():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_mod()
+_mod = load_validate_marketplace()
 _classify = _mod._classify_ip_literal
 _is_safe = _mod._is_safe_download_url
 Results = _mod.Results

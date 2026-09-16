@@ -12,25 +12,14 @@ Targets branches previously uncovered by tests/:
 - ``check_dashboard_schema`` skips a malformed dashboard.json (JSON syntax
   error) without crashing.
 """
-import importlib.util
 import json
 import os
 import textwrap
 import unittest
 
+from tests.conftest import load_validate_marketplace
 
-def _load_mod():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_mod()
+_mod = load_validate_marketplace()
 _is_safe = _mod._is_safe_download_url
 _classify = _mod._classify_ip_literal
 parse_card_registry = _mod.parse_card_registry
