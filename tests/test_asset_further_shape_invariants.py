@@ -38,12 +38,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
-CARD_PRESETS = sorted((REPO_ROOT / "card-presets").glob("*.json"))
-PRESETS = sorted((REPO_ROOT / "presets").glob("*.json"))
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
-THEMES = sorted((REPO_ROOT / "themes").glob("*.json"))
+from tests.repo_paths import CARD_PRESETS, DASHBOARDS, PRESETS, REPO_ROOT, THEMES
 ALL_JSON = CARD_PRESETS + PRESETS + DASHBOARDS + THEMES
 
 REQUIRED_PRESET_KEYS = {"format", "card_type", "title", "config"}

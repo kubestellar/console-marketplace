@@ -21,9 +21,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
-THEMES = sorted((REPO_ROOT / "themes").glob("*.json"))
+from tests.repo_paths import DASHBOARDS, REPO_ROOT, THEMES
 
 HEX_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
 

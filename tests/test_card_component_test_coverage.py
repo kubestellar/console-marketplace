@@ -32,7 +32,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+from tests.repo_paths import REPO_ROOT
+
 CARDS_DIR = REPO_ROOT / "web" / "src" / "components" / "cards"
 
 # Filename stems that are NOT component-level tests. Kept as a small, explicit

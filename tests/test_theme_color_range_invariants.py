@@ -32,31 +32,8 @@ import json
 import re
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-THEMES = sorted((REPO_ROOT / "themes").glob("*.json"))
-
-# Same shadcn-standard color tokens as test_asset_shape_invariants.py —
-# duplicated here (not imported) to keep this module self-contained so
-# either file can be run in isolation.
-REQUIRED_HSL_KEYS = {
-    "accent",
-    "accentForeground",
-    "background",
-    "border",
-    "card",
-    "cardForeground",
-    "destructive",
-    "destructiveForeground",
-    "foreground",
-    "input",
-    "muted",
-    "mutedForeground",
-    "primary",
-    "primaryForeground",
-    "ring",
-    "secondary",
-    "secondaryForeground",
-}
+from tests.color_tokens import REQUIRED_HSL_KEYS
+from tests.repo_paths import REPO_ROOT, THEMES
 
 GLASS_KEYS = (
     "glassBackground",

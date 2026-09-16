@@ -30,8 +30,7 @@ import json
 import re
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-THEMES = sorted((REPO_ROOT / "themes").glob("*.json"))
+from tests.repo_paths import REPO_ROOT, THEMES
 
 # #rgb, #rrggbb, #rrggbbaa (case-insensitive).
 HEX_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")

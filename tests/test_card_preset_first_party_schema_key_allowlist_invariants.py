@@ -54,8 +54,8 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CARD_PRESET_FILES = sorted((REPO_ROOT / "card-presets").glob("*.json"))
+from tests.repo_paths import CARD_PRESETS as CARD_PRESET_FILES
+from tests.repo_paths import REPO_ROOT
 
 EXPECTED_TOP_LEVEL_KEYS = frozenset({
     "format", "card_type", "title", "config",

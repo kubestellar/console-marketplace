@@ -16,37 +16,11 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
-CARD_PRESETS = sorted((REPO_ROOT / "card-presets").glob("*.json"))
-PRESETS = sorted((REPO_ROOT / "presets").glob("*.json"))
-THEMES = sorted((REPO_ROOT / "themes").glob("*.json"))
+from tests.color_tokens import REQUIRED_HSL_KEYS
+from tests.repo_paths import CARD_PRESETS, DASHBOARDS, PRESETS, REPO_ROOT, THEMES
 
 HSL_RE = re.compile(r"^\d+(\.\d+)? \d+(\.\d+)?% \d+(\.\d+)?%$")
 SNAKE_RE = re.compile(r"^[a-z][a-z0-9_]*$")
-
-# Shadcn-standard color tokens that must be raw HSL triplets ("H S% L%") in
-# every theme. Brand/glass/scrollbar/chart tokens are excluded — themes may
-# use hex, rgba, or arrays for those.
-REQUIRED_HSL_KEYS = {
-    "accent",
-    "accentForeground",
-    "background",
-    "border",
-    "card",
-    "cardForeground",
-    "destructive",
-    "destructiveForeground",
-    "foreground",
-    "input",
-    "muted",
-    "mutedForeground",
-    "primary",
-    "primaryForeground",
-    "ring",
-    "secondary",
-    "secondaryForeground",
-}
 
 
 def _load(path: Path) -> dict:

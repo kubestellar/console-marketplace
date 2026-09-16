@@ -27,11 +27,9 @@ import os
 import re
 import unittest
 from datetime import datetime
-from pathlib import Path
 
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY_JSON = REPO_ROOT / "registry.json"
+from tests.repo_paths import REGISTRY_PATH as REGISTRY_JSON
+from tests.repo_paths import REPO_ROOT
 
 _ASSET_DIRS_FLAT = ("card-presets", "presets", "themes")
 _DASHBOARDS_DIR = "dashboards"

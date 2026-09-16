@@ -6,6 +6,8 @@
  * no Kubernetes clusters are connected.
  */
 
+import { minutesAgoIso } from '../shared/timeOffsets'
+
 export interface BuildpacksDemoImage {
   name: string
   namespace: string
@@ -29,7 +31,7 @@ export const BUILDPACKS_DEMO_DATA: BuildpacksDemoData = {
       builder: 'paketobuildpacks/builder-jammy-full',
       image: 'registry.io/frontend:v2.1.0',
       status: 'succeeded',
-      updated: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min ago
+      updated: minutesAgoIso(30),
       cluster: 'eks-prod-us-east-1',
     },
     {
@@ -38,7 +40,7 @@ export const BUILDPACKS_DEMO_DATA: BuildpacksDemoData = {
       builder: 'paketobuildpacks/builder-jammy-full',
       image: 'registry.io/payments:v3.5.0',
       status: 'failed',
-      updated: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 h ago
+      updated: minutesAgoIso(2 * 60),
       cluster: 'gke-staging',
     },
     {
@@ -47,7 +49,7 @@ export const BUILDPACKS_DEMO_DATA: BuildpacksDemoData = {
       builder: 'paketobuildpacks/builder-jammy-base',
       image: 'registry.io/auth:v1.8.3',
       status: 'succeeded',
-      updated: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 min ago
+      updated: minutesAgoIso(45),
       cluster: 'eks-prod-us-east-1',
     },
     {
@@ -56,7 +58,7 @@ export const BUILDPACKS_DEMO_DATA: BuildpacksDemoData = {
       builder: 'paketobuildpacks/builder-jammy-full',
       image: 'registry.io/worker:v0.9.1',
       status: 'building',
-      updated: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 min ago
+      updated: minutesAgoIso(5),
       cluster: 'gke-staging',
     },
     {
@@ -65,9 +67,9 @@ export const BUILDPACKS_DEMO_DATA: BuildpacksDemoData = {
       builder: 'paketobuildpacks/builder-jammy-base',
       image: 'registry.io/analytics:v1.0.0',
       status: 'unknown',
-      updated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      updated: minutesAgoIso(24 * 60),
       cluster: 'aks-dev-eu',
     },
   ],
-  lastCheckTime: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 min ago
+  lastCheckTime: minutesAgoIso(2),
 }

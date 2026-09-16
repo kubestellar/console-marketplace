@@ -33,7 +33,8 @@ import re
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from tests.repo_paths import REPO_ROOT
+
 WEB_SRC = REPO_ROOT / "web" / "src"
 
 # Single-line ``export * from '<spec>'`` (with optional trailing

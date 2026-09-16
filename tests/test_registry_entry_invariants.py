@@ -31,12 +31,10 @@ The checks here catch a class of drift the existing suite does not:
 import json
 import re
 from datetime import datetime
-from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY_PATH = REPO_ROOT / "registry.json"
+from tests.repo_paths import REGISTRY_PATH, REPO_ROOT
 
 VALID_TYPES = {"dashboard", "card-preset", "theme"}
 

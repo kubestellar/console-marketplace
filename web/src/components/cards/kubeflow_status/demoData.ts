@@ -8,15 +8,16 @@
  * mode or when no Kubernetes clusters are connected.
  */
 
-/** Time offsets (in milliseconds) used for relative timestamps. */
-const ONE_MINUTE_MS = 60 * 1000
-const FIVE_MINUTES_MS = 5 * ONE_MINUTE_MS
-const FIFTEEN_MINUTES_MS = 15 * ONE_MINUTE_MS
-const ONE_HOUR_MS = 60 * ONE_MINUTE_MS
-const THREE_HOURS_MS = 3 * ONE_HOUR_MS
-const SIX_HOURS_MS = 6 * ONE_HOUR_MS
-const TWELVE_HOURS_MS = 12 * ONE_HOUR_MS
-const ONE_DAY_MS = 24 * ONE_HOUR_MS
+import {
+  FIFTEEN_MINUTES_MS,
+  FIVE_MINUTES_MS,
+  ONE_DAY_MS,
+  ONE_HOUR_MS,
+  ONE_MINUTE_MS,
+  SIX_HOURS_MS,
+  THREE_HOURS_MS,
+  TWELVE_HOURS_MS,
+} from '../shared/timeOffsets'
 
 /* ------------------------------------------------------------------ */
 /*  Pipeline Runs                                                      */
