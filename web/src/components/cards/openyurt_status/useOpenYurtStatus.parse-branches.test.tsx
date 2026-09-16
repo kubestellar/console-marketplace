@@ -10,27 +10,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { OPENYURT_DEMO_DATA } from './demoData'
 import { useOpenYurtStatus, type OpenYurtStatus as OpenYurtStatusData, type UseOpenYurtStatusResult } from './useOpenYurtStatus'
+import { createCacheMocks, jsonResponse } from '../../../test/cacheMock'
 
-interface CacheOptions<T> {
-  key: string
-  fetcher: () => Promise<T>
-  demoData: T
-  initialData: T
-  category: string
-  persist: boolean
-  demoWhenEmpty: boolean
-}
-
-interface JsonResponse<T> {
-  ok: boolean
-  status: number
-  statusText: string
-  json: () => Promise<T>
-}
-
-const mockUseCache = vi.fn()
-const mockAuthFetch = vi.fn()
-const mockFetch = vi.fn()
+const { mockUseCache, mockAuthFetch, mockFetch, lastCacheOptions } = createCacheMocks<OpenYurtStatusData>()
 
 vi.mock('../../../lib/cache', () => ({
   useCache: (options: unknown) => mockUseCache(options),
@@ -49,19 +31,6 @@ const defaultCacheResult: UseOpenYurtStatusResult = {
   consecutiveFailures: 0,
   lastRefresh: 1_725_000_000_000,
   refetch: vi.fn(),
-}
-
-function jsonResponse<T>(body: T, init: Partial<Omit<JsonResponse<T>, 'json'>> = {}): JsonResponse<T> {
-  return {
-    ok: init.ok ?? true,
-    status: init.status ?? 200,
-    statusText: init.statusText ?? 'OK',
-    json: async () => body,
-  }
-}
-
-function lastCacheOptions(): CacheOptions<OpenYurtStatusData> {
-  return mockUseCache.mock.calls.at(-1)?.[0] as CacheOptions<OpenYurtStatusData>
 }
 
 describe('useOpenYurtStatus parseNodePool/parseGateway/isPodReady branches', () => {

@@ -3,16 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { OPENKRUISE_DEMO_DATA } from './demoData'
 import { useOpenKruiseStatus, type OpenKruiseStatus } from './useOpenKruiseStatus'
-
-interface CacheOptions<T> {
-  key: string
-  fetcher: () => Promise<T>
-  demoData: T
-  initialData: T
-  category: string
-  persist: boolean
-  demoWhenEmpty: boolean
-}
+import { createCacheMocks } from '../../../test/cacheMock'
 
 const EMPTY_STATUS: OpenKruiseStatus = {
   cloneSets: [],
@@ -37,15 +28,11 @@ const defaultCacheResult = {
   refetch: vi.fn(),
 }
 
-const mockUseCache = vi.fn()
+const { mockUseCache, lastCacheOptions } = createCacheMocks<OpenKruiseStatus>()
 
 vi.mock('../../../lib/cache', () => ({
   useCache: (options: unknown) => mockUseCache(options),
 }))
-
-function lastCacheOptions(): CacheOptions<OpenKruiseStatus> {
-  return mockUseCache.mock.calls.at(-1)?.[0] as CacheOptions<OpenKruiseStatus>
-}
 
 describe('useOpenKruiseStatus', () => {
   beforeEach(() => {

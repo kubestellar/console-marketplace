@@ -3,26 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BUILDPACKS_DEMO_DATA } from './demoData'
 import { EMPTY_BUILDPACKS_DATA, useBuildpacksStatus, type BuildpacksStatus } from './useBuildpacksStatus'
+import { createCacheMocks } from '../../../test/cacheMock'
 
-interface CacheOptions<T> {
-  key: string
-  fetcher: () => Promise<T>
-  demoData: T
-  initialData: T
-  category: string
-  persist: boolean
-  demoWhenEmpty: boolean
-}
-
-const mockUseCache = vi.fn()
+const { mockUseCache, lastCacheOptions } = createCacheMocks<BuildpacksStatus>()
 
 vi.mock('../../../lib/cache', () => ({
   useCache: (options: unknown) => mockUseCache(options),
 }))
-
-function lastCacheOptions(): CacheOptions<BuildpacksStatus> {
-  return mockUseCache.mock.calls.at(-1)?.[0] as CacheOptions<BuildpacksStatus>
-}
 
 describe('useBuildpacksStatus', () => {
   beforeEach(() => {
