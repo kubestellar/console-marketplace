@@ -149,21 +149,24 @@ class ShimReExportInvariants(unittest.TestCase):
     def test_shim_pattern_finds_expected_categories(self):
         """Sanity-check the walker before the resolution loop below
         relies on it. We expect at least one shim in each of the
-        three known categories (hook re-exports, lib/cards re-exports,
-        per-card CardDataContext re-exports) so a walker regression
-        that drops one whole family surfaces as a clear failure here.
+        two known categories (hook re-exports, lib/cards re-exports)
+        so a walker regression that drops one whole family surfaces
+        as a clear failure here.
+
+        A third category (per-card ``CardDataContext.tsx`` re-export
+        shims under ``web/src/components/cards/<card>/``) existed
+        historically but was retired by #736 (2026-09-16), which
+        deleted those one-line shims and inlined
+        ``../CardDataContext`` imports at the card level. The
+        category is intentionally empty on main and is no longer
+        asserted here.
         """
         rels = {p for p, _ in self.shims}
         hooks = [p for p in rels if "/components/hooks/" in p]
         lib_cards = [p for p in rels if "/components/lib/cards/" in p]
-        card_ctx = [p for p in rels if p.endswith("/CardDataContext.tsx")
-                    and "/components/cards/" in p
-                    and p != "web/src/components/cards/CardDataContext.tsx"]
         self.assertGreater(len(hooks), 0, f"no hook shims found in {rels}")
         self.assertGreater(len(lib_cards), 0,
                            f"no lib/cards shims found in {rels}")
-        self.assertGreater(len(card_ctx), 0,
-                           f"no per-card CardDataContext shims found in {rels}")
 
     def test_every_barrel_shim_resolves_to_a_real_file(self):
         """The core invariant. For every shim NOT listed in
