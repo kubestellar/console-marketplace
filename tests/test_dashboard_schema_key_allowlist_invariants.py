@@ -37,8 +37,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
+from tests.repo_paths import DASHBOARDS, REPO_ROOT
 
 # The complete, closed set of top-level keys currently emitted by
 # scripts/export_dashboard.py and consumed by the marketplace UI. Any

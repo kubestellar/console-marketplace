@@ -22,11 +22,9 @@ import json
 import os
 import re
 import unittest
-from pathlib import Path
 
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY_JSON = REPO_ROOT / "registry.json"
+from tests.repo_paths import REGISTRY_PATH as REGISTRY_JSON
+from tests.repo_paths import REPO_ROOT
 
 # Directories that can back a registry entry's ``downloadUrl``.  ``card-preset``
 # entries are allowed to live in either ``presets/`` (the CNCF preset dumping

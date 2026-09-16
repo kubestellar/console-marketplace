@@ -11,7 +11,7 @@
  * - Raven Gateway: cross-pool network tunnel for edge-cloud connectivity
  */
 
-const DEMO_LAST_CHECK_OFFSET_MS = 45_000 // Demo data shows as checked 45 seconds ago
+import { secondsAgoIso } from '../shared/timeOffsets'
 
 export type NodePoolType = 'edge' | 'cloud'
 
@@ -135,6 +135,6 @@ export const OPENYURT_DEMO_DATA: OpenYurtDemoData = {
   ],
   totalNodes: 20,
   autonomousNodes: 17,
-  lastCheckTime: new Date(Date.now() - DEMO_LAST_CHECK_OFFSET_MS).toISOString(),
+  lastCheckTime: secondsAgoIso(45),
   fetchError: null,
 }

@@ -29,8 +29,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY_PATH = REPO_ROOT / "registry.json"
+from tests.repo_paths import REGISTRY_PATH, REPO_ROOT
 
 
 def _load(path: Path) -> dict:

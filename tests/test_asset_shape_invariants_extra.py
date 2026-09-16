@@ -20,9 +20,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
-THEMES = sorted((REPO_ROOT / "themes").glob("*.json"))
+from tests.repo_paths import DASHBOARDS, REPO_ROOT, THEMES
 
 
 def _load(path: Path) -> dict:

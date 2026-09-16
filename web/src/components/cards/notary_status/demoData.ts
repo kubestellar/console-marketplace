@@ -7,6 +7,8 @@
  * when no Kubernetes clusters are connected.
  */
 
+import { minutesAgoIso } from '../shared/timeOffsets'
+
 export interface NotaryDemoTrustPolicy {
   name: string
   registryScopes: string[]
@@ -67,5 +69,5 @@ export const NOTARY_DEMO_DATA: NotaryDemoData = {
       trustPolicies: [],
     },
   ],
-  lastCheckTime: new Date(Date.now() - 4 * 60 * 1000).toISOString(), // 4 minutes ago
+  lastCheckTime: minutesAgoIso(4),
 }

@@ -34,8 +34,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
+from tests.repo_paths import DASHBOARDS, REPO_ROOT
 
 
 def _load(p: Path) -> dict:

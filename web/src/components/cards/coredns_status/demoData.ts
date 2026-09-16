@@ -7,9 +7,7 @@
  * clusters are connected.
  */
 
-/** Time offsets (in milliseconds) used for relative timestamps. */
-const ONE_MINUTE_MS = 60 * 1000
-const FIVE_MINUTES_MS = 5 * ONE_MINUTE_MS
+import { FIVE_MINUTES_MS } from '../shared/timeOffsets'
 
 export interface CoreDNSDemoServer {
   name: string

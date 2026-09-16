@@ -30,12 +30,10 @@ without a corresponding update to
 
 import json
 import re
-from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY_PATH = REPO_ROOT / "registry.json"
+from tests.repo_paths import REGISTRY_PATH, REPO_ROOT
 
 DOWNLOAD_URL_RE = re.compile(
     r"^https://raw\.githubusercontent\.com/"

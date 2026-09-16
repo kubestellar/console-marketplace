@@ -36,8 +36,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-DASHBOARDS = sorted((REPO_ROOT / "dashboards").glob("*/dashboard.json"))
+from tests.repo_paths import DASHBOARDS, REPO_ROOT
 
 
 def _load(path: Path) -> dict:

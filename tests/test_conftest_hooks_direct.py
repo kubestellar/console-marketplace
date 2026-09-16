@@ -26,7 +26,8 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from tests.repo_paths import REPO_ROOT
+
 CONFTEST_PATH = REPO_ROOT / "conftest.py"
 
 

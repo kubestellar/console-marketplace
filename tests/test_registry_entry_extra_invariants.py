@@ -24,12 +24,10 @@ that the existing suite does not cover today:
 import json
 import re
 from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY_PATH = REPO_ROOT / "registry.json"
+from tests.repo_paths import REGISTRY_PATH, REPO_ROOT
 
 # https://github.com/shinnn/github-username-regex — GitHub's actual rule
 GITHUB_USERNAME_RE = re.compile(

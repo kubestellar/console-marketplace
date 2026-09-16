@@ -14,13 +14,11 @@ expose a dangling or off-org link.
 """
 from __future__ import annotations
 
-import json
 import re
-from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from tests.repo_paths import load_registry
 
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 HEX_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
@@ -30,7 +28,7 @@ STATUS = {"available", "help-wanted"}
 
 @pytest.fixture(scope="module")
 def all_entries() -> list[dict]:
-    r = json.loads((REPO_ROOT / "registry.json").read_text())
+    r = load_registry()
     return list(r["items"]) + list(r["presets"])
 
 
