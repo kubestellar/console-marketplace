@@ -4,7 +4,8 @@ import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import { CardSearchInput, CardPaginationFooter } from '../../lib/cards/CardComponents'
 import { useCardData } from '../../lib/cards/cardHooks'
-import { useCardLoadingState } from './CardDataContext'
+import { useCardLoadingState } from '../CardDataContext'
+import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
 import { useDemoMode } from '../../hooks/useDemoMode'
 import { useGlobalFilters } from '../../hooks/useGlobalFilters'
 import { useTranslation } from 'react-i18next'
@@ -52,10 +53,7 @@ export function BuildpacksStatus() {
     [rawImages],
   )
 
-  const globalFiltered = useMemo(() => {
-    if (!selectedClusters || selectedClusters.length === 0) return allRows
-    return allRows.filter(row => selectedClusters.includes(row.cluster))
-  }, [allRows, selectedClusters])
+  const globalFiltered = useClusterFilteredRows(allRows, selectedClusters)
 
   const {
     items: displayRows,

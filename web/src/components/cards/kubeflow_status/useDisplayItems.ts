@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
 import type { KubeflowDemoData } from './demoData'
 import type { KubeflowDisplayItem } from './types'
 
@@ -107,10 +108,7 @@ export function useDisplayItems(
 ) {
   const allItems = useMemo(() => mapToDisplayItems(rawData, t), [rawData, t])
 
-  const globalFiltered = useMemo(() => {
-    if (!selectedClusters || selectedClusters.length === 0) return allItems
-    return allItems.filter(item => selectedClusters.includes(item.cluster))
-  }, [allItems, selectedClusters])
+  const globalFiltered = useClusterFilteredRows(allItems, selectedClusters)
 
   const categoryFiltered = useMemo(() => {
     if (!selectedCategory) return globalFiltered
