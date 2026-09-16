@@ -47,6 +47,24 @@ describe('CardSearchInput', () => {
     expect(input).not.toHaveAttribute('placeholder')
     expect(input.className).toBe('')
   })
+
+  it('invokes onChange with an empty string when the input is cleared', () => {
+    const onChange = vi.fn()
+    render(<CardSearchInput value="test" onChange={onChange} />)
+
+    fireEvent.change(screen.getByTestId('card-search'), { target: { value: '' } })
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+
+  it('invokes onChange with special characters typed into the input', () => {
+    const onChange = vi.fn()
+    render(<CardSearchInput value="" onChange={onChange} />)
+
+    fireEvent.change(screen.getByTestId('card-search'), {
+      target: { value: '<script>alert(1)</script>' },
+    })
+    expect(onChange).toHaveBeenCalledWith('<script>alert(1)</script>')
+  })
 })
 
 describe('CardControlsRow', () => {
@@ -62,6 +80,17 @@ describe('CardControlsRow', () => {
   it('renders without crashing when no children are supplied', () => {
     const { container } = render(<CardControlsRow />)
     expect(container.querySelector('div')).not.toBeNull()
+  })
+
+  it('renders multiple children', () => {
+    render(
+      <CardControlsRow>
+        <span data-testid="a">A</span>
+        <span data-testid="b">B</span>
+      </CardControlsRow>,
+    )
+    expect(screen.getByTestId('a')).toBeInTheDocument()
+    expect(screen.getByTestId('b')).toBeInTheDocument()
   })
 })
 
