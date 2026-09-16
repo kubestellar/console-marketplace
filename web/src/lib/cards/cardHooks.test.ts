@@ -59,6 +59,32 @@ describe('useCardData', () => {
     expect(r.totalPages).toBe(1)
   })
 
+  it('handles exactly one page of items (boundary)', () => {
+    const r = useCardData(items.slice(0, 5))
+    expect(r.items).toHaveLength(5)
+    expect(r.totalPages).toBe(1)
+    expect(r.needsPagination).toBe(false)
+  })
+
+  it('handles one more item than a page (boundary)', () => {
+    const r = useCardData(items.slice(0, 6))
+    expect(r.items).toHaveLength(5)
+    expect(r.totalPages).toBe(2)
+    expect(r.needsPagination).toBe(true)
+  })
+
+  it('returns the provided items unchanged when they fit on one page', () => {
+    const small = [{ id: 100 }, { id: 200 }]
+    const r = useCardData(small)
+    expect(r.items).toStrictEqual(small)
+  })
+
+  it('works with primitive item types', () => {
+    const r = useCardData(['a', 'b', 'c'])
+    expect(r.items).toEqual(['a', 'b', 'c'])
+    expect(r.totalItems).toBe(3)
+  })
+
   it('handles an empty item list without throwing', () => {
     const r = useCardData<Item>([])
     expect(r.totalItems).toBe(0)
@@ -79,6 +105,16 @@ describe('useCardData', () => {
     })
     expect(r.sorting.sortBy).toBe('name')
     expect(r.sorting.sortDirection).toBe('desc')
+  })
+
+  it('falls back to "status" when sort option has no defaultField', () => {
+    const r = useCardData(items, { sort: {} })
+    expect(r.sorting.sortBy).toBe('status')
+  })
+
+  it('falls back to "asc" when sort option has no defaultDirection', () => {
+    const r = useCardData(items, { sort: {} })
+    expect(r.sorting.sortDirection).toBe('asc')
   })
 
   it('exposes empty filter and cluster state by default', () => {
