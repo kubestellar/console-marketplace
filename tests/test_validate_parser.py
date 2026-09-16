@@ -4,19 +4,15 @@ Tests core pure functions: _extract_object_block, get_registry_entries,
 load_json, find_json_files, and check_naming_conventions logic.
 """
 
-import importlib.util
 import json
-import os
 import sys
 import tempfile
 
 import pytest
 
-# Import the validate script as a module
-_script = os.path.join(os.path.dirname(__file__), "..", "scripts", "validate-marketplace.py")
-spec = importlib.util.spec_from_file_location("validate_marketplace", _script)
-vm = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(vm)
+from tests.conftest import load_validate_marketplace
+
+vm = load_validate_marketplace()
 
 
 # --- _extract_object_block ---

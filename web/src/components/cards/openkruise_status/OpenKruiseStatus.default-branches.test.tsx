@@ -30,6 +30,7 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { OPENKRUISE_DEMO_DATA } from './demoData'
+import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
 
 const mockUseClusters = vi.fn()
 const mockUseDemoMode = vi.fn()
@@ -42,9 +43,7 @@ vi.mock('../../../hooks/useMCP', () => ({
   useClusters: () => mockUseClusters(),
 }))
 
-vi.mock('../../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="openkruise-skeleton" />,
-}))
+vi.mock('../../ui/Skeleton', () => mockSkeletonModule('openkruise-skeleton'))
 
 vi.mock('../../ui/Select', () => ({
   Select: ({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -52,16 +51,11 @@ vi.mock('../../ui/Select', () => ({
   ),
 }))
 
-vi.mock('../../ui/ClusterBadge', () => ({
-  ClusterBadge: ({ cluster }: { cluster: string }) => <span>{cluster}</span>,
-}))
+vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
-  CardSearchInput: ({ value, placeholder }: { value: string; placeholder: string }) => (
-    <input data-testid="openkruise-search" value={value} placeholder={placeholder} readOnly />
-  ),
+  ...mockCardComponents('openkruise'),
   CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  CardPaginationFooter: () => <div data-testid="openkruise-pagination" />,
   CardAIActions: () => <div data-testid="openkruise-ai-actions" />,
 }))
 

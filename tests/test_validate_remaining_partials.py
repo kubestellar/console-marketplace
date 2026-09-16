@@ -23,23 +23,11 @@
   parses as a JSON list — ``all_keys.update(data.keys())`` must be
   skipped rather than raising AttributeError.
 """
-import importlib.util
 import json
-import os
 
+from tests.conftest import load_validate_marketplace
 
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+_mod = load_validate_marketplace()
 Results = _mod.Results
 
 

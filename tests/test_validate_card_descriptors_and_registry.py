@@ -10,15 +10,11 @@ Focus areas (previously uncovered):
     category files).
 """
 
-import importlib.util
-import os
 import tempfile
 
-# Import the validate script as a module (dashes in filename prevent normal import).
-_script = os.path.join(os.path.dirname(__file__), "..", "scripts", "validate-marketplace.py")
-spec = importlib.util.spec_from_file_location("validate_marketplace", _script)
-vm = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(vm)
+from tests.conftest import load_validate_marketplace
+
+vm = load_validate_marketplace()
 
 
 # --- parse_card_descriptors -------------------------------------------------

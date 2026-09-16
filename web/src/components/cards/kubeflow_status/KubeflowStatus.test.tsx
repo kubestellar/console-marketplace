@@ -2,20 +2,11 @@ import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import type { CardDataOptions } from '../../../test/cardTestHelpers'
+import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
 
 interface DisplayItem extends Record<string, unknown> {
   cluster: string
-}
-
-interface CardDataOptions<T> {
-  filter?: {
-    searchFields?: (keyof T)[]
-  }
-  sort?: {
-    defaultField?: string
-    defaultDirection?: 'asc' | 'desc'
-    comparators?: Record<string, (a: T, b: T) => number>
-  }
 }
 
 const mockUseClusters = vi.fn()
@@ -28,28 +19,12 @@ vi.mock('../../hooks/useMCP', () => ({
   useClusters: () => mockUseClusters(),
 }))
 
-vi.mock('../ui/Skeleton', () => ({
-  Skeleton: () => <div data-testid="kubeflow-skeleton" />,
-}))
+vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
-vi.mock('../ui/ClusterBadge', () => ({
-  ClusterBadge: ({ cluster }: { cluster: string }) => <span>{cluster}</span>,
-}))
+vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../lib/cards/CardComponents', () => ({
-  CardSearchInput: ({ value, onChange, placeholder }: {
-    value: string
-    onChange: (value: string) => void
-    placeholder: string
-    className?: string
-  }) => (
-    <input
-      data-testid="kubeflow-search"
-      value={value}
-      placeholder={placeholder}
-      onChange={event => onChange(event.target.value)}
-    />
-  ),
+  ...mockCardComponents('kubeflow'),
   CardControlsRow: ({
     children,
     cardControls,
@@ -91,32 +66,6 @@ vi.mock('../../lib/cards/CardComponents', () => ({
         </>
       )}
       {children}
-    </div>
-  ),
-  CardPaginationFooter: ({
-    currentPage,
-    totalPages,
-    onPageChange,
-    needsPagination,
-  }: {
-    currentPage?: number
-    totalPages?: number
-    onPageChange?: (page: number) => void
-    needsPagination?: boolean
-  }) => (
-    <div data-testid="kubeflow-pagination">
-      <span data-testid="kubeflow-page-indicator">
-        {currentPage}/{totalPages}
-      </span>
-      {needsPagination && onPageChange && (
-        <button
-          data-testid="kubeflow-next-page"
-          onClick={() => onPageChange(currentPage === totalPages ? 1 : (currentPage ?? 1) + 1)}
-          type="button"
-        >
-          next page
-        </button>
-      )}
     </div>
   ),
   CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,

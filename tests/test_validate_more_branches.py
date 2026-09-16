@@ -11,24 +11,13 @@ Targets branches previously uncovered:
 - Running the script as ``__main__`` via ``runpy`` so the trailing
   ``if __name__ == "__main__": main()`` line is exercised in-process.
 """
-import importlib.util
 import os
 import runpy
 import unittest
 
+from tests.conftest import load_validate_marketplace
 
-def _load_mod():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_mod()
+_mod = load_validate_marketplace()
 Results = _mod.Results
 
 

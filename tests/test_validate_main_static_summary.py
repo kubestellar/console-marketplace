@@ -23,25 +23,13 @@ that returns an empty string on a fully populated console setup;
 both are effectively dead relative to the current CLI contract, so
 they're not chased here.)
 """
-import importlib.util
-import os
 from datetime import datetime, timezone
 
 import pytest
 
+from tests.conftest import load_validate_marketplace
 
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+_mod = load_validate_marketplace()
 
 # Reuse the marketplace fixture helper from the neighbouring test file
 # to keep the layout identical across suites.
