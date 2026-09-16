@@ -12,7 +12,7 @@ import { useCardLoadingState } from '../CardDataContext'
 import { useDemoMode } from '../../hooks/useDemoMode'
 import { useGlobalFilters } from '../../hooks/useGlobalFilters'
 import { useTranslation } from 'react-i18next'
-import { KUBEFLOW_DEMO_DATA, type KubeflowDemoData } from './demoData'
+import { useKubeflowStatus } from './useKubeflowStatus'
 import { useDisplayItems } from './useDisplayItems'
 import { ItemRow } from './ItemRow'
 import {
@@ -53,16 +53,27 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
     '' as CategoryOption,
   )
 
-  // Data source -------------------------------------------------------
-  // In production a real data hook (e.g. useCachedKubeflowData) would
-  // fetch live data and fall back to demo data automatically, similar to
-  // useCachedHelmReleases. Until that hook exists we source data from
-  // useDemoMode and the static demo dataset.
-  const isDemoData = isDemoMode
-  const rawData: KubeflowDemoData = KUBEFLOW_DEMO_DATA
+  // Live data comes from useKubeflowStatus (backed by useCache). It falls
+  // back to KUBEFLOW_DEMO_DATA via useCache's demoWhenEmpty path when the
+  // fetcher fails or returns nothing, so the card always has something to
+  // render.
+  const {
+    data: rawData,
+    isLoading: dataLoading,
+    isRefreshing: dataRefreshing,
+    isDemoFallback,
+  } = useKubeflowStatus()
+
+  // isDemoData is true whenever we're showing demo-sourced data — explicit
+  // demo mode or the live fetcher fell back.
+  const isDemoData = isDemoMode || isDemoFallback
 
   // #1 + #5  Report loading / demo state to CardWrapper
-  const { showSkeleton, showEmptyState } = useCardLoadingState({ isDemoData })
+  const { showSkeleton, showEmptyState } = useCardLoadingState({
+    isLoading: dataLoading,
+    isRefreshing: dataRefreshing,
+    isDemoData,
+  })
 
   // #3  Transform every Kubeflow resource into a unified display item,
   // then apply the global cluster filter and the resource-type selector.

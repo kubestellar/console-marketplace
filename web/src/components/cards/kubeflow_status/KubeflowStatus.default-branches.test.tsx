@@ -23,12 +23,14 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
+import { KUBEFLOW_DEMO_DATA } from './demoData'
 
 const mockUseClusters = vi.fn()
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
+const mockUseKubeflowStatus = vi.fn()
 
 vi.mock('../../hooks/useMCP', () => ({
   useClusters: () => mockUseClusters(),
@@ -58,6 +60,10 @@ vi.mock('../../hooks/useDemoMode', () => ({
 
 vi.mock('../../hooks/useGlobalFilters', () => ({
   useGlobalFilters: () => mockUseGlobalFilters(),
+}))
+
+vi.mock('./useKubeflowStatus', () => ({
+  useKubeflowStatus: () => mockUseKubeflowStatus(),
 }))
 
 vi.mock('react-i18next', () => ({
@@ -113,6 +119,16 @@ describe('KubeflowStatus — getCategoryIcon/getCategoryLabel default arms', () 
     mockUseClusters.mockReturnValue({ isLoading: false })
     mockUseDemoMode.mockReturnValue({ isDemoMode: true })
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
+    mockUseKubeflowStatus.mockReturnValue({
+      data: KUBEFLOW_DEMO_DATA,
+      isLoading: false,
+      isRefreshing: false,
+      isFailed: false,
+      isDemoFallback: false,
+      consecutiveFailures: 0,
+      lastRefresh: 1_725_000_000_000,
+      refetch: vi.fn(),
+    })
     mockUseCardLoadingState.mockReturnValue({
       showSkeleton: false,
       showEmptyState: false,
