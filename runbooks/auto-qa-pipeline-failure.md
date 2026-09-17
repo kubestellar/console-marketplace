@@ -30,29 +30,23 @@ and filed a legitimate `[Auto-QA]` finding, use `registry-incident-response.md` 
 
 ## Current Status
 
-> **The companion `Alert on scan pipeline failure` workflow step described below has
-> not been merged into `marketplace-auto-qa.yml`.** A prior automated PR (#550) could
-> only land this runbook: the agent token used to open that PR lacks the `workflows`
-> GitHub App permission required to create or update any file under
-> `.github/workflows/`, so pushes touching `marketplace-auto-qa.yml` are rejected by
-> GitHub before a PR can even be opened. Until a maintainer with `workflows`
-> permission applies the step manually (see [tracking issue
-> #545](https://github.com/kubestellar/console-marketplace/issues/545) for the
-> suggested diff), a crash in the `Run full quality scan` step still produces a
-> **green** run with **zero** `[Auto-QA]` findings and no alert of any kind. Use the
-> "Missing findings pattern" signal below as the only currently-working detection
-> method.
+> **The `Alert on scan pipeline failure` workflow step described below has landed** in
+> `marketplace-auto-qa.yml` (see [tracking issue
+> #545](https://github.com/kubestellar/console-marketplace/issues/545)). It runs
+> `if: always() && steps.scan.outcome == 'failure'` immediately after `Run full
+> quality scan` and files/updates a `[Auto-QA] Nightly scan pipeline failed —
+> detection degraded` issue labeled `auto-qa:pipeline-failure` whenever the scan step
+> itself fails, so a crash is no longer silent. The "Missing findings pattern" signal
+> below remains a useful secondary check but is no longer the only detection method.
 
 ## When to Use This Runbook
 
-- (Once the companion workflow step lands) An issue titled `[Auto-QA] Nightly scan
-  pipeline failed — detection degraded` (label `auto-qa:pipeline-failure`) is opened
-  or updated by `marketplace-auto-qa.yml`.
-- **Today, before that step lands:** you notice several consecutive nights with no
-  `[Auto-QA]` findings at all, which is unusual given the repo's typical finding
-  rate, and want to rule out a silent detection failure rather than assume the
-  marketplace is simply clean. This is currently the *only* way to detect the
-  failure mode this runbook covers.
+- An issue titled `[Auto-QA] Nightly scan pipeline failed — detection degraded`
+  (label `auto-qa:pipeline-failure`) is opened or updated by
+  `marketplace-auto-qa.yml`.
+- You notice several consecutive nights with no `[Auto-QA]` findings at all, which is
+  unusual given the repo's typical finding rate, and want to rule out a silent
+  detection failure rather than assume the marketplace is simply clean.
 
 ## Why This Can Happen Silently
 
@@ -67,19 +61,18 @@ before valid JSON is produced means:
 - This is visually indistinguishable, from the Issues tab, from a clean scan that
   found no problems.
 
-A proposed `Alert on scan pipeline failure` step (added directly after the scan
-step) would close this gap: it would run `if: always() && steps.scan.outcome ==
-'failure'` and file/update a dedicated issue labeled `auto-qa:pipeline-failure`
-whenever the scan step itself fails, so a crash is never silent. **This step is not
-yet merged** — see [Current Status](#current-status) above.
+The `Alert on scan pipeline failure` step (added directly after the scan step) closes
+this gap: it runs `if: always() && steps.scan.outcome == 'failure'` and files/updates
+a dedicated issue labeled `auto-qa:pipeline-failure` whenever the scan step itself
+fails, so a crash is no longer silent. See [Current Status](#current-status) above.
 
 ## Detecting a Pipeline Failure
 
 | Signal | Where to look | Status |
 |---|---|---|
-| Dedicated alert issue | Issues labeled `auto-qa:pipeline-failure` | Not yet available — see [Current Status](#current-status) |
-| Workflow run log | Actions → `Marketplace Auto-QA` → the failed run's `Run full quality scan` step | Works today, but requires manually checking every run |
-| Missing findings pattern | No `[Auto-QA]` issues for several nights despite known outstanding registry drift | The only reliable signal today |
+| Dedicated alert issue | Issues labeled `auto-qa:pipeline-failure` | Available — see [Current Status](#current-status) |
+| Workflow run log | Actions → `Marketplace Auto-QA` → the failed run's `Run full quality scan` step | Works today |
+| Missing findings pattern | No `[Auto-QA]` issues for several nights despite known outstanding registry drift | Secondary signal |
 
 ## Triage
 
