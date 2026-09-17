@@ -45,15 +45,22 @@ jobs:
       - name: Run fuzzing tests
         id: run-fuzzing
         run: |
-          set +e
           cd fuzz
-          # Run fuzzer for 60 seconds with timeout
+          # Run fuzzer for 60 seconds with timeout. `timeout` exits 124 when the
+          # fuzzer is still running (and hasn't crashed) at the 60s deadline --
+          # that is the expected/normal outcome and must not fail the step. Any
+          # OTHER non-zero exit means Atheris found and reported a crash, which
+          # must fail the step so the workflow-failure alert can fire instead of
+          # being silently swallowed by an unconditional `|| true`.
+          set +e
           timeout 60s python fuzz_json_parser.py -atheris_runs=100000
-          if [ $? -eq 0 ]; then
-            echo "status=pass" >> "$GITHUB_OUTPUT"
-          else
-            echo "status=fail" >> "$GITHUB_OUTPUT"
+          FUZZ_EXIT=$?
+          set -e
+          if [ "$FUZZ_EXIT" -ne 0 ] && [ "$FUZZ_EXIT" -ne 124 ]; then
+            echo "::error::Atheris fuzzing reported a crash (exit code $FUZZ_EXIT) -- see the log above for the traceback and reproducer input."
+            exit "$FUZZ_EXIT"
           fi
+          echo "status=pass" >> "$GITHUB_OUTPUT"
 
       - name: Fuzzing observability summary
         if: always()
