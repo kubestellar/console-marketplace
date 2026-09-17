@@ -9,6 +9,7 @@ on:
     paths:
       - 'web/src/components/cards/**'
       - 'scripts/check-card-test-coverage.sh'
+      - 'scripts/test_check-card-test-coverage.sh'
       - '.github/workflows/card-test-coverage-check.yml'
 
 permissions:
@@ -31,6 +32,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Run shell unit tests for the gate script
+        run: bash scripts/test_check-card-test-coverage.sh
 
       - name: Detect untested card components
         id: coverage

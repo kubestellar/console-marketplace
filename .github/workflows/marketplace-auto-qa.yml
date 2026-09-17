@@ -69,6 +69,81 @@ jobs:
           # summary to $GITHUB_STEP_SUMMARY.
           python3 scripts/auto_qa_report.py /tmp/scan-results.json /tmp
 
+      - name: Alert on scan pipeline failure
+        if: always() && steps.scan.outcome == 'failure'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+        with:
+          github-token: ${{ secrets.CONSOLE_AUTO }}
+          script: |
+            const title = '[Auto-QA] Nightly scan pipeline failed — detection degraded';
+            const marker = '<!-- auto-qa-pipeline-failure -->';
+            const runUrl = process.env.RUN_URL;
+            const sha = process.env.COMMIT_SHA.substring(0, 7);
+            const now = new Date().toISOString();
+
+            const body = [
+              marker,
+              '## Auto-QA pipeline failure',
+              '',
+              `The \`Run full quality scan\` step of the nightly Marketplace Auto-QA workflow failed on ${now} (commit \`${sha}\`), before it could produce a valid scan result.`,
+              '',
+              'Because this step runs with `continue-on-error: true`, the overall workflow run did **not** fail and no `[Auto-QA]` finding issues were created — this is otherwise indistinguishable from a clean scan.',
+              '',
+              `**Run:** ${runUrl}`,
+              '',
+              'See `runbooks/auto-qa-pipeline-failure.md` for triage and recovery steps.',
+            ].join('\n');
+
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'auto-qa:pipeline-failure',
+                color: 'B71C1C',
+                description: 'The Auto-QA scan pipeline itself failed to complete',
+              });
+            } catch (e) {
+              core.info(`Label auto-qa:pipeline-failure already exists or could not be created: ${e.message}`);
+            }
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'auto-qa:pipeline-failure',
+              per_page: 10,
+            });
+
+            const open = existing.find(i => i.body && i.body.includes(marker));
+
+            if (open) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: open.number,
+                body,
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: open.number,
+                body: `Pipeline failure recurred on ${now} (run: ${runUrl}).`,
+              });
+              core.info(`Updated existing pipeline-failure issue #${open.number}`);
+            } else {
+              const { data: issue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['bug', 'auto-qa', 'auto-qa:pipeline-failure', 'help wanted'],
+              });
+              core.info(`Created pipeline-failure issue #${issue.number}`);
+            }
+
       - name: Ensure labels exist
         if: steps.scan.outputs.error_count != '0' || steps.scan.outputs.warn_count != '0'
         env:

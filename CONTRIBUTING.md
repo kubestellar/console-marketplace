@@ -315,7 +315,6 @@ Current checks include:
 
 - **Validate JSON** (`.github/workflows/validate-json.yml`)
 - **Marketplace Quality Gate** (`.github/workflows/marketplace-quality.yml`)
-- **PR Verifier** (`.github/workflows/pr-verifier.yml`)
 
 Run the local validation commands above before you open the PR so CI findings are limited to genuine review issues.
 
