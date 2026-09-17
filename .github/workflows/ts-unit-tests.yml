@@ -19,6 +19,9 @@ permissions:
 jobs:
   vitest:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - name: Checkout marketplace
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -99,3 +102,40 @@ jobs:
           if [ "$OVERALL_STATUS" != "pass" ]; then
             exit 1
           fi
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          SUMMARY_JSON="coverage/coverage-summary.json"
+          if [ -f "$SUMMARY_JSON" ]; then
+            python3 - "$SUMMARY_JSON" >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          import json
+          import sys
+
+          with open(sys.argv[1]) as f:
+              data = json.load(f)
+          total = data.get("total", {})
+
+          print("### Vitest Coverage Summary (web/src)")
+          print("")
+          print("| Metric | % | Covered / Total |")
+          print("|---|---|---|")
+          for metric in ("lines", "statements", "functions", "branches"):
+              m = total.get(metric, {})
+              pct = m.get("pct", "N/A")
+              covered = m.get("covered", "N/A")
+              tot = m.get("total", "N/A")
+              print(f"| {metric} | {pct}% | {covered} / {tot} |")
+          EOF
+          else
+            echo "No coverage-summary.json found at $SUMMARY_JSON" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ts-unit-tests-coverage-${{ github.run_id }}
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: warn
