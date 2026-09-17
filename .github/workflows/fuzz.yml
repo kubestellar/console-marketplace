@@ -53,10 +53,10 @@ jobs:
           for json_file in ../registry.json ../dashboards/*/dashboard.json ../presets/*.json ../card-presets/*.json; do
             if [ -f "$json_file" ]; then
               echo "Fuzzing with corpus from: $json_file"
-              python -c "
-          import json
-          import sys
-          with open('$json_file') as f:
+              JSON_FILE="$json_file" python - <<'PYEOF'
+          import json, os
+          path = os.environ["JSON_FILE"]
+          with open(path) as f:
               content = f.read()
               # Test original
               json.loads(content)
@@ -74,7 +74,7 @@ jobs:
                   try:
                       json.loads('}' + content)
                   except: pass
-          "
+          PYEOF
             fi
           done
           echo "Fuzzing completed successfully - no crashes detected"
