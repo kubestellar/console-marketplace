@@ -49,7 +49,53 @@ jobs:
         run: ln -s "${GITHUB_WORKSPACE}/console-parent/web/node_modules" "${GITHUB_WORKSPACE}/web/node_modules"
 
       - name: Run vitest with coverage gate
+        id: vitest-run
         working-directory: console-parent/web
-        run: npx vitest run --config "${GITHUB_WORKSPACE}/vitest.marketplace.config.ts" --dir "${GITHUB_WORKSPACE}/web" --coverage
+        run: |
+          set +e
+          npx vitest run --config "${GITHUB_WORKSPACE}/vitest.marketplace.config.ts" --dir "${GITHUB_WORKSPACE}/web" --coverage 2>&1 | tee /tmp/vitest-output.log
+          VITEST_EXIT=${PIPESTATUS[0]}
+          set -e
+          # Parse vitest's own bounded "Test Files"/"Tests" summary lines, e.g.
+          # "Tests  42 passed (42)" -- first number is the bounded passed count.
+          TEST_FILES_LINE=$(grep -E '^ *Test Files' /tmp/vitest-output.log | tail -1)
+          TESTS_LINE=$(grep -E '^ *Tests' /tmp/vitest-output.log | tail -1)
+          TESTS_PASSED=$(echo "$TESTS_LINE" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || echo 0)
+          TESTS_FAILED=$(echo "$TESTS_LINE" | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+' || echo 0)
+          echo "test_files_summary=${TEST_FILES_LINE:-N/A}" >> "$GITHUB_OUTPUT"
+          echo "tests_passed=${TESTS_PASSED:-0}" >> "$GITHUB_OUTPUT"
+          echo "tests_failed=${TESTS_FAILED:-0}" >> "$GITHUB_OUTPUT"
+          exit "$VITEST_EXIT"
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
+
+      - name: TypeScript unit test observability summary
+        if: always()
+        run: |
+          VITEST_OUTCOME="${{ steps.vitest-run.outcome }}"
+          TESTS_PASSED="${{ steps.vitest-run.outputs.tests_passed || 0 }}"
+          TESTS_FAILED="${{ steps.vitest-run.outputs.tests_failed || 0 }}"
+          TEST_FILES_SUMMARY="${{ steps.vitest-run.outputs.test_files_summary || 'N/A' }}"
+
+          if [ "$VITEST_OUTCOME" = "success" ]; then
+            OVERALL_STATUS="pass"
+          else
+            OVERALL_STATUS="fail"
+          fi
+
+          {
+            echo "### TypeScript Unit Test Summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Test files | ${TEST_FILES_SUMMARY} |"
+            echo "| Tests passed | ${TESTS_PASSED} |"
+            echo "| Tests failed | ${TESTS_FAILED} |"
+            echo "| Overall status | ${OVERALL_STATUS} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "TS_UNIT_TESTS_SUMMARY: {\"tests_passed\":${TESTS_PASSED},\"tests_failed\":${TESTS_FAILED},\"overall_status\":\"${OVERALL_STATUS}\"}"
+
+          if [ "$OVERALL_STATUS" != "pass" ]; then
+            exit 1
+          fi
