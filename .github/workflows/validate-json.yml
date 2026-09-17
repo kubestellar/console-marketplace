@@ -125,3 +125,7 @@ jobs:
           print(f"Checked {len(registry_entries)} registry entries, {len(seen_ids)} unique IDs")
           print("\nAll validations passed")
           SCRIPT
+
+      - name: Validate JSON observability summary
+        if: always()
+        run: python3 scripts/validate_json_summary.py

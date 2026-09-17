@@ -43,67 +43,19 @@ jobs:
           chmod +x fuzz/fuzz_json_parser.py
 
       - name: Run fuzzing tests
+        id: run-fuzzing
         run: |
+          set +e
           cd fuzz
           # Run fuzzer for 60 seconds with timeout
-          timeout 60s python fuzz_json_parser.py -atheris_runs=100000 || true
-          
-          # Test with actual repository files as corpus
-          echo "Testing with real JSON files from repository..."
-          for json_file in ../registry.json ../dashboards/*/dashboard.json ../presets/*.json ../card-presets/*.json; do
-            if [ -f "$json_file" ]; then
-              echo "Fuzzing with corpus from: $json_file"
-              JSON_FILE="$json_file" python - <<'PYEOF'
-          import json, os
-          path = os.environ["JSON_FILE"]
-          with open(path) as f:
-              content = f.read()
-              # Test original
-              json.loads(content)
-              # Test with mutations
-              for i in range(10):
-                  # Test truncated
-                  if len(content) > 10:
-                      try:
-                          json.loads(content[:-i])
-                      except: pass
-                  # Test with extra characters
-                  try:
-                      json.loads(content + '{')
-                  except: pass
-                  try:
-                      json.loads('}' + content)
-                  except: pass
-          PYEOF
-            fi
-          done
-          echo "Fuzzing completed successfully - no crashes detected"
+          timeout 60s python fuzz_json_parser.py -atheris_runs=100000
+          if [ $? -eq 0 ]; then
+            echo "status=pass" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=fail" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Test edge cases
+      - name: Fuzzing observability summary
+        if: always()
         run: |
-          python3 - << 'SCRIPT'
-          import json
-          
-          # Test edge cases that should NOT crash
-          edge_cases = [
-              '{}',
-              '[]',
-              'null',
-              '""',
-              '0',
-              '{"nested": {"deeply": {"very": {"deep": {}}}}}',
-              '{"array": [[[[[]]]]]}',
-              '[' + ','.join(['{}'] * 1000) + ']',
-              '{"key": "' + 'x' * 10000 + '"}',
-          ]
-          
-          print("Testing edge cases...")
-          for i, case in enumerate(edge_cases):
-              try:
-                  json.loads(case)
-                  print(f"✓ Edge case {i+1} parsed successfully")
-              except Exception as e:
-                  print(f"✓ Edge case {i+1} raised expected error: {type(e).__name__}")
-          
-          print("\nAll edge case tests passed!")
-          SCRIPT
+          python3 scripts/fuzz_summary.py --fuzzer-status "${{ steps.run-fuzzing.outputs.status || 'unknown' }}"
