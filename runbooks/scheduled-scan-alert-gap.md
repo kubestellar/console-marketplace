@@ -18,48 +18,45 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 
 ## Current Status
 
-> **No mechanism fix exists yet.** Tracking issue
-> [#573](https://github.com/kubestellar/console-marketplace/issues/573) (successor to
-> the doc-only fix that closed
-> [#565](https://github.com/kubestellar/console-marketplace/issues/565)) documents two
-> confirmed gaps:
->
-> 1. `fuzz.yml`'s "Run fuzzing tests" step runs
->    `timeout 60s python fuzz_json_parser.py -atheris_runs=100000 || true`. The
->    trailing `|| true` discards Atheris's non-zero exit code unconditionally, so the
->    step always succeeds and always prints "Fuzzing completed successfully - no
->    crashes detected" — even on a real crash. There is no failure signal to alert on.
-> 2. `codeql.yml` and `scorecard.yml` have no `workflow_run`-triggered alert, issue-
->    filing step, or other cross-workflow notification. `grep -rn
->    "workflow_run\|notify\|slack" .github/workflows/*.yml` returns zero matches.
->
-> Both fixes require editing files under `.github/workflows/`, which needs the
-> `workflows` GitHub App permission that automated PRs from this project do not carry
-> (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545) for
-> the same constraint on a sibling gap; confirmed again for this gap when a push
-> touching `.github/workflows/fuzz.yml` was rejected with `refusing to allow a GitHub
-> App to create or update workflow ... without workflows permission`). A validated,
-> actionlint-clean, ready-to-apply diff for both fixes — including a new
-> `workflow-failure-issue.yml` that also covers `stale.yml` (closing #607 in the same
-> change) — is posted on
+> **Mechanism fix has landed.** [PR #758](https://github.com/kubestellar/console-marketplace/pull/758)
+> (merged 2026-09-17, closing [#607](https://github.com/kubestellar/console-marketplace/issues/607))
+> applied the ready-to-apply diff previously posted on
 > [issue #573](https://github.com/kubestellar/console-marketplace/issues/573#issuecomment-5578394201)
-> for a maintainer with `workflows` permission to apply directly. Until it is applied,
-> use the manual detection steps below.
+> and resolved both gaps this runbook originally documented:
 >
-> **This gap is now confirmed active, not just theoretical.** As of 2026-09-15,
-> `OpenSSF Scorecard` has failed on every run (both `push` and the weekly `schedule`
-> trigger) since 2026-08-31T18:13:01Z (last success) — 79 consecutive red runs across
-> ~14.3 days, most recently
+> 1. `fuzz.yml`'s "Run fuzzing tests" step no longer swallows Atheris's exit code with
+>    `|| true`. It now captures the exit code explicitly and only treats `124`
+>    (the expected `timeout` deadline) as non-failing; any other non-zero exit calls
+>    `exit "$FUZZ_EXIT"` so the step — and the workflow run — actually fails on a real
+>    crash.
+> 2. `.github/workflows/workflow-failure-issue.yml` now exists: it subscribes to
+>    `workflow_run` `completed` events for `JSON Fuzzing`, `CodeQL Analysis`,
+>    `OpenSSF Scorecard`, **and** `Stale Issues`, and on a `schedule`/`workflow_dispatch`
+>    failure either opens a new issue (labeled `workflow-failure`, linking back to this
+>    runbook) or comments on the existing open one for that workflow. This covers
+>    `codeql.yml`/`scorecard.yml` (tracked by #573) and `stale.yml` (tracked by #607) in
+>    the same change.
+>
+> [Issue #573](https://github.com/kubestellar/console-marketplace/issues/573) has been
+> closed as fixed by this change. As of this writing no `Workflow failure: ...` issue
+> has been auto-filed yet (the mechanism only fires on the next scheduled/dispatch run
+> of each workflow), so the "Detecting a Failure Today" table below is retained as a
+> manual fallback until an automated alert has been observed firing at least once.
+>
+> **`scorecard.yml`'s pre-existing outage is a separate, still-open problem.** As of
+> 2026-09-15, `OpenSSF Scorecard` had failed on every run (both `push` and the weekly
+> `schedule` trigger) since 2026-08-31T18:13:01Z (last success) — 79 consecutive red
+> runs across ~14.3 days, most recently
 > [run 34920414145](https://github.com/kubestellar/console-marketplace/actions/runs/34920414145)
-> (2026-09-15T02:14:29Z) — with zero notification of any kind, because the alert gap
-> this runbook describes means nothing observes the run status. Root cause per the job
-> log (e.g.
+> (2026-09-15T02:14:29Z). Root cause per the job log (e.g.
 > [run 34089835030](https://github.com/kubestellar/console-marketplace/actions/runs/34089835030)):
 > `docker pull gcr.io/openssf/scorecard-action:v2.4.0` is rejected with
 > `denied: This API method requires billing to be enabled` — an upstream GCR billing
 > gate on the public `ossf/scorecard-action` image used by
 > `kubestellar/infra/.github/workflows/reusable-scorecard.yml`. This is **not** a bug in
-> this repo's workflow YAML or a locally fixable regression; see
+> this repo's workflow YAML or something the new alert mechanism can fix by itself — it
+> only ensures the *next* occurrence of this (or any other) scheduled failure gets a
+> filed issue instead of going unnoticed. See
 > [Detecting a Failure Today](#detecting-a-failure-today) and
 > [Triage](#triage) below before assuming a local cause.
 
@@ -75,13 +72,15 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 
 | Workflow | Schedule (UTC) | Signal | Where to look |
 |---|---|---|---|
-| `fuzz.yml` | Mon 03:00 | Green run is **not proof of no crash** — `\|\| true` swallows the exit code | Actions → `JSON Fuzzing` → open the latest scheduled run → "Run fuzzing tests" step log; look for Atheris crash/repro output printed above the always-succeeding `echo` |
-| `codeql.yml` | Mon 04:00 | Run status | Actions → `CodeQL Analysis` → confirm the latest scheduled run is green; a red run has no other notification |
-| `scorecard.yml` | Mon 06:00 | Run status | Actions → `OpenSSF Scorecard` → confirm the latest scheduled run is green; a red run has no other notification |
+| `fuzz.yml` | Mon 03:00 | A real Atheris crash now fails the step and the run (the `\|\| true` swallow is fixed); `workflow-failure-issue.yml` files/updates a `workflow-failure`-labeled issue on a `schedule`/`workflow_dispatch` failure | Issues search: `label:workflow-failure "JSON Fuzzing" in:title`, or Actions → `JSON Fuzzing` → latest run |
+| `codeql.yml` | Mon 04:00 | `workflow-failure-issue.yml` files/updates a `workflow-failure`-labeled issue on a `schedule`/`workflow_dispatch` failure | Issues search: `label:workflow-failure "CodeQL Analysis" in:title`, or Actions → `CodeQL Analysis` → latest run |
+| `scorecard.yml` | Mon 06:00 | `workflow-failure-issue.yml` files/updates a `workflow-failure`-labeled issue on a `schedule`/`workflow_dispatch` failure | Issues search: `label:workflow-failure "OpenSSF Scorecard" in:title`, or Actions → `OpenSSF Scorecard` → latest run |
 
-Because none of these workflows file an issue or otherwise notify on failure, the
-Actions tab is the only working signal — check it manually after each Monday's runs,
-or whenever a security/quality question needs the freshest scan result.
+`workflow-failure-issue.yml` only fires on `schedule`/`workflow_dispatch` runs (not on
+`push`/`pull_request` runs of `codeql.yml`/`scorecard.yml`), and only files/comments once
+per still-open issue — it does not re-notify beyond that comment. The Actions tab
+remains the ground-truth signal; use the table above as the primary alert path and the
+Actions tab as a fallback if you suspect the alert workflow itself failed to run.
 
 ## Triage
 
@@ -114,12 +113,13 @@ or whenever a security/quality question needs the freshest scan result.
 - **`codeql.yml`/`scorecard.yml` failure:** apply the fix implied by the log (action
   version bump, permission change, etc.) and confirm the next scheduled or manually
   dispatched run is green.
-- Once a maintainer applies the `workflows`-permission-gated fix in
-  [#573](https://github.com/kubestellar/console-marketplace/issues/573) (which also
-  closes [#607](https://github.com/kubestellar/console-marketplace/issues/607) via the
-  same `workflow-failure-issue.yml` addition), update the "Current Status" section
-  above and SLO 5 **and** SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos) to reflect the
-  mechanism is live, and add the new alert issue label to the table above.
+- The `workflows`-permission-gated fix landed in
+  [PR #758](https://github.com/kubestellar/console-marketplace/pull/758), closing
+  [#607](https://github.com/kubestellar/console-marketplace/issues/607) and
+  [#573](https://github.com/kubestellar/console-marketplace/issues/573) via the
+  `workflow-failure-issue.yml` addition — see [Current Status](#current-status) above
+  and SLO 5/SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos), both now updated to reflect the
+  mechanism is live.
 
 ## Verifying Recovery
 
@@ -128,23 +128,22 @@ or whenever a security/quality question needs the freshest scan result.
 
 ## Stale Issues Workflow
 
-`.github/workflows/stale.yml` has the same undocumented gap as the three workflows
-above. The doc-only tracking issue [#598](https://github.com/kubestellar/console-marketplace/issues/598)
-was closed once this section and SLO 6 in [`SLO.md`](./SLO.md#slis-and-slos) were added;
-the underlying mechanism gap is now tracked in its own dedicated issue,
-[#607](https://github.com/kubestellar/console-marketplace/issues/607) (distinct from
-[#573](https://github.com/kubestellar/console-marketplace/issues/573), which covers only
-`fuzz.yml`/`codeql.yml`/`scorecard.yml`):
+`.github/workflows/stale.yml` had the same gap as the three workflows above. It is now
+covered by the same `workflow-failure-issue.yml` mechanism (merged in
+[PR #758](https://github.com/kubestellar/console-marketplace/pull/758), closing
+[#607](https://github.com/kubestellar/console-marketplace/issues/607)): a `schedule`/
+`workflow_dispatch` failure of `Stale Issues` files or updates a `workflow-failure`-
+labeled issue the same way as `fuzz.yml`/`codeql.yml`/`scorecard.yml` above.
 
 | Workflow | Schedule (UTC) | Signal | Where to look |
 |---|---|---|---|
-| `stale.yml` | Daily 00:00 | Run status only — it calls `kubestellar/infra`'s `reusable-stale.yml` with no failure notification | Actions → `Stale Issues` → confirm the latest scheduled run is green; a red run has no other notification |
+| `stale.yml` | Daily 00:00 | `workflow-failure-issue.yml` files/updates a `workflow-failure`-labeled issue on a `schedule`/`workflow_dispatch` failure | Issues search: `label:workflow-failure "Stale Issues" in:title`, or Actions → `Stale Issues` → latest run |
 
-A silent daily failure here means stale issues/PRs stop being triaged with no signal
-beyond noticing the backlog is not shrinking as expected. Triage and recovery follow the
-same pattern as `codeql.yml`/`scorecard.yml` above: open the failed run's log, identify
-the cause (usually a reusable-workflow break or a permissions change), fix it, and
-confirm the next scheduled or `workflow_dispatch`-triggered run is green.
+A silent daily failure here means stale issues/PRs stop being triaged. Triage and
+recovery follow the same pattern as `codeql.yml`/`scorecard.yml` above: open the failed
+run's log, identify the cause (usually a reusable-workflow break or a permissions
+change), fix it, and confirm the next scheduled or `workflow_dispatch`-triggered run is
+green.
 
 ## Recording the Incident
 
