@@ -18,13 +18,13 @@ should be detected and resolved, not any request-latency/availability target.
 | 2 | Time from a PR-time check failure (`Validate JSON` / `Marketplace Quality Gate`) to that PR being blocked from merging | 0 (should never merge with failing checks) | PR status checks | [`registry-incident-response.md`](./registry-incident-response.md) — **not yet met**: checks are not merge-blocking today (see [issue #560](https://github.com/kubestellar/console-marketplace/issues/560)) |
 | 3 | Time from the nightly Auto-QA *pipeline itself* crashing (not a content finding) to an alert | ≤ 24h | Proposed `Alert on scan pipeline failure` step | [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) — **not yet met**: the step is not merged (see [issue #545](https://github.com/kubestellar/console-marketplace/issues/545)); today this failure mode is silent and only detectable by noticing an unusual gap in `[Auto-QA]` findings |
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
-| 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for these three workflows | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **not yet met**: documents manual detection only; see [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) |
-| 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | **Not yet defined** | None — no `workflow_run` alert exists for this workflow either | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **not yet met**: same undocumented gap class as SLO 5, tracked in its own dedicated issue [#607](https://github.com/kubestellar/console-marketplace/issues/607) (the doc-only tracking issue #598 for this specific workflow was closed once this runbook section and row were added; #607 was opened afterward because #573 covers only `fuzz.yml`/`codeql.yml`/`scorecard.yml`, not `stale.yml`; the underlying alert gap itself is still open) |
+| 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | `.github/workflows/workflow-failure-issue.yml`'s `workflow_run` trigger, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **met**: mechanism is live and closed [issue #573](https://github.com/kubestellar/console-marketplace/issues/573); not yet observed firing on a real failure (see [Current Status](./scheduled-scan-alert-gap.md#current-status)) |
+| 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | Same `workflow-failure-issue.yml` mechanism as SLO 5, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **met**: closed [issue #607](https://github.com/kubestellar/console-marketplace/issues/607); not yet observed firing on a real failure |
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
 | 8 | Whether a completed `validate-json.yml` run left a bounded, machine-readable record of what it checked (registry entries checked, dashboards checked, error count, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo`/`print` lines in the raw step log | [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) — **not yet met**: the underlying logic is extracted into a tested, standalone `scripts/validate_json_summary.py`, but wiring it into the workflow is blocked on the same `workflows` permission gap as SLO 3/7; see [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
 | 9 | Whether a completed `python-unit-tests.yml` / `ts-unit-tests.yml` run left a bounded, machine-readable record of pass/fail counts | Every run's Summary tab shows this record | Python: root `conftest.py` `pytest_terminal_summary`/`pytest_sessionfinish` hook (no workflow edit needed). TS: none today | [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md) — **partially met**: Python side closed via merged [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) fix (`conftest.py`); TS side still blocked on the same `workflows` permission gap as SLO 3/7/8 — a ready-to-apply diff for `ts-unit-tests.yml` is preserved in the runbook for a maintainer |
 
-## Why SLOs 2, 3, 5, 6, 7, 8, and 9 (TS half) Are Reported as Unmet
+## Why SLOs 2, 3, 7, 8, and 9 (TS half) Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -40,31 +40,21 @@ aspirational, already-healthy state:
   pipeline-failure runbook, and [issue #545](https://github.com/kubestellar/console-marketplace/issues/545)
   for the exact proposed diff). Until a maintainer applies it manually, the only working
   detection signal for a crashed scan is noticing an unusual gap in `[Auto-QA]` findings.
-- **SLO 5** is not yet defined at all: `fuzz.yml`, `codeql.yml`, and `scorecard.yml` are
-  weekly `schedule:`-triggered workflows with no companion failure alert, so a silent
-  failure in any of them (infra flake, dependency break, action version bump) is only
-  visible as a red run in the Actions tab — see
-  [issue #573](https://github.com/kubestellar/console-marketplace/issues/573) and the
-  manual detection steps in
-  [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md). `fuzz.yml`
-  additionally masks real Atheris-detected crashes with `|| true` after its fuzz-run step,
-  so even a genuine crash produces a green run today. **This gap is confirmed active, not
-  hypothetical:** as of 2026-09-12, `scorecard.yml` has failed on every run since its
-  last success on 2026-08-31T18:13:01Z (64 consecutive red runs across ~11.5 days) due
-  to an upstream GCR billing gate on the `ossf/scorecard-action` image, with zero
-  notification of the ongoing outage — see the
-  [Current Status](./scheduled-scan-alert-gap.md#current-status) update in
-  `scheduled-scan-alert-gap.md`.
-- **SLO 6** is the same undocumented-gap situation as SLO 5, for a different scheduled
-  workflow: `stale.yml` runs daily via
-  `kubestellar/infra/.github/workflows/reusable-stale.yml` with no `workflow_run` alert,
-  issue-filing step, or other notification on failure — the mechanism fix has its own
-  dedicated tracker, [issue #607](https://github.com/kubestellar/console-marketplace/issues/607),
-  separate from [issue #573](https://github.com/kubestellar/console-marketplace/issues/573)
-  (which covers only `fuzz.yml`/`codeql.yml`/`scorecard.yml`)
-  (the earlier doc-only tracking issue #598 was closed once this row and
-  [`scheduled-scan-alert-gap.md#stale-issues-workflow`](./scheduled-scan-alert-gap.md#stale-issues-workflow)
-  were added — the underlying gap itself remains open).
+- **SLO 5** and **SLO 6** are now met: `.github/workflows/workflow-failure-issue.yml`
+  (merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758),
+  closing [issue #573](https://github.com/kubestellar/console-marketplace/issues/573)
+  and [issue #607](https://github.com/kubestellar/console-marketplace/issues/607))
+  subscribes to `workflow_run` `completed` events for `JSON Fuzzing`,
+  `CodeQL Analysis`, `OpenSSF Scorecard`, and `Stale Issues`, and files or updates a
+  `workflow-failure`-labeled issue on any `schedule`/`workflow_dispatch` failure.
+  `fuzz.yml` also no longer masks real Atheris-detected crashes with `|| true` — see
+  [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) for the mechanism
+  detail. Neither has yet been observed firing on a genuine failure in production, so
+  re-verify against the workflow file (not just this note) before relying on it for an
+  active incident. Note `scorecard.yml`'s ongoing GCR-billing-gate outage (documented in
+  the runbook's [Current Status](./scheduled-scan-alert-gap.md#current-status)) is a
+  separate, still-open problem that this alert mechanism only makes *visible*, not
+  fixed.
 - **SLO 7** depends on the same class of workflow-file change as SLO 3: a validated
   diff exists (adding a final `if: always()` summary step to `fuzz.yml`'s `fuzz-json`
   job) but eight prior automated attempts to push it were all rejected by GitHub for
@@ -95,6 +85,9 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2, SLO 3, SLO 5, SLO 6, SLO 7, SLO 8, or the TS half of SLO 9 as met until
+Do not mark SLO 2, SLO 3, SLO 7, SLO 8, or the TS half of SLO 9 as met until
 the corresponding gap above is actually closed — verify by re-reading the referenced
-workflow/settings, not by assuming a linked issue was resolved.
+workflow/settings, not by assuming a linked issue was resolved. SLO 5 and SLO 6 are
+marked met above because their mechanism (`workflow-failure-issue.yml`) is merged and
+present on `main` today — re-verify that file still exists and still lists all four
+workflow names before relying on this note.
