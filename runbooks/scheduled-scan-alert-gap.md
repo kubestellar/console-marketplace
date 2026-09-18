@@ -59,6 +59,14 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 > filed issue instead of going unnoticed. See
 > [Detecting a Failure Today](#detecting-a-failure-today) and
 > [Triage](#triage) below before assuming a local cause.
+>
+> **Update 2026-09-18:** `scorecard.yml`'s `push`-triggered runs have been green
+> since 2026-09-17T07:15:27Z (9 consecutive successes as of this writing) — the
+> upstream GCR billing gate appears to have cleared. The weekly `schedule`-triggered
+> run (next due 2026-09-21, per the `cron: '0 6 * * 1'` trigger) has not yet
+> reconfirmed this independently — the last `schedule` run (2026-09-14) was still a
+> failure — so do not mark this fully resolved until that scheduled run is also
+> green.
 
 ## When to Use This Runbook
 
