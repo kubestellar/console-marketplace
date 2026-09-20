@@ -18,37 +18,17 @@ original finding.
 
 ## Current Status
 
-> **The logic has been extracted and tested, but the workflow itself is not wired
-> up.** [`scripts/validate_json_summary.py`](../scripts/validate_json_summary.py)
-> re-implements the same three checks `validate-json.yml` already runs (registry.json
-> parses, `dashboards/*/dashboard.json` files parse and match the `kc-dashboard-v1`
-> schema, and registry entries have matching asset files) as a standalone,
-> unit-tested module (see
-> [`tests/test_validate_json_summary.py`](../tests/test_validate_json_summary.py)).
-> Running it directly produces the bounded summary:
->
-> ```
-> $ python3 scripts/validate_json_summary.py
-> ### Validate JSON Summary
->
-> | Field | Value |
-> |---|---|
-> | Registry entries checked | 77 |
-> | Dashboards checked | 3 |
-> | Error count | 0 |
-> | Status | pass |
->
-> VALIDATE_JSON_SUMMARY: {"registry_entries_checked": 77, "dashboards_checked": 3, "error_count": 0, "status": "pass"}
-> ```
->
-> Wiring this into `validate-json.yml` (replacing its three inline steps with a call
-> to this script, or adding it as a final `if: always()` step) requires editing a file
-> under `.github/workflows/`, which needs the `workflows` GitHub App permission this
-> project's automated PRs do not carry — the same repo-wide token restriction already
-> documented for [issue #545](https://github.com/kubestellar/console-marketplace/issues/545)
-> (`auto-qa-pipeline-failure.md`) and [issue #597](https://github.com/kubestellar/console-marketplace/issues/597)
-> (`fuzz-yml-ci-summary-gap.md`). This runbook preserves the ready-to-apply wiring so
-> it can be applied without re-deriving the logic.
+> **RESOLVED.** `.github/workflows/validate-json.yml` now runs
+> `python3 scripts/validate_json_summary.py` as a final step (added by commit
+> `378cfdf`, "wire step-summary into fuzz.yml and validate-json.yml"), alongside
+> the three original inline checks. Confirmed present on `main` as of this audit
+> pass. [Issue #621](https://github.com/kubestellar/console-marketplace/issues/621)
+> is closed. As with the matching `fuzz.yml` gap, the prior blocker (no
+> `workflows` GitHub App permission on this project's automated-PR token, so
+> telemetry's own pushes touching `.github/workflows/` were rejected server-side)
+> was cleared by a differently-scoped automation run that does carry that
+> permission — not by telemetry. Both Option A and Option B below are kept only
+> as a historical record; do not re-attempt this fix or re-open #621.
 
 ## When to Use This Runbook
 
@@ -58,12 +38,11 @@ original finding.
   [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) and want
   the exact wiring to apply, without waiting on another automated attempt.
 
-## Applying the Fix
+## Applying the Fix (already done — kept for reference)
 
-Two independent, validated fixes exist for the same gap. Apply **one** of them (not
-both) — a maintainer with the `workflows` GitHub App permission (or a local
-PAT-based push) is needed either way, since both touch
-`.github/workflows/validate-json.yml`.
+The workflow was fixed using a variant of Option A (a final `if: always()` step
+calling the standalone script). Both options are kept below only as a historical
+record of the two approaches that were considered.
 
 ### Option A: call the extracted script (smaller diff)
 
@@ -198,15 +177,13 @@ index 2d4377c..21bb283 100644
 
 ## Verifying Recovery
 
-1. Trigger the workflow on a PR touching `registry.json` or a `dashboards/**/*.json`
-   file.
-2. Confirm the run's **Summary** tab shows a "Validate JSON Summary" (Option A) or
-   "JSON Validation Summary" (Option B) table with non-zero `Registry entries
-   checked` / `Dashboards checked` counts and an explicit pass/fail overall status.
-3. Confirm the step's log contains a `VALIDATE_JSON_SUMMARY: {...}` line.
-4. Temporarily reintroducing an invalid `dashboard.json` (or a malformed
-   `registry.json` entry) should cause the summary step to report a non-zero error
-   count and `fail`/non-zero exit, rather than the job simply failing on an earlier
-   step with no aggregate record.
-5. Close [issue #621](https://github.com/kubestellar/console-marketplace/issues/621)
-   once confirmed.
+Confirmed on `main`:
+
+1. `validate-json.yml` runs on PRs touching `registry.json` or
+   `dashboards/**/*.json`.
+2. The run's **Summary** tab shows a "Validate JSON Summary" table with non-zero
+   `Registry entries checked` / `Dashboards checked` counts and an explicit
+   pass/fail overall status.
+3. The step's log contains a `VALIDATE_JSON_SUMMARY: {...}` line.
+4. [Issue #621](https://github.com/kubestellar/console-marketplace/issues/621) is
+   closed.
