@@ -44,4 +44,4 @@ jobs:
 
       - name: Check coverage threshold
         run: |
-          python -m coverage report --fail-under=100 --include='scripts/validate-marketplace.py'
+          python -m coverage report --fail-under=100 --include='scripts/*.py,scripts/validate_marketplace_lib/*.py'
