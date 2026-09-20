@@ -19,40 +19,20 @@ for the original finding.
 
 ## Current Status
 
-> **The corpus-mutation and edge-case testing logic now exists as a standalone,
-> unit-tested script:** [`scripts/fuzz_summary.py`](../scripts/fuzz_summary.py)
-> (tests: [`tests/test_fuzz_summary.py`](../tests/test_fuzz_summary.py)). It
-> re-implements the same fixed-corpus mutation testing and fixed edge-case list
-> `fuzz.yml` already runs, and emits the bounded markdown table + single-line
-> `FUZZ_SUMMARY: {...}` JSON record described below. It does **not** invoke
-> atheris itself — that remains a subprocess step in the workflow — but accepts
-> the atheris exit status via `--fuzzer-status`/`FUZZER_STATUS` so a wired
-> workflow can report on the whole job. This script is pushable today (it lives
-> outside `.github/workflows/`); **only the workflow wiring below still needs a
-> maintainer with the `workflows` GitHub App permission.**
->
-> A validated, ready-to-apply diff (below) adds a
-> final `if: always()` "Fuzzing observability summary" step to the `fuzz-json` job.
-> It has been implemented and locally validated (YAML parses cleanly; each `run:`
-> block's shell logic was reviewed and dry-run tested) in **eight separate prior
-> attempts**, all blocked at push time with the same rejection:
->
-> ```
-> ! [remote rejected] telemetry/fuzz-yml-... -> telemetry/fuzz-yml-...
->   (refusing to allow a GitHub App to create or update workflow
->   `.github/workflows/fuzz.yml` without `workflows` permission)
-> ```
->
-> This is the same repo-wide GitHub App token restriction already documented for
-> [issue #545](https://github.com/kubestellar/console-marketplace/issues/545) and
-> [issue #573](https://github.com/kubestellar/console-marketplace/issues/573): the
-> token used by automated PRs in this project has no `workflows` OAuth scope, so
-> **any** push touching a file under `.github/workflows/` is rejected by GitHub
-> before a PR can even be opened — retrying the same edit does not change this
-> outcome. This runbook exists so the validated diff is preserved in a file
-> automation *can* land, instead of being re-derived (and re-blocked) on every
-> future audit pass. A maintainer with `workflows` permission can apply the diff
-> below directly; no further review of the logic should be needed first.
+> **RESOLVED.** `.github/workflows/fuzz.yml` now has a `Fuzzing observability
+> summary` step (added by commit `378cfdf`, "wire step-summary into fuzz.yml and
+> validate-json.yml") that calls
+> [`scripts/fuzz_summary.py`](../scripts/fuzz_summary.py) with
+> `--fuzzer-status "${{ steps.run-fuzzing.outputs.status || 'unknown' }}"` and runs
+> `if: always()`, matching the diff previously preserved below. Confirmed present
+> on `main` as of this audit pass. [Issue #597](https://github.com/kubestellar/console-marketplace/issues/597)
+> is closed. The prior blocker (this project's automated-PR token lacks the
+> `workflows` GitHub App permission needed to push a change under
+> `.github/workflows/`, so telemetry's own repeated attempts to land this diff
+> were rejected server-side every time) was cleared by a differently-scoped
+> automation run that *does* carry that permission — not by telemetry. This
+> section, and the diff below, are kept only as a historical record of what was
+> applied and why; do not re-attempt this fix or re-open #597.
 
 ## When to Use This Runbook
 
@@ -62,7 +42,7 @@ for the original finding.
 - You are a maintainer looking to close [issue #597](https://github.com/kubestellar/console-marketplace/issues/597)
   and want the exact diff to apply, without waiting on another automated attempt.
 
-## Ready-to-Apply Diff
+## Applied Diff (historical reference)
 
 Validated against `.github/workflows/fuzz.yml` at commit `c3d7da5`. Adds a step
 `id`, captures the atheris exit status, and replaces the workflow's duplicated
@@ -169,17 +149,16 @@ index c926327..af33ad5 100644
 
 </details>
 
-## Applying the Fix
+## Applying the Fix (already done — kept for reference)
 
-1. Apply the diff above to `.github/workflows/fuzz.yml` (a maintainer with the
-   `workflows` GitHub App permission, or a local PAT-based push, can do this
-   directly — automation cannot).
-2. Trigger the workflow manually (`workflow_dispatch`) or wait for the next PR/
-   scheduled run.
-3. Confirm the run's **Summary** tab shows a "JSON Fuzzing Summary" table, and the
-   "Fuzzing observability summary" step's log contains a `FUZZ_SUMMARY: {...}` line.
-4. Close [issue #597](https://github.com/kubestellar/console-marketplace/issues/597)
-   once confirmed.
+1. ~~Apply the diff above to `.github/workflows/fuzz.yml`~~ — done, see commit
+   `378cfdf`.
+2. ~~Trigger the workflow~~ — confirmed running on `main`.
+3. Confirmed: the run's **Summary** tab shows a "JSON Fuzzing Summary" table, and
+   the "Fuzzing observability summary" step's log contains a `FUZZ_SUMMARY: {...}`
+   line.
+4. [Issue #597](https://github.com/kubestellar/console-marketplace/issues/597) is
+   closed.
 
 ## Verifying Recovery
 

@@ -22,8 +22,10 @@ original finding.
 
 ## Current Status
 
-> **Python side: fixed, no workflow edit needed.** A root-level `conftest.py` now
-> hooks `pytest_terminal_summary`/`pytest_sessionfinish` to emit a
+> **Both sides: resolved.**
+>
+> **Python side:** fixed via `conftest.py`, no workflow edit needed. A root-level
+> `conftest.py` hooks `pytest_terminal_summary`/`pytest_sessionfinish` to emit a
 > `PYTHON_UNIT_TESTS_SUMMARY: {...}` JSON line and a `$GITHUB_STEP_SUMMARY` Markdown
 > table for every `pytest tests/` run — including the exact
 > `python -m coverage run --branch --source=scripts -m pytest tests/ -v` invocation
@@ -48,27 +50,34 @@ original finding.
 > [PR #632](https://github.com/kubestellar/console-marketplace/pull/632),
 > closing #631) excludes the one provably-dead partial branch, and
 > `python-unit-tests.yml`'s "Check coverage threshold" step has passed on every
-> `main` run since. Issue #620 remains open on GitHub as a stale duplicate
-> tracker as of this writing — see
-> [issue #693](https://github.com/kubestellar/console-marketplace/issues/693)
-> for the confirmed duplicate-PR/issue analysis — but do not treat the coverage
-> gate itself as an open gap; re-verify against current `main` before assuming
-> otherwise.
+> `main` run since (re-verified this pass: `coverage report --fail-under=100
+> --include='scripts/*.py,scripts/validate_marketplace_lib/*.py'` → 100%, no
+> misses). [Issue #620](https://github.com/kubestellar/console-marketplace/issues/620),
+> [issue #631](https://github.com/kubestellar/console-marketplace/issues/631), and
+> [issue #693](https://github.com/kubestellar/console-marketplace/issues/693) (the
+> confirmed duplicate-PR/issue analysis) are all closed.
 >
-> **TypeScript side (`ts-unit-tests.yml`): still blocked.** Unlike the Python fix,
-> a no-workflow-edit path for vitest wasn't pursued this round because
-> `ts-unit-tests.yml` sparse-checks out `web/src/test/setup.ts` from
-> `kubestellar/console` at run time and links that repo's `node_modules` — wiring a
-> custom vitest reporter through that cross-repo setup safely needs local
-> validation against the real linked `node_modules` this environment doesn't have,
-> and it isn't worth risking on an unverified guess. The ready-to-apply
-> `ts-unit-tests.yml` diff below is preserved for a maintainer with `workflows`
-> permission, or for a future session that can validate a reporter-based fix
-> end-to-end. This half of the same blocker is already documented for
+> **TypeScript side (`ts-unit-tests.yml`): also fixed.** Unlike the Python fix, a
+> no-workflow-edit path wasn't available for vitest (see the prior reasoning
+> below, kept for context), but the ready-to-apply diff was subsequently applied
+> directly to `.github/workflows/ts-unit-tests.yml` by a differently-scoped
+> automation run that carries the `workflows` GitHub App permission (commit
+> `cd698b0`, "add CI summary to ts-unit-tests.yml") — not by telemetry. Confirmed
+> present on `main` as of this audit pass: the "Run vitest with coverage gate"
+> step has an `id`, and a final `if: always()` "TypeScript unit test observability
+> summary" step writes a `$GITHUB_STEP_SUMMARY` table and a
+> `TS_UNIT_TESTS_SUMMARY: {...}` line, matching the diff below.
+> [Issue #636](https://github.com/kubestellar/console-marketplace/issues/636),
 > [issue #545](https://github.com/kubestellar/console-marketplace/issues/545),
-> [issue #573](https://github.com/kubestellar/console-marketplace/issues/573),
-> [issue #597](https://github.com/kubestellar/console-marketplace/issues/597), and
-> [issue #621](https://github.com/kubestellar/console-marketplace/issues/621).
+> [issue #573](https://github.com/kubestellar/console-marketplace/issues/573), and
+> [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) are
+> all closed. The diff below is kept only as a historical record; do not
+> re-attempt this fix or re-open any of these issues.
+>
+> The paragraph below describes why telemetry itself did not pursue the
+> vitest-reporter path in the round the fix was originally scoped, preserved for
+> context on why the ready-to-apply diff (rather than a custom reporter) was the
+> path actually taken:
 
 ## When to Use This Runbook
 
@@ -167,7 +176,7 @@ index 450a41d..140d716 100644
 
 </details>
 
-## Ready-to-Apply Diff: `ts-unit-tests.yml`
+## Applied Diff: `ts-unit-tests.yml` (historical reference)
 
 Validated against `.github/workflows/ts-unit-tests.yml` at commit `212a551`.
 
@@ -238,22 +247,19 @@ index e54d6b4..c93fb6e 100644
 
 </details>
 
-## Applying the Fix
+## Applying the Fix (both sides done — kept for reference)
 
-- **Python side:** already applied via `conftest.py` — no further action needed.
-  Confirm on the next `python-unit-tests.yml` run that the "Run tests with
-  coverage" step's log contains a `PYTHON_UNIT_TESTS_SUMMARY: {...}` line and the
-  job's **Summary** tab shows the "Python Unit Tests Summary" table.
-- **TypeScript side:** still requires the diff below.
-  1. Apply the `ts-unit-tests.yml` diff (a maintainer with the `workflows` GitHub
-     App permission, or a local PAT-based push, can do this directly —
-     automation cannot).
-  2. Trigger the workflow via a PR that touches its watched paths.
-  3. Confirm the run's **Summary** tab shows the "TypeScript Unit Test Summary"
-     table, and the final step's log contains a `TS_UNIT_TESTS_SUMMARY: {...}`
-     line.
-  4. Close [issue #636](https://github.com/kubestellar/console-marketplace/issues/636)
-     once the TypeScript side is confirmed (Python side already closes its half).
+- **Python side:** applied via `conftest.py`. Confirmed: `python-unit-tests.yml`'s
+  "Run tests with coverage" step's log contains a `PYTHON_UNIT_TESTS_SUMMARY:
+  {...}` line and the job's **Summary** tab shows the "Python Unit Tests Summary"
+  table.
+- **TypeScript side:** applied via commit `cd698b0` ("add CI summary to
+  ts-unit-tests.yml"), landed by a differently-scoped automation run that carries
+  the `workflows` GitHub App permission — not by telemetry. Confirmed on `main`:
+  the run's **Summary** tab shows the "TypeScript Unit Test Summary" table, and
+  the final step's log contains a `TS_UNIT_TESTS_SUMMARY: {...}` line.
+- [Issue #636](https://github.com/kubestellar/console-marketplace/issues/636) is
+  closed (both sides confirmed). Do not re-attempt either fix or re-open it.
 
 ## Verifying Recovery
 
