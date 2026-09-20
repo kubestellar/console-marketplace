@@ -1,0 +1,28 @@
+name: Unit Tests
+
+# This workflow file was deleted when unit test coverage was split into
+# python-unit-tests.yml and ts-unit-tests.yml. GitHub keeps a registered
+# workflow visible (Actions sidebar + badge) until it records a fresh run
+# or is explicitly disabled via the API. Because this repo's CI proxy
+# tokens do not carry the `actions: write` scope needed to disable the
+# workflow directly (see kubestellar/console-marketplace#766), this
+# minimal no-op step is restored solely to produce a passing run and
+# clear the stale "failing" badge left over from 2026-05-30. All real
+# unit test coverage lives in python-unit-tests.yml and ts-unit-tests.yml.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  noop:
+    name: Retired (see python-unit-tests.yml / ts-unit-tests.yml)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: No-op
+        run: |
+          echo "This workflow has been retired."
+          echo "Unit test coverage now lives in python-unit-tests.yml and ts-unit-tests.yml."
