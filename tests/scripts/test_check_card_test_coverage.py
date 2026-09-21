@@ -1,9 +1,11 @@
 """Tests for scripts/check-card-test-coverage.sh.
 
 The script scans a git diff between HEAD and a base ref for newly added
-`web/src/components/cards/<name>/index.tsx` files and reports any that
-lack a colocated or `__tests__/`-based test file. It is informational
-(always exits 0) and writes a markdown report to /tmp.
+`web/src/components/cards/<name>/index.tsx` files, as well as newly added
+per-file helpers (e.g. `parse.ts`, `ItemRow.tsx`) inside card directories,
+and reports any that lack a colocated or `__tests__/`-based direct test
+file. It is informational (always exits 0) and writes a markdown report
+to /tmp.
 
 These tests build a self-contained git repository per case, drop the
 script into `scripts/`, run it, and assert on the stdout `gap_count=N`
@@ -208,15 +210,18 @@ class TestCheckCardTestCoverage(unittest.TestCase):
 
     # --- boundary cases -----------------------------------------------------
 
-    def test_ignores_non_index_tsx_additions(self) -> None:
-        # A helper file in a cards directory is not the entrypoint; the
-        # script only cares about newly added `index.tsx` files.
+    def test_flags_non_index_tsx_additions(self) -> None:
+        # A per-file helper added to a cards directory (not just the
+        # `index.tsx` entrypoint) is checked for its own direct test file;
+        # it is flagged when no `helper.test.*` exists alongside it.
         self.harness.add_head_files({
             "web/src/components/cards/existing/helper.tsx": INDEX_TSX,
         })
         result = self.harness.run_script(report_path=str(self.report))
         self.assertEqual(result.returncode, 0)
-        self.assertIn("gap_count=0", result.stdout)
+        self.assertIn("gap_count=1", result.stdout)
+        body = self.report.read_text()
+        self.assertIn("web/src/components/cards/existing/helper.tsx", body)
 
     def test_ignores_index_tsx_outside_cards_dir(self) -> None:
         self.harness.add_head_files({
