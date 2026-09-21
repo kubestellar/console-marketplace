@@ -1,3 +1,5 @@
+import { useMemo, useRef, useState } from 'react'
+
 interface CardDataFilter {
   searchFields?: string[]
   clusterField?: string
@@ -17,6 +19,7 @@ interface CardDataOptions {
 }
 
 const DEFAULT_ITEMS_PER_PAGE = 5
+const DEFAULT_CLUSTER_FIELD = 'cluster'
 
 function resolveItemsPerPage(defaultLimit?: number | 'unlimited') {
   if (defaultLimit === 'unlimited') {
@@ -30,71 +33,197 @@ function resolveItemsPerPage(defaultLimit?: number | 'unlimited') {
   return DEFAULT_ITEMS_PER_PAGE
 }
 
+function getField(item: unknown, field: string): unknown {
+  if (item !== null && typeof item === 'object' && field in (item as Record<string, unknown>)) {
+    return (item as Record<string, unknown>)[field]
+  }
+  return undefined
+}
+
+function matchesSearch(item: unknown, query: string, searchFields?: string[]): boolean {
+  const needle = query.trim().toLowerCase()
+  if (!needle) {
+    return true
+  }
+
+  const fields =
+    searchFields && searchFields.length > 0
+      ? searchFields
+      : item !== null && typeof item === 'object'
+        ? Object.keys(item as Record<string, unknown>)
+        : []
+
+  return fields.some(field => {
+    const value = getField(item, field)
+    return value != null && String(value).toLowerCase().includes(needle)
+  })
+}
+
+function defaultComparator(a: unknown, b: unknown): number {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a - b
+  }
+  return String(a ?? '').localeCompare(String(b ?? ''))
+}
+
 /**
- * PLACEHOLDER — non-functional stub.
+ * Shared search / sort / pagination / cluster-filter primitive used by card
+ * components. `items` is expected to already be filtered by the global
+ * cluster selector (see `useClusterFilteredRows`) — this hook applies the
+ * card-local search text, card-local cluster filter, sort, and pagination on
+ * top of that.
  *
- * `useCardData` currently returns the shape of a full search/sort/pagination
- * hook, but every setter is a no-op and `filters.search` is a hard-coded empty
- * string. The pagination shape reflects `defaultLimit` but there is no way to
- * change page, page size, sort field, sort direction, search text, or cluster
- * filter state at runtime.
- *
- * Card components that render `<CardSearchInput value={filters.search}
- * onChange={filters.setSearch} />` therefore ship a controlled input pinned to
- * `''` — typing does nothing. `<CardPaginationFooter />` renders an empty
- * `<div>` for the same reason.
- *
- * Do not build new cards against these no-op fields expecting them to work.
- * The real implementation is tracked in
- * https://github.com/kubestellar/console-marketplace/issues/778 — until it
- * lands, cards that need working search/pagination should manage that state
- * locally with `useState` instead of destructuring these fields.
- *
- * The unit tests in `cardHooks.test.ts` codify the stub behaviour (asserting
- * `filters.search === ''` and that `setSearch()` does not throw) and must be
- * replaced when the real hook lands.
+ * Cluster filtering reads `opts.filter.clusterField` (defaults to
+ * `'cluster'`) off each item. Search reads `opts.filter.searchFields`
+ * (defaults to every own-enumerable key of the item) and matches
+ * case-insensitively. Sorting uses `opts.sort.comparators[sortBy]` when
+ * provided, otherwise falls back to a locale/number comparator on the
+ * `sortBy` field.
  */
-export function useCardData<T, _SortKey = string>(items: T[], opts?: CardDataOptions) {
-  const itemsPerPage = resolveItemsPerPage(opts?.defaultLimit)
-  const pageItems = itemsPerPage === 'unlimited' ? items : items.slice(0, itemsPerPage as number)
+export function useCardData<T, SortKey extends string = string>(
+  items: T[],
+  opts?: CardDataOptions,
+) {
+  const filterOpts = opts?.filter
+  const sortOpts = opts?.sort
+  const clusterField = filterOpts?.clusterField ?? DEFAULT_CLUSTER_FIELD
+
+  const [search, setSearchState] = useState('')
+  const [localClusterFilter, setLocalClusterFilter] = useState<string[]>([])
+  const [showClusterFilter, setShowClusterFilter] = useState(false)
+  const [sortBy, setSortByState] = useState<SortKey>(
+    (sortOpts?.defaultField as SortKey | undefined) ?? ('status' as SortKey),
+  )
+  const [sortDirection, setSortDirectionState] = useState<'asc' | 'desc'>(
+    sortOpts?.defaultDirection ?? 'asc',
+  )
+  const [itemsPerPage, setItemsPerPageState] = useState<number | 'unlimited'>(
+    resolveItemsPerPage(opts?.defaultLimit),
+  )
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const clusterFilterRef = useRef<HTMLDivElement | null>(null)
+
+  const availableClusters = useMemo(() => {
+    const seen = new Set<string>()
+    for (const item of items) {
+      const value = getField(item, clusterField)
+      if (typeof value === 'string' && value) {
+        seen.add(value)
+      }
+    }
+    return Array.from(seen).sort()
+  }, [items, clusterField])
+
+  const clusterFiltered = useMemo(() => {
+    if (localClusterFilter.length === 0) {
+      return items
+    }
+    return items.filter(item => {
+      const value = getField(item, clusterField)
+      return typeof value === 'string' && localClusterFilter.includes(value)
+    })
+  }, [items, localClusterFilter, clusterField])
+
+  const searched = useMemo(
+    () => clusterFiltered.filter(item => matchesSearch(item, search, filterOpts?.searchFields)),
+    [clusterFiltered, search, filterOpts?.searchFields],
+  )
+
+  const sorted = useMemo(() => {
+    const comparator = sortOpts?.comparators?.[sortBy]
+    return [...searched].sort((a, b) => {
+      const fieldA = getField(a, sortBy)
+      const fieldB = getField(b, sortBy)
+      const result = comparator ? comparator(fieldA, fieldB) : defaultComparator(fieldA, fieldB)
+      return sortDirection === 'desc' ? -result : result
+    })
+  }, [searched, sortBy, sortDirection, sortOpts?.comparators])
+
+  const totalItems = sorted.length
+  const totalPages =
+    itemsPerPage === 'unlimited'
+      ? totalItems > 0
+        ? 1
+        : 0
+      : Math.ceil(totalItems / itemsPerPage)
+  // Clamp without an effect: if search/filter/sort shrank the result set out
+  // from under a stale `currentPage`, render the closest valid page instead
+  // of an out-of-range slice.
+  const safeCurrentPage = totalPages === 0 ? 1 : Math.min(Math.max(currentPage, 1), totalPages)
+
+  const pageItems = useMemo(() => {
+    if (itemsPerPage === 'unlimited') {
+      return sorted
+    }
+    const start = (safeCurrentPage - 1) * itemsPerPage
+    return sorted.slice(start, start + itemsPerPage)
+  }, [sorted, safeCurrentPage, itemsPerPage])
+
+  const needsPagination = itemsPerPage !== 'unlimited' && totalItems > itemsPerPage
+
+  function goToPage(page: number) {
+    setCurrentPage(Math.min(Math.max(page, 1), Math.max(totalPages, 1)))
+  }
+
+  function setItemsPerPage(next: number | 'unlimited') {
+    setItemsPerPageState(next)
+    setCurrentPage(1)
+  }
+
+  function setSearch(value: string) {
+    setSearchState(value)
+    setCurrentPage(1)
+  }
+
+  function toggleClusterFilter(cluster: string) {
+    setLocalClusterFilter(prev =>
+      prev.includes(cluster) ? prev.filter(c => c !== cluster) : [...prev, cluster],
+    )
+    setCurrentPage(1)
+  }
+
+  function clearClusterFilter() {
+    setLocalClusterFilter([])
+    setCurrentPage(1)
+  }
+
+  function setSortBy(field: SortKey) {
+    setSortByState(field)
+  }
+
+  function setSortDirection(direction: 'asc' | 'desc') {
+    setSortDirectionState(direction)
+  }
 
   return {
     items: pageItems,
-    totalItems: items.length,
-    currentPage: 1,
-    totalPages: itemsPerPage === 'unlimited' ? 1 : Math.ceil(items.length / (itemsPerPage as number)),
+    totalItems,
+    currentPage: safeCurrentPage,
+    totalPages,
     itemsPerPage,
-    // STUB: no-op — see JSDoc above and issue #778.
-    setItemsPerPage: () => {},
-    // STUB: no-op — see JSDoc above and issue #778.
-    goToPage: () => {},
-    needsPagination: itemsPerPage !== 'unlimited' && items.length > (itemsPerPage as number),
+    setItemsPerPage,
+    goToPage,
+    needsPagination,
     filters: {
-      // STUB: always '' — cards rendering CardSearchInput against this get a
-      // controlled input that ignores keystrokes. See issue #778.
-      search: '',
-      // STUB: no-op — see issue #778.
-      setSearch: () => {},
-      localClusterFilter: [] as string[],
-      // STUB: no-op — see issue #778.
-      toggleClusterFilter: () => {},
-      // STUB: no-op — see issue #778.
-      clearClusterFilter: () => {},
-      availableClusters: [] as string[],
-      showClusterFilter: false,
-      // STUB: no-op — see issue #778.
-      setShowClusterFilter: () => {},
-      clusterFilterRef: { current: null } as { current: null },
+      search,
+      setSearch,
+      localClusterFilter,
+      toggleClusterFilter,
+      clearClusterFilter,
+      availableClusters,
+      showClusterFilter,
+      setShowClusterFilter,
+      clusterFilterRef,
     },
     sorting: {
-      sortBy: opts?.sort?.defaultField ?? 'status',
-      // STUB: no-op — see issue #778.
-      setSortBy: () => {},
-      sortDirection: opts?.sort?.defaultDirection ?? 'asc',
-      // STUB: no-op — see issue #778.
-      setSortDirection: () => {},
+      sortBy,
+      setSortBy,
+      sortDirection,
+      setSortDirection,
     },
-    containerRef: { current: null } as { current: null },
+    containerRef,
     containerStyle: {},
   }
 }

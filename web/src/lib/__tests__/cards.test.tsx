@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, renderHook, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import {
@@ -45,7 +45,14 @@ describe('lib/cards', () => {
           <CardControlsRow>
             <span>install actions</span>
           </CardControlsRow>
-          <CardPaginationFooter />
+          <CardPaginationFooter
+            currentPage={1}
+            totalPages={1}
+            totalItems={0}
+            itemsPerPage={DEFAULT_PAGE_SIZE}
+            onPageChange={() => {}}
+            needsPagination={false}
+          />
           <CardAIActions />
         </>,
       )
@@ -64,53 +71,55 @@ describe('lib/cards', () => {
         { name: 'gpu/ops?*' },
       ]
 
-      const result = useCardData(items, { defaultLimit: CUSTOM_PAGE_SIZE })
+      const { result } = renderHook(() => useCardData(items, { defaultLimit: CUSTOM_PAGE_SIZE }))
 
-      expect(result.items).toStrictEqual(items.slice(0, CUSTOM_PAGE_SIZE))
-      expect(result.totalItems).toBe(TOTAL_ITEMS)
-      expect(result.totalPages).toBe(SECOND_PAGE_COUNT)
-      expect(result.itemsPerPage).toBe(CUSTOM_PAGE_SIZE)
-      expect(result.needsPagination).toBe(true)
+      expect(result.current.items).toStrictEqual(items.slice(0, CUSTOM_PAGE_SIZE))
+      expect(result.current.totalItems).toBe(TOTAL_ITEMS)
+      expect(result.current.totalPages).toBe(SECOND_PAGE_COUNT)
+      expect(result.current.itemsPerPage).toBe(CUSTOM_PAGE_SIZE)
+      expect(result.current.needsPagination).toBe(true)
     })
 
     it('returns all items when pagination is disabled explicitly', () => {
       const items = [{ name: 'open-cluster-management' }, { name: 'kyverno' }]
 
-      const result = useCardData(items, { defaultLimit: 'unlimited' })
+      const { result } = renderHook(() => useCardData(items, { defaultLimit: 'unlimited' }))
 
-      expect(result.items).toStrictEqual(items)
-      expect(result.totalPages).toBe(1)
-      expect(result.itemsPerPage).toBe('unlimited')
-      expect(result.needsPagination).toBe(false)
+      expect(result.current.items).toStrictEqual(items)
+      expect(result.current.totalPages).toBe(1)
+      expect(result.current.itemsPerPage).toBe('unlimited')
+      expect(result.current.needsPagination).toBe(false)
     })
 
     it('falls back to the default page size for malformed numeric limits', () => {
       const items = Array.from({ length: PAGED_ITEM_COUNT }, (_, index) => ({ name: `card-${index}` }))
 
-      const zeroLimit = useCardData(items, { defaultLimit: 0 })
-      const negativeLimit = useCardData(items, { defaultLimit: -3 })
+      const { result: zeroLimit } = renderHook(() => useCardData(items, { defaultLimit: 0 }))
+      const { result: negativeLimit } = renderHook(() => useCardData(items, { defaultLimit: -3 }))
 
-      expect(zeroLimit.itemsPerPage).toBe(DEFAULT_PAGE_SIZE)
-      expect(zeroLimit.items).toHaveLength(DEFAULT_PAGE_SIZE)
-      expect(zeroLimit.totalPages).toBe(SECOND_PAGE_COUNT)
-      expect(negativeLimit.itemsPerPage).toBe(DEFAULT_PAGE_SIZE)
-      expect(negativeLimit.items).toHaveLength(DEFAULT_PAGE_SIZE)
-      expect(negativeLimit.totalPages).toBe(SECOND_PAGE_COUNT)
+      expect(zeroLimit.current.itemsPerPage).toBe(DEFAULT_PAGE_SIZE)
+      expect(zeroLimit.current.items).toHaveLength(DEFAULT_PAGE_SIZE)
+      expect(zeroLimit.current.totalPages).toBe(SECOND_PAGE_COUNT)
+      expect(negativeLimit.current.itemsPerPage).toBe(DEFAULT_PAGE_SIZE)
+      expect(negativeLimit.current.items).toHaveLength(DEFAULT_PAGE_SIZE)
+      expect(negativeLimit.current.totalPages).toBe(SECOND_PAGE_COUNT)
     })
 
     it('honors custom sort defaults while keeping filter state initialized', () => {
-      const result = useCardData([], {
-        sort: {
-          defaultField: 'name',
-          defaultDirection: 'desc',
-        },
-      })
+      const { result } = renderHook(() =>
+        useCardData([], {
+          sort: {
+            defaultField: 'name',
+            defaultDirection: 'desc',
+          },
+        }),
+      )
 
-      expect(result.sorting.sortBy).toBe('name')
-      expect(result.sorting.sortDirection).toBe('desc')
-      expect(result.filters.search).toBe('')
-      expect(result.filters.availableClusters).toStrictEqual([])
-      expect(result.filters.clusterFilterRef).toEqual({ current: null })
+      expect(result.current.sorting.sortBy).toBe('name')
+      expect(result.current.sorting.sortDirection).toBe('desc')
+      expect(result.current.filters.search).toBe('')
+      expect(result.current.filters.availableClusters).toStrictEqual([])
+      expect(result.current.filters.clusterFilterRef).toEqual({ current: null })
     })
   })
 })

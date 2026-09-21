@@ -1,3 +1,4 @@
+import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { useCardData } from '../../lib/cards/cardHooks'
@@ -14,46 +15,48 @@ describe('useCardData', () => {
       { name: 'kyverno', cluster: 'edge-west' },
     ]
 
-    const result = useCardData(items)
+    const { result } = renderHook(() => useCardData(items))
 
-    expect(result.items).toEqual(items)
-    expect(result.totalItems).toBe(2)
-    expect(result.currentPage).toBe(1)
-    expect(result.totalPages).toBe(1)
-    expect(result.itemsPerPage).toBe(5)
-    expect(result.needsPagination).toBe(false)
-    expect(result.filters).toMatchObject({
+    expect(result.current.items).toEqual(items)
+    expect(result.current.totalItems).toBe(2)
+    expect(result.current.currentPage).toBe(1)
+    expect(result.current.totalPages).toBe(1)
+    expect(result.current.itemsPerPage).toBe(5)
+    expect(result.current.needsPagination).toBe(false)
+    expect(result.current.filters).toMatchObject({
       search: '',
       localClusterFilter: [],
-      availableClusters: [],
+      availableClusters: ['edge-west', 'hub-east'],
       showClusterFilter: false,
     })
-    expect(result.filters.clusterFilterRef).toEqual({ current: null })
-    expect(result.sorting).toMatchObject({
+    expect(result.current.filters.clusterFilterRef).toEqual({ current: null })
+    expect(result.current.sorting).toMatchObject({
       sortBy: 'status',
       sortDirection: 'asc',
     })
-    expect(result.containerRef).toEqual({ current: null })
-    expect(result.containerStyle).toEqual({})
+    expect(result.current.containerRef).toEqual({ current: null })
+    expect(result.current.containerStyle).toEqual({})
   })
 
-  it('exposes no-op callbacks that are safe to invoke', () => {
-    const result = useCardData<TestItem>([])
+  it('exposes callbacks that are safe to invoke and update state', () => {
+    const { result } = renderHook(() => useCardData<TestItem>([]))
 
     expect(() => {
-      result.setItemsPerPage()
-      result.goToPage()
-      result.filters.setSearch()
-      result.filters.toggleClusterFilter()
-      result.filters.clearClusterFilter()
-      result.filters.setShowClusterFilter()
-      result.sorting.setSortBy()
-      result.sorting.setSortDirection()
+      act(() => {
+        result.current.setItemsPerPage(5)
+        result.current.goToPage(1)
+        result.current.filters.setSearch('')
+        result.current.filters.toggleClusterFilter('hub-east')
+        result.current.filters.clearClusterFilter()
+        result.current.filters.setShowClusterFilter(false)
+        result.current.sorting.setSortBy('status')
+        result.current.sorting.setSortDirection('asc')
+      })
     }).not.toThrow()
 
-    expect(result.totalItems).toBe(0)
-    expect(result.filters.search).toBe('')
-    expect(result.sorting.sortBy).toBe('status')
-    expect(result.sorting.sortDirection).toBe('asc')
+    expect(result.current.totalItems).toBe(0)
+    expect(result.current.filters.search).toBe('')
+    expect(result.current.sorting.sortBy).toBe('status')
+    expect(result.current.sorting.sortDirection).toBe('asc')
   })
 })
