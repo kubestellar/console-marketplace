@@ -134,9 +134,9 @@ export function useCardData<T, SortKey extends string = string>(
   const sorted = useMemo(() => {
     const comparator = sortOpts?.comparators?.[sortBy]
     return [...searched].sort((a, b) => {
-      const result = comparator
-        ? comparator(a, b)
-        : defaultComparator(getField(a, sortBy), getField(b, sortBy))
+      const fieldA = getField(a, sortBy)
+      const fieldB = getField(b, sortBy)
+      const result = comparator ? comparator(fieldA, fieldB) : defaultComparator(fieldA, fieldB)
       return sortDirection === 'desc' ? -result : result
     })
   }, [searched, sortBy, sortDirection, sortOpts?.comparators])
