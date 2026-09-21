@@ -2,7 +2,9 @@
 # scripts/check-card-test-coverage.sh
 #
 # Detects newly added card component directories in web/src/components/cards/
-# that have no corresponding test file.
+# that have no corresponding test file, and newly added per-file helpers
+# (e.g. parse.ts, fetch.ts, ItemRow.tsx) inside existing card directories
+# that have no direct sibling test file of their own.
 #
 # Usage:
 #   ./scripts/check-card-test-coverage.sh            # uses origin/main as base
@@ -45,6 +47,16 @@ GAP_COUNT=0
 CHANGED_CARD_COUNT=0
 GAPS=""
 
+# Helper: check if a direct test file exists for a specific source file
+# (co-located <base>.test.* or __tests__/<base>.test.*), as opposed to
+# has_test() above which only checks for *any* test file in the card dir.
+has_direct_test() {
+  local card_dir="$1" base="$2"
+  [ -n "$(find "${card_dir}" -maxdepth 1 -name "${base}.test.*" 2>/dev/null | head -1)" ] && return 0
+  [ -n "$(find "${card_dir}/__tests__" -maxdepth 1 -name "${base}.test.*" 2>/dev/null | head -1)" ] && return 0
+  return 1
+}
+
 # Find new index.tsx files in cards subdirectories
 while IFS= read -r f; do
   # Match: web/src/components/cards/<card-dir>/index.tsx
@@ -59,6 +71,24 @@ while IFS= read -r f; do
   fi
 done <<< "$CHANGED"
 
+# Find newly added per-file helpers (non-index, non-test, non-demoData)
+# inside card directories that have no direct sibling test of their own.
+while IFS= read -r f; do
+  # Match: web/src/components/cards/<card-dir>/<base>.(ts|tsx)
+  if [[ "$f" =~ ^web/src/components/cards/([^/]+)/([^/]+)\.(ts|tsx)$ ]]; then
+    card_name="${BASH_REMATCH[1]}"
+    base="${BASH_REMATCH[2]}"
+    card_dir="web/src/components/cards/${card_name}"
+    case "$base" in
+      index|demoData|*.test|*.spec) continue ;;
+    esac
+    if ! has_direct_test "$card_dir" "$base"; then
+      GAP_COUNT=$((GAP_COUNT + 1))
+      GAPS="${GAPS}\n| \`${f}\` | No direct \`${base}.test.*\` |"
+    fi
+  fi
+done <<< "$CHANGED"
+
 # Write report
 {
   echo "## 🧪 Card Test Coverage Gate"
@@ -66,13 +96,13 @@ done <<< "$CHANGED"
   if [ "$GAP_COUNT" -eq 0 ]; then
     echo "✅ All new card components have at least one test file."
   else
-    echo "⚠️ **${GAP_COUNT} new card component(s) added without a test file:**"
+    echo "⚠️ **${GAP_COUNT} new card component(s)/file(s) added without a direct test file:**"
     echo ""
-    echo "| Card Directory | Issue |"
+    echo "| Card Directory / File | Issue |"
     echo "|---|---|"
     printf "%b\n" "$GAPS"
     echo ""
-    echo "**Please add a test file** (e.g. \`<CardName>.test.tsx\` or \`__tests__/<CardName>.test.tsx\`) before merging."
+    echo "**Please add a direct test file** (e.g. \`<Name>.test.tsx\` or \`__tests__/<Name>.test.tsx\`) before merging."
     echo ""
     echo "_This check is informational — it does not block merge._"
   fi
