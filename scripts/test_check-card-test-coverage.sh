@@ -66,6 +66,26 @@ add_card() {
   esac
 }
 
+# add_helper CARD_DIR NAME EXT [WITH_TEST]
+# adds a per-file helper (e.g. parse.ts, ItemRow.tsx) inside an existing card
+# directory. WITH_TEST mirrors add_card's modes.
+add_helper() {
+  local dir="$1" card="$2" name="$3" ext="$4" mode="${5:-none}"
+  local card_dir="$dir/web/src/components/cards/$card"
+  mkdir -p "$card_dir"
+  echo "export const ${name} = 1" > "$card_dir/${name}.${ext}"
+  case "$mode" in
+    tests)
+      mkdir -p "$card_dir/__tests__"
+      echo "// test" > "$card_dir/__tests__/${name}.test.${ext}"
+      ;;
+    colocated)
+      echo "// test" > "$card_dir/${name}.test.${ext}"
+      ;;
+    none) : ;;
+  esac
+}
+
 commit_head() {
   local dir="$1" msg="$2"
   (
@@ -147,7 +167,7 @@ run_script "$d" "main"
 assert_contains "4a gap=1" "gap_count=1" "$OUT"
 assert_contains "4b changed=1" '"changed_card_count":1' "$OUT"
 assert_contains "4c gaps=1" '"gap_count":1' "$OUT"
-assert_contains "4d warn banner" "1 new card component(s) added without a test file" "$OUT"
+assert_contains "4d warn banner" "1 new card component(s)/file(s) added without a direct test file" "$OUT"
 assert_contains "4e cites path" "web/src/components/cards/MissingCard/" "$OUT"
 [ "$RC" -eq 0 ] && record_pass "4f rc=0 informational" || record_fail "4f rc" "rc=$RC (must be 0)"
 rm -rf "$d"
@@ -163,7 +183,7 @@ commit_head "$d" "mix"
 run_script "$d" "main"
 assert_contains "5a changed=2" '"changed_card_count":2' "$OUT"
 assert_contains "5b gaps=1" '"gap_count":1' "$OUT"
-assert_contains "5c warn 1 card" "1 new card component(s) added without a test file" "$OUT"
+assert_contains "5c warn 1 card" "1 new card component(s)/file(s) added without a direct test file" "$OUT"
 assert_contains "5d cites BadOne" "web/src/components/cards/BadOne/" "$OUT"
 assert_not_contains "5e no GoodOne row" "web/src/components/cards/GoodOne/ |" "$OUT"
 rm -rf "$d"
@@ -190,6 +210,44 @@ if [ -s /tmp/card-test-coverage-gaps.md ] && grep -qF "ArtifactCard" /tmp/card-t
 else
   record_fail "7a report file" "missing or empty"
 fi
+rm -rf "$d"
+
+# ---- case 8: new helper file without a direct test → flagged ----
+echo "case 8: new helper without direct test"
+d="$(make_case)"
+add_helper "$d" "openyurt_status" "parse" "ts" none
+commit_head "$d" "add parse.ts"
+run_script "$d" "main"
+assert_contains "8a gap=1" "gap_count=1" "$OUT"
+assert_contains "8b cites file" "web/src/components/cards/openyurt_status/parse.ts" "$OUT"
+assert_contains "8c no-direct-test note" "No direct \`parse.test.*\`" "$OUT"
+rm -rf "$d"
+
+# ---- case 9: new helper file with a colocated direct test → passes ----
+echo "case 9: new helper with colocated direct test"
+d="$(make_case)"
+add_helper "$d" "openyurt_status" "parse" "ts" colocated
+commit_head "$d" "add parse.ts with test"
+run_script "$d" "main"
+assert_contains "9a gap=0" "gap_count=0" "$OUT"
+rm -rf "$d"
+
+# ---- case 10: new helper file with a __tests__/ direct test → passes ----
+echo "case 10: new helper with __tests__ direct test"
+d="$(make_case)"
+add_helper "$d" "kubeflow_status" "ItemRow" "tsx" tests
+commit_head "$d" "add ItemRow.tsx with test"
+run_script "$d" "main"
+assert_contains "10a gap=0" "gap_count=0" "$OUT"
+rm -rf "$d"
+
+# ---- case 11: new demoData.ts is skipped (not treated as an untested helper) ----
+echo "case 11: demoData.ts skipped"
+d="$(make_case)"
+add_helper "$d" "openyurt_status" "demoData" "ts" none
+commit_head "$d" "add demoData.ts"
+run_script "$d" "main"
+assert_contains "11a gap=0" "gap_count=0" "$OUT"
 rm -rf "$d"
 
 echo
