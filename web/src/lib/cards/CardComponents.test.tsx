@@ -95,9 +95,52 @@ describe('CardControlsRow', () => {
 })
 
 describe('CardPaginationFooter', () => {
-  it('renders a container with the card-pagination testid', () => {
-    render(<CardPaginationFooter />)
-    expect(screen.getByTestId('card-pagination')).toBeInTheDocument()
+  const baseProps = {
+    currentPage: 2,
+    totalPages: 3,
+    totalItems: 13,
+    itemsPerPage: 5,
+    onPageChange: () => {},
+    needsPagination: true,
+  }
+
+  it('renders an empty container with the card-pagination testid when pagination is not needed', () => {
+    render(<CardPaginationFooter {...baseProps} needsPagination={false} />)
+    const el = screen.getByTestId('card-pagination')
+    expect(el).toBeInTheDocument()
+    expect(el).toBeEmptyDOMElement()
+  })
+
+  it('renders the item range and page count when pagination is needed', () => {
+    render(<CardPaginationFooter {...baseProps} />)
+    expect(screen.getByText('6-10 of 13')).toBeInTheDocument()
+    expect(screen.getByText('2 / 3')).toBeInTheDocument()
+  })
+
+  it('invokes onPageChange with the previous page when the previous button is clicked', () => {
+    const onPageChange = vi.fn()
+    render(<CardPaginationFooter {...baseProps} onPageChange={onPageChange} />)
+
+    fireEvent.click(screen.getByLabelText('Previous page'))
+    expect(onPageChange).toHaveBeenCalledWith(1)
+  })
+
+  it('invokes onPageChange with the next page when the next button is clicked', () => {
+    const onPageChange = vi.fn()
+    render(<CardPaginationFooter {...baseProps} onPageChange={onPageChange} />)
+
+    fireEvent.click(screen.getByLabelText('Next page'))
+    expect(onPageChange).toHaveBeenCalledWith(3)
+  })
+
+  it('disables the previous button on the first page', () => {
+    render(<CardPaginationFooter {...baseProps} currentPage={1} />)
+    expect(screen.getByLabelText('Previous page')).toBeDisabled()
+  })
+
+  it('disables the next button on the last page', () => {
+    render(<CardPaginationFooter {...baseProps} currentPage={3} />)
+    expect(screen.getByLabelText('Next page')).toBeDisabled()
   })
 })
 
