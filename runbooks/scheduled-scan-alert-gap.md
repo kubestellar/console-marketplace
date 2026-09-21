@@ -190,3 +190,9 @@ cadence instead of hours, so a long-running silent-alert-gap incident like the o
 consecutive failed runs as of this writing) gets the same postmortem treatment a
 content incident of comparable duration would receive, rather than being tracked only
 in an ever-growing Incident Report issue with no closing analysis.
+>
+> [#712](https://github.com/kubestellar/console-marketplace/issues/712)'s outage
+> (2026-08-31 to 2026-09-17, ~17 days, 81+ consecutive failed runs) cleared this
+> threshold well before it was closed as resolved, but no postmortem was filed at
+> closing time. That gap is now closed:
+> [`postmortems/2026-09-17-scorecard-gcr-billing-gate-outage.md`](./postmortems/2026-09-17-scorecard-gcr-billing-gate-outage.md).

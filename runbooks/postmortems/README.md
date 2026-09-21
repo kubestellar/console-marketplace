@@ -8,5 +8,8 @@ postmortem from scratch or from an ad-hoc format. See
 [`../registry-incident-response.md#postmortem-template`](../registry-incident-response.md#postmortem-template)
 for when a postmortem is required.
 
-This directory is currently empty because no incident has reached the postmortem stage
-yet.
+## Postmortems
+
+| Date | Incident | Severity |
+|------|----------|----------|
+| 2026-09-17 | [`scorecard.yml` silent failure — upstream GCR billing gate](./2026-09-17-scorecard-gcr-billing-gate-outage.md) | P3 |
