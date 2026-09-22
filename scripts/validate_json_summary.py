@@ -9,10 +9,18 @@ This mirrors the gap already closed for `scripts/validate-marketplace.py`
 (`MARKETPLACE_QUALITY_SUMMARY:` line) and flagged for `fuzz.yml` in
 runbooks/fuzz-yml-ci-summary-gap.md. See tracking issue #621.
 
-This module re-implements the same three checks the workflow already runs
+This module runs the same three checks the workflow already runs
 (registry.json parses, dashboards/*/dashboard.json files parse and match the
 `kc-dashboard-v1` schema, and registry entries have matching asset files) as
 a standalone, unit-testable script, and emits:
+
+The underlying schema/consistency rules (dashboard `format`/`name`/`cards`
+fields, per-card `card_type`/`position`, per-type expected registry file
+paths, and the `downloadUrl` "/main/..." regex) are shared with
+`validate_marketplace_lib.checks_schema` -- the canonical implementation used
+by `validate-marketplace.py` -- instead of being re-derived here a third time
+(see issue #789). This script keeps its own message wording and
+`ValidationResult` shape so its output/tests are unaffected.
 
   - a bounded markdown table (written to $GITHUB_STEP_SUMMARY when set, else
     stdout)
@@ -40,9 +48,22 @@ import argparse
 import glob
 import json
 import os
-import re
 import sys
 from dataclasses import dataclass, field
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Reuse the canonical schema-check logic (issue #789) instead of
+# re-deriving the same `format`/`name`/`cards`/`card_type`/`position` rules,
+# per-type expected-file mapping, and downloadUrl regex a third time. Each
+# call site here keeps its own message wording so existing behavior and
+# tests are unaffected -- only the underlying checks are shared.
+from validate_marketplace_lib.checks_schema import (
+    card_field_issues,
+    dashboard_field_issues,
+    expected_registry_paths,
+    registry_download_url_path,
+)
 
 
 @dataclass
@@ -84,17 +105,20 @@ def _validate_dashboard_files(repo_root: str, result: ValidationResult) -> None:
             result.errors.append(f"{rel}: invalid JSON ({exc})")
             continue
 
-        if data.get("format") != "kc-dashboard-v1":
+        issues = dashboard_field_issues(data)
+        if not issues["format_ok"]:
             result.errors.append(f"{rel}: missing or wrong 'format' field")
-        if not data.get("name"):
+        if not issues["name_ok"]:
             result.errors.append(f"{rel}: missing 'name' field")
-        if not isinstance(data.get("cards"), list):
+        cards = issues["cards"]
+        if cards is None:
             result.errors.append(f"{rel}: missing or invalid 'cards' array")
             continue
-        for i, card in enumerate(data["cards"]):
-            if not card.get("card_type"):
+        for i, card in enumerate(cards):
+            card_issues = card_field_issues(card)
+            if not card_issues["card_type_ok"]:
                 result.errors.append(f"{rel}: cards[{i}] missing 'card_type'")
-            if not isinstance(card.get("position"), dict):
+            if card_issues["position"] is None:
                 result.errors.append(f"{rel}: cards[{i}] missing 'position'")
 
 
@@ -114,17 +138,7 @@ def _validate_registry_entries(
             result.errors.append(f"duplicate registry id '{item_id}'")
         seen_ids.add(item_id)
 
-        if item_type == "dashboard":
-            expected_paths = [f"dashboards/{item_id}/dashboard.json"]
-        elif item_type == "card-preset":
-            expected_paths = [
-                f"presets/{item_id}.json",
-                f"card-presets/{item_id}.json",
-            ]
-        elif item_type == "theme":
-            expected_paths = [f"themes/{item_id}.json"]
-        else:
-            expected_paths = []
+        expected_paths = expected_registry_paths(item_id, item_type)
 
         if expected_paths and not any(
             os.path.isfile(os.path.join(repo_root, p)) for p in expected_paths
@@ -134,14 +148,12 @@ def _validate_registry_entries(
                 f"in {', '.join(expected_paths)}"
             )
 
-        url = item.get("downloadUrl", "")
-        if url:
-            match = re.search(r"/main/(.+)$", url)
-            if match and not os.path.isfile(os.path.join(repo_root, match.group(1))):
-                result.errors.append(
-                    f"registry entry '{item_id}' downloadUrl path "
-                    f"'{match.group(1)}' does not match any file"
-                )
+        url_path = registry_download_url_path(item.get("downloadUrl", ""))
+        if url_path and not os.path.isfile(os.path.join(repo_root, url_path)):
+            result.errors.append(
+                f"registry entry '{item_id}' downloadUrl path "
+                f"'{url_path}' does not match any file"
+            )
 
 
 def run_validation(repo_root: str) -> ValidationResult:
