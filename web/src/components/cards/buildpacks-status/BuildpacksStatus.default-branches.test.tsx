@@ -25,9 +25,9 @@ vi.mock('../ui/Skeleton', () => mockSkeletonModule('buildpacks-skeleton'))
 
 vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
-vi.mock('../../lib/cards/CardComponents', () => mockCardComponents('buildpacks'))
+vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('buildpacks'))
 
-vi.mock('../../lib/cards/cardHooks', () => ({
+vi.mock('../../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown) => mockUseCardData(items),
 }))
 

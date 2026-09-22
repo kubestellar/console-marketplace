@@ -11,7 +11,7 @@
  *
  *   vi.mock('../ui/Skeleton', () => mockSkeletonModule('coredns-skeleton'))
  *   vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
- *   vi.mock('../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
+ *   vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
  */
 
 /** Shape shared by the `useCardData` mock options across card test suites. */

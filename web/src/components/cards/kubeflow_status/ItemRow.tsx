@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ClusterBadge } from '../ui/ClusterBadge'
-import { CardAIActions } from '../../lib/cards/CardComponents'
+import { CardAIActions } from '../../../lib/cards/CardComponents'
 import type { KubeflowDisplayItem } from './types'
 
 function getStatusIcon(status: string) {

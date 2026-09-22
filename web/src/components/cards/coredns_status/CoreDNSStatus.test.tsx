@@ -18,9 +18,9 @@ vi.mock('../ui/Skeleton', () => mockSkeletonModule('coredns-skeleton'))
 
 vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
-vi.mock('../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
+vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
 
-vi.mock('../../lib/cards/cardHooks', () => ({
+vi.mock('../../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown) => mockUseCardData(items),
 }))
 

@@ -12,8 +12,8 @@ import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import {
   CardPaginationFooter,
-} from '../../lib/cards/CardComponents'
-import { useCardData } from '../../lib/cards/cardHooks'
+} from '../../../lib/cards/CardComponents'
+import { useCardData } from '../../../lib/cards/cardHooks'
 import { useCardLoadingState } from '../CardDataContext'   // required hook #1
 import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
 import { useDemoMode } from '../../../hooks/useDemoMode'    // required hook #2

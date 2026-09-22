@@ -40,13 +40,13 @@ vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
 vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
-vi.mock('../../lib/cards/CardComponents', () => ({
+vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('kubeflow'),
   CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,
 }))
 
-vi.mock('../../lib/cards/cardHooks', () => ({
+vi.mock('../../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown) => mockUseCardData(items),
 }))
 
