@@ -17,7 +17,7 @@ const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 const mockUseKubeflowStatus = vi.fn()
 
-vi.mock('../../hooks/useMCP', () => ({
+vi.mock('../../../hooks/useMCP', () => ({
   useClusters: () => mockUseClusters(),
 }))
 
@@ -81,11 +81,11 @@ vi.mock('../CardDataContext', () => ({
   useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 
-vi.mock('../../hooks/useDemoMode', () => ({
+vi.mock('../../../hooks/useDemoMode', () => ({
   useDemoMode: () => mockUseDemoMode(),
 }))
 
-vi.mock('../../hooks/useGlobalFilters', () => ({
+vi.mock('../../../hooks/useGlobalFilters', () => ({
   useGlobalFilters: () => mockUseGlobalFilters(),
 }))
 

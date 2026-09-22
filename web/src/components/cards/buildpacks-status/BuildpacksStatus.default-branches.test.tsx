@@ -45,11 +45,11 @@ vi.mock('./useBuildpacksStatus', () => ({
   }),
 }))
 
-vi.mock('../../hooks/useDemoMode', () => ({
+vi.mock('../../../hooks/useDemoMode', () => ({
   useDemoMode: () => mockUseDemoMode(),
 }))
 
-vi.mock('../../hooks/useGlobalFilters', () => ({
+vi.mock('../../../hooks/useGlobalFilters', () => ({
   useGlobalFilters: () => mockUseGlobalFilters(),
 }))
 

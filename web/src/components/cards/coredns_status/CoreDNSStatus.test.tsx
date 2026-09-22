@@ -38,11 +38,11 @@ vi.mock('./useCoreDNSStatus', () => ({
   }),
 }))
 
-vi.mock('../../hooks/useDemoMode', () => ({
+vi.mock('../../../hooks/useDemoMode', () => ({
   useDemoMode: () => mockUseDemoMode(),
 }))
 
-vi.mock('../../hooks/useGlobalFilters', () => ({
+vi.mock('../../../hooks/useGlobalFilters', () => ({
   useGlobalFilters: () => mockUseGlobalFilters(),
 }))
 

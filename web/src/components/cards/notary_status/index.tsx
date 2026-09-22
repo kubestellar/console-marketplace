@@ -16,8 +16,8 @@ import {
 import { useCardData } from '../../lib/cards/cardHooks'
 import { useCardLoadingState } from '../CardDataContext'   // required hook #1
 import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
-import { useDemoMode } from '../../hooks/useDemoMode'    // required hook #2
-import { useGlobalFilters } from '../../hooks/useGlobalFilters' // required hook #3
+import { useDemoMode } from '../../../hooks/useDemoMode'    // required hook #2
+import { useGlobalFilters } from '../../../hooks/useGlobalFilters' // required hook #3
 import { useTranslation } from 'react-i18next'           // required hook #4
 import {
   type NotaryDemoData,
