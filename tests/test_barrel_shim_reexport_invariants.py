@@ -149,23 +149,28 @@ class ShimReExportInvariants(unittest.TestCase):
 
     def test_shim_pattern_finds_expected_categories(self):
         """Sanity-check the walker before the resolution loop below
-        relies on it. We expect at least one shim in each of the
-        two known categories (hook re-exports, lib/cards re-exports)
-        so a walker regression that drops one whole family surfaces
+        relies on it. We expect at least one shim in the remaining
+        known category (``web/src/components/lib/cards/`` re-exports)
+        so a walker regression that drops that whole family surfaces
         as a clear failure here.
 
-        A third category (per-card ``CardDataContext.tsx`` re-export
-        shims under ``web/src/components/cards/<card>/``) existed
-        historically but was retired by #736 (2026-09-16), which
-        deleted those one-line shims and inlined
-        ``../CardDataContext`` imports at the card level. The
-        category is intentionally empty on main and is no longer
-        asserted here.
+        Two other categories existed historically and have been
+        retired:
+
+        * Per-card ``CardDataContext.tsx`` re-export shims under
+          ``web/src/components/cards/<card>/`` were retired by #736
+          (2026-09-16), which deleted those one-line shims and
+          inlined ``../CardDataContext`` imports at the card level.
+        * ``web/src/components/hooks/`` re-export shims were retired
+          by #782 (2026-09-22), which deleted the shim directory and
+          rewired the four consumer cards to import ``cardHooks``
+          directly from ``web/src/components/lib/cards/cardHooks``.
+
+        Both retired categories are intentionally empty on main and
+        are no longer asserted here.
         """
         rels = {p for p, _ in self.shims}
-        hooks = [p for p in rels if "/components/hooks/" in p]
         lib_cards = [p for p in rels if "/components/lib/cards/" in p]
-        self.assertGreater(len(hooks), 0, f"no hook shims found in {rels}")
         self.assertGreater(len(lib_cards), 0,
                            f"no lib/cards shims found in {rels}")
 
