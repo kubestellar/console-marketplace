@@ -44,6 +44,47 @@ def check_preset_schema(base, results):
             results.error("preset-schema", f"`{rel}`: missing or empty 'title'")
 
 
+def dashboard_field_issues(data):
+    """Return the shared "is this a valid dashboard document" facts for `data`.
+
+    Single source of truth for the `format`/`name`/`cards` checks that used to
+    be duplicated across `checks_schema.check_dashboard_schema`,
+    `validate_json_summary.py`, and `validate-json.yml` (see issue #789).
+    Returns a dict with keys `format_ok`, `name_ok`, `cards` (the cards list,
+    or None if `cards` is missing/not a list) so each caller can keep its own
+    message wording/severity.
+    """
+    cards = data.get("cards")
+    return {
+        "format_ok": data.get("format") == "kc-dashboard-v1",
+        "name_ok": bool(data.get("name")),
+        "cards": cards if isinstance(cards, list) else None,
+    }
+
+
+def card_field_issues(card):
+    """Return which required per-card fields are missing on `card`.
+
+    Shared by every dashboard-schema check site: `card_type` must be
+    non-empty and `position` must be an object. Returns a dict with
+    `card_type_ok` and `position` (the position dict, or None if missing).
+    """
+    pos = card.get("position")
+    return {
+        "card_type_ok": bool(card.get("card_type")),
+        "position": pos if isinstance(pos, dict) else None,
+    }
+
+
+def grid_overflow(pos):
+    """Return True if position `pos` overflows the 12-column grid."""
+    x = pos.get("x", 0)
+    w = pos.get("w", 0)
+    if isinstance(x, (int, float)) and isinstance(w, (int, float)):
+        return x + w > 12
+    return False
+
+
 def check_dashboard_schema(base, results):
     """Validate dashboard format and grid positions."""
     files = find_json_files(base, ["dashboards/*/dashboard.json"])
@@ -54,24 +95,28 @@ def check_dashboard_schema(base, results):
         if err:
             continue
 
-        if data.get("format") != "kc-dashboard-v1":
+        issues = dashboard_field_issues(data)
+
+        if not issues["format_ok"]:
             results.error("dashboard-schema",
                          f"`{rel}`: format must be 'kc-dashboard-v1', got '{data.get('format')}'")
 
-        if not data.get("name"):
+        if not issues["name_ok"]:
             results.error("dashboard-schema", f"`{rel}`: missing 'name' field")
 
-        cards = data.get("cards")
-        if not isinstance(cards, list):
+        cards = issues["cards"]
+        if cards is None:
             results.error("dashboard-schema", f"`{rel}`: 'cards' must be an array")
             continue
 
         for i, card in enumerate(cards):
-            if not card.get("card_type"):
+            card_issues = card_field_issues(card)
+
+            if not card_issues["card_type_ok"]:
                 results.error("dashboard-schema", f"`{rel}` cards[{i}]: missing 'card_type'")
 
-            pos = card.get("position")
-            if not isinstance(pos, dict):
+            pos = card_issues["position"]
+            if pos is None:
                 results.error("dashboard-schema", f"`{rel}` cards[{i}]: missing 'position'")
                 continue
 
@@ -80,13 +125,11 @@ def check_dashboard_schema(base, results):
                     results.error("dashboard-schema",
                                  f"`{rel}` cards[{i}]: position missing '{key}'")
 
-            x = pos.get("x", 0)
-            w = pos.get("w", 0)
-            if isinstance(x, (int, float)) and isinstance(w, (int, float)):
-                if x + w > 12:
-                    results.error("dashboard-grid",
-                                 f"`{rel}` cards[{i}] ({card.get('card_type', '?')}): "
-                                 f"x({x}) + w({w}) = {x+w} > 12 (grid overflow)")
+            if grid_overflow(pos):
+                results.error("dashboard-grid",
+                             f"`{rel}` cards[{i}] ({card.get('card_type', '?')}): "
+                             f"x({pos.get('x', 0)}) + w({pos.get('w', 0)}) = "
+                             f"{pos.get('x', 0)+pos.get('w', 0)} > 12 (grid overflow)")
 
 
 def check_theme_schema(base, results):
@@ -167,6 +210,38 @@ def get_registry_entries(data):
     return data.get("items", []) + data.get("presets", [])
 
 
+def expected_registry_paths(item_id, item_type):
+    """Return candidate relative file paths a registry entry of `item_type`
+    is expected to have on disk (relative to the marketplace repo root).
+
+    Single source of truth for the per-type path mapping duplicated across
+    `checks_schema.check_registry_consistency`, `validate_json_summary.py`,
+    and `validate-json.yml` (see issue #789).
+    """
+    if item_type == "dashboard":
+        return [os.path.join("dashboards", item_id, "dashboard.json")]
+    if item_type == "card-preset":
+        return [
+            os.path.join("presets", f"{item_id}.json"),
+            os.path.join("card-presets", f"{item_id}.json"),
+        ]
+    if item_type == "theme":
+        return [os.path.join("themes", f"{item_id}.json")]
+    return []
+
+
+def registry_download_url_path(url):
+    """Extract the path after '/main/' from a registry `downloadUrl`, or None.
+
+    Shared regex used by every schema-check site to validate that
+    `downloadUrl` points at a real file in the repo.
+    """
+    if not url:
+        return None
+    m = re.search(r"/main/(.+)$", url)
+    return m.group(1) if m else None
+
+
 def check_registry_consistency(base, results):
     """Validate registry.json entries match actual files."""
     data, err = load_json(os.path.join(base, "registry.json"))
@@ -187,40 +262,29 @@ def check_registry_consistency(base, results):
         seen_ids.add(item_id)
 
         # File existence check based on type
+        expected = expected_registry_paths(item_id, item_type)
         if item_type == "dashboard":
-            expected = os.path.join(base, "dashboards", item_id, "dashboard.json")
-            if not os.path.isfile(expected):
+            if not os.path.isfile(os.path.join(base, expected[0])):
                 results.error("registry",
                              f"Registry entry '{item_id}' (dashboard) has no file at "
                              f"dashboards/{item_id}/dashboard.json")
         elif item_type == "card-preset":
-            # Could be in presets/ or card-presets/
-            candidates = [
-                os.path.join(base, "presets", f"{item_id}.json"),
-                os.path.join(base, "card-presets", f"{item_id}.json"),
-            ]
-            if not any(os.path.isfile(c) for c in candidates):
+            if not any(os.path.isfile(os.path.join(base, c)) for c in expected):
                 results.error("registry",
                              f"Registry entry '{item_id}' (card-preset) has no file in "
                              f"presets/ or card-presets/")
         elif item_type == "theme":
-            expected = os.path.join(base, "themes", f"{item_id}.json")
-            if not os.path.isfile(expected):
+            if not os.path.isfile(os.path.join(base, expected[0])):
                 results.error("registry",
                              f"Registry entry '{item_id}' (theme) has no file at "
                              f"themes/{item_id}.json")
 
         # downloadUrl path check
-        url = item.get("downloadUrl", "")
-        if url:
-            # Extract path after /main/
-            m = re.search(r"/main/(.+)$", url)
-            if m:
-                url_path = m.group(1)
-                if not os.path.isfile(os.path.join(base, url_path)):
-                    results.error("registry",
-                                 f"Registry '{item_id}': downloadUrl path '{url_path}' "
-                                 f"does not match any file")
+        url_path = registry_download_url_path(item.get("downloadUrl", ""))
+        if url_path and not os.path.isfile(os.path.join(base, url_path)):
+            results.error("registry",
+                         f"Registry '{item_id}': downloadUrl path '{url_path}' "
+                         f"does not match any file")
 
     results.ok("registry", f"Checked {len(entries)} registry entries, {len(seen_ids)} unique IDs")
 
