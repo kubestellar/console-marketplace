@@ -18,9 +18,9 @@ vi.mock('../ui/Skeleton', () => mockSkeletonModule('notary-skeleton'))
 
 vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
 
-vi.mock('../../lib/cards/CardComponents', () => mockCardComponents('notary'))
+vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('notary'))
 
-vi.mock('../../lib/cards/cardHooks', () => ({
+vi.mock('../../../lib/cards/cardHooks', () => ({
   useCardData: (rows: unknown) => mockUseCardData(rows),
 }))
 

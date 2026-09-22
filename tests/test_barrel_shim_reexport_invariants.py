@@ -60,6 +60,9 @@ RESOLVE_SUFFIXES = (".ts", ".tsx", "/index.ts", "/index.tsx")
 # (buildpacks-status/CardDataContext.tsx and
 # coredns_status/CardDataContext.tsx) were fixed under
 # kubestellar/console-marketplace#494 and both now resolve.
+# All three historical shim categories have since been retired
+# (#736, #782, #787); ``KNOWN_BROKEN`` and this invariant now
+# serve only as a regression guard on any future reintroduction.
 KNOWN_BROKEN: frozenset[str] = frozenset()
 
 
@@ -141,20 +144,12 @@ class ShimReExportInvariants(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.shims = list(_find_shim_files())
-        assert cls.shims, (
-            f"no barrel-shim files found under {WEB_SRC}. Either the "
-            f"shim pattern regressed, or this test lost sight of its "
-            f"target tree — fail loudly rather than silently pass."
-        )
 
-    def test_shim_pattern_finds_expected_categories(self):
-        """Sanity-check the walker before the resolution loop below
-        relies on it. We expect at least one shim in the remaining
-        known category (``web/src/components/lib/cards/`` re-exports)
-        so a walker regression that drops that whole family surfaces
-        as a clear failure here.
+    def test_no_retired_shim_categories_reappear(self):
+        """Guard against regressions that reintroduce any of the
+        historically retired barrel-shim categories under ``web/src/``.
 
-        Two other categories existed historically and have been
+        Three categories existed historically and have all been
         retired:
 
         * Per-card ``CardDataContext.tsx`` re-export shims under
@@ -164,15 +159,23 @@ class ShimReExportInvariants(unittest.TestCase):
         * ``web/src/components/hooks/`` re-export shims were retired
           by #782 (2026-09-22), which deleted the shim directory and
           rewired the four consumer cards to import ``cardHooks``
-          directly from ``web/src/components/lib/cards/cardHooks``.
+          directly from ``web/src/lib/cards/cardHooks``.
+        * ``web/src/components/lib/cards/`` re-export shims were
+          retired by #787 (2026-09-22), which deleted the shim
+          directory and standardized all six card consumers on the
+          direct ``../../../lib/cards/...`` spelling that
+          ``openkruise_status`` and ``openyurt_status`` already used.
 
-        Both retired categories are intentionally empty on main and
-        are no longer asserted here.
+        A re-added file matching any of these paths is a warning
+        sign that the shim indirection is creeping back in.
         """
         rels = {p for p, _ in self.shims}
-        lib_cards = [p for p in rels if "/components/lib/cards/" in p]
-        self.assertGreater(len(lib_cards), 0,
-                           f"no lib/cards shims found in {rels}")
+        retired_prefixes = (
+            "web/src/components/lib/cards/",
+        )
+        offenders = [p for p in rels if any(p.startswith(pref) for pref in retired_prefixes)]
+        self.assertEqual(offenders, [],
+                         f"retired barrel-shim category reappeared: {offenders}")
 
     def test_every_barrel_shim_resolves_to_a_real_file(self):
         """The core invariant. For every shim NOT listed in
