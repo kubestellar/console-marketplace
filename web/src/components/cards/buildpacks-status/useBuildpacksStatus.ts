@@ -1,4 +1,5 @@
-import { useCache, type UseCacheResult } from '../../../lib/cache'
+import { type UseCacheResult } from '../../../lib/cache'
+import { useDemoOnlyCard } from '../../../lib/cards/useDemoOnlyCard'
 import { BUILDPACKS_DEMO_DATA, type BuildpacksDemoData } from './demoData'
 
 export type BuildpacksStatus = BuildpacksDemoData
@@ -10,22 +11,12 @@ export const EMPTY_BUILDPACKS_DATA: BuildpacksStatus = {
   lastCheckTime: new Date(0).toISOString(),
 }
 
-// No stable backend endpoint exists for this card yet. Returning the empty
-// shape lets useCache select the demo payload without presenting it as live.
-async function fetchBuildpacksStatus(): Promise<BuildpacksStatus> {
-  return EMPTY_BUILDPACKS_DATA
-}
-
 export type UseBuildpacksStatusResult = UseCacheResult<BuildpacksStatus>
 
 export function useBuildpacksStatus(): UseBuildpacksStatusResult {
-  return useCache<BuildpacksStatus>({
+  return useDemoOnlyCard<BuildpacksStatus>({
     key: CACHE_KEY,
-    fetcher: fetchBuildpacksStatus,
     demoData: BUILDPACKS_DEMO_DATA,
-    initialData: EMPTY_BUILDPACKS_DATA,
-    category: 'default',
-    persist: true,
-    demoWhenEmpty: true,
+    emptyData: EMPTY_BUILDPACKS_DATA,
   })
 }
