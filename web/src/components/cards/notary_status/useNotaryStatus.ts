@@ -1,4 +1,5 @@
-import { useCache, type UseCacheResult } from '../../../lib/cache'
+import { type UseCacheResult } from '../../../lib/cache'
+import { useDemoOnlyCard } from '../../../lib/cards/useDemoOnlyCard'
 import { NOTARY_DEMO_DATA, type NotaryDemoData } from './demoData'
 
 export type NotaryStatus = NotaryDemoData
@@ -10,22 +11,12 @@ export const EMPTY_NOTARY_DATA: NotaryStatus = {
   lastCheckTime: new Date(0).toISOString(),
 }
 
-// No stable backend endpoint exists for this card yet. Returning the empty
-// shape lets useCache select the demo payload without presenting it as live.
-async function fetchNotaryStatus(): Promise<NotaryStatus> {
-  return EMPTY_NOTARY_DATA
-}
-
 export type UseNotaryStatusResult = UseCacheResult<NotaryStatus>
 
 export function useNotaryStatus(): UseNotaryStatusResult {
-  return useCache<NotaryStatus>({
+  return useDemoOnlyCard<NotaryStatus>({
     key: CACHE_KEY,
-    fetcher: fetchNotaryStatus,
     demoData: NOTARY_DEMO_DATA,
-    initialData: EMPTY_NOTARY_DATA,
-    category: 'default',
-    persist: true,
-    demoWhenEmpty: true,
+    emptyData: EMPTY_NOTARY_DATA,
   })
 }
