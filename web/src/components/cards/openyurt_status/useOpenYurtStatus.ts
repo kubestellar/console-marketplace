@@ -1,4 +1,4 @@
-import { useCache } from '../../../lib/cache'
+import { useCache, type UseCacheResult } from '../../../lib/cache'
 import { OPENYURT_DEMO_DATA } from './demoData'
 import { fetchOpenYurtStatus, INITIAL_DATA, type OpenYurtStatus } from './fetch'
 import type { OpenYurtFetchError } from './fetch'
@@ -7,16 +7,7 @@ export type { OpenYurtStatus, OpenYurtFetchError }
 
 const CACHE_KEY = 'openyurt-status'
 
-export interface UseOpenYurtStatusResult {
-  data: OpenYurtStatus
-  isLoading: boolean
-  isRefreshing: boolean
-  isFailed: boolean
-  isDemoFallback: boolean
-  consecutiveFailures: number
-  lastRefresh: number | null
-  refetch: () => Promise<void>
-}
+export type UseOpenYurtStatusResult = UseCacheResult<OpenYurtStatus>
 
 export function useOpenYurtStatus(cluster?: string): UseOpenYurtStatusResult {
   const {

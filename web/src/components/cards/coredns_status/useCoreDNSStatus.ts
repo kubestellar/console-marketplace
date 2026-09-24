@@ -1,4 +1,4 @@
-import { useCache } from '../../../lib/cache'
+import { useCache, type UseCacheResult } from '../../../lib/cache'
 import { COREDNS_DEMO_DATA, type CoreDNSDemoData } from './demoData'
 
 export type CoreDNSStatus = CoreDNSDemoData
@@ -19,16 +19,7 @@ async function fetchCoreDNSStatus(): Promise<CoreDNSStatus> {
   return EMPTY_COREDNS_DATA
 }
 
-export interface UseCoreDNSStatusResult {
-  data: CoreDNSStatus
-  isLoading: boolean
-  isRefreshing: boolean
-  isFailed: boolean
-  isDemoFallback: boolean
-  consecutiveFailures: number
-  lastRefresh: number | null
-  refetch: () => Promise<void>
-}
+export type UseCoreDNSStatusResult = UseCacheResult<CoreDNSStatus>
 
 export function useCoreDNSStatus(): UseCoreDNSStatusResult {
   return useCache<CoreDNSStatus>({
