@@ -1,4 +1,4 @@
-import { useCache } from '../../../lib/cache'
+import { useCache, type UseCacheResult } from '../../../lib/cache'
 import { BUILDPACKS_DEMO_DATA, type BuildpacksDemoData } from './demoData'
 
 export type BuildpacksStatus = BuildpacksDemoData
@@ -16,16 +16,7 @@ async function fetchBuildpacksStatus(): Promise<BuildpacksStatus> {
   return EMPTY_BUILDPACKS_DATA
 }
 
-export interface UseBuildpacksStatusResult {
-  data: BuildpacksStatus
-  isLoading: boolean
-  isRefreshing: boolean
-  isFailed: boolean
-  isDemoFallback: boolean
-  consecutiveFailures: number
-  lastRefresh: number | null
-  refetch: () => Promise<void>
-}
+export type UseBuildpacksStatusResult = UseCacheResult<BuildpacksStatus>
 
 export function useBuildpacksStatus(): UseBuildpacksStatusResult {
   return useCache<BuildpacksStatus>({

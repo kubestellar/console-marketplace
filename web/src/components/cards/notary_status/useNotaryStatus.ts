@@ -1,4 +1,4 @@
-import { useCache } from '../../../lib/cache'
+import { useCache, type UseCacheResult } from '../../../lib/cache'
 import { NOTARY_DEMO_DATA, type NotaryDemoData } from './demoData'
 
 export type NotaryStatus = NotaryDemoData
@@ -16,16 +16,7 @@ async function fetchNotaryStatus(): Promise<NotaryStatus> {
   return EMPTY_NOTARY_DATA
 }
 
-export interface UseNotaryStatusResult {
-  data: NotaryStatus
-  isLoading: boolean
-  isRefreshing: boolean
-  isFailed: boolean
-  isDemoFallback: boolean
-  consecutiveFailures: number
-  lastRefresh: number | null
-  refetch: () => Promise<void>
-}
+export type UseNotaryStatusResult = UseCacheResult<NotaryStatus>
 
 export function useNotaryStatus(): UseNotaryStatusResult {
   return useCache<NotaryStatus>({
