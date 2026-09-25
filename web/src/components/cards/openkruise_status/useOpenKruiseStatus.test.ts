@@ -54,10 +54,10 @@ describe('useOpenKruiseStatus', () => {
     })
   })
 
-  it('uses the demo payload as the fetch result', async () => {
+  it('returns the empty payload from the stub fetcher (never demo — see kubestellar/console-marketplace#802 Slice B)', async () => {
     renderHook(() => useOpenKruiseStatus())
 
-    await expect(lastCacheOptions().fetcher()).resolves.toEqual(OPENKRUISE_DEMO_DATA)
+    await expect(lastCacheOptions().fetcher()).resolves.toEqual(EMPTY_STATUS)
   })
 
   it('passes through loading and failed cache states unchanged', () => {

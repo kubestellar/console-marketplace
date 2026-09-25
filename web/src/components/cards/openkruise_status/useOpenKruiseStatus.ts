@@ -1,11 +1,12 @@
-import { useCache } from '../../../lib/cache'
+import { type UseCacheResult } from '../../../lib/cache'
+import { useDemoOnlyCard } from '../../../lib/cards/useDemoOnlyCard'
 import { OPENKRUISE_DEMO_DATA, type OpenKruiseDemoData } from './demoData'
 
 export type OpenKruiseStatus = OpenKruiseDemoData
 
 const CACHE_KEY = 'openkruise-status'
 
-const INITIAL_DATA: OpenKruiseStatus = {
+export const EMPTY_OPENKRUISE_DATA: OpenKruiseStatus = {
   cloneSets: [],
   advancedStatefulSets: [],
   advancedDaemonSets: [],
@@ -17,18 +18,12 @@ const INITIAL_DATA: OpenKruiseStatus = {
   lastCheckTime: '',
 }
 
-async function fetchOpenKruiseStatus(): Promise<OpenKruiseStatus> {
-  return OPENKRUISE_DEMO_DATA
-}
+export type UseOpenKruiseStatusResult = UseCacheResult<OpenKruiseStatus>
 
-export function useOpenKruiseStatus() {
-  return useCache<OpenKruiseStatus>({
+export function useOpenKruiseStatus(): UseOpenKruiseStatusResult {
+  return useDemoOnlyCard<OpenKruiseStatus>({
     key: CACHE_KEY,
-    fetcher: fetchOpenKruiseStatus,
     demoData: OPENKRUISE_DEMO_DATA,
-    initialData: INITIAL_DATA,
-    category: 'default',
-    persist: true,
-    demoWhenEmpty: true,
+    emptyData: EMPTY_OPENKRUISE_DATA,
   })
 }

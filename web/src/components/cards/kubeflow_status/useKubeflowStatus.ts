@@ -1,11 +1,12 @@
-import { useCache } from '../../../lib/cache'
+import { type UseCacheResult } from '../../../lib/cache'
+import { useDemoOnlyCard } from '../../../lib/cards/useDemoOnlyCard'
 import { KUBEFLOW_DEMO_DATA, type KubeflowDemoData } from './demoData'
 
 export type KubeflowStatus = KubeflowDemoData
 
 const CACHE_KEY = 'kubeflow-status'
 
-const INITIAL_DATA: KubeflowStatus = {
+export const EMPTY_KUBEFLOW_DATA: KubeflowStatus = {
   pipelineRuns: [],
   experiments: [],
   notebooks: [],
@@ -17,18 +18,12 @@ const INITIAL_DATA: KubeflowStatus = {
   lastCheckTime: '',
 }
 
-async function fetchKubeflowStatus(): Promise<KubeflowStatus> {
-  return KUBEFLOW_DEMO_DATA
-}
+export type UseKubeflowStatusResult = UseCacheResult<KubeflowStatus>
 
-export function useKubeflowStatus() {
-  return useCache<KubeflowStatus>({
+export function useKubeflowStatus(): UseKubeflowStatusResult {
+  return useDemoOnlyCard<KubeflowStatus>({
     key: CACHE_KEY,
-    fetcher: fetchKubeflowStatus,
     demoData: KUBEFLOW_DEMO_DATA,
-    initialData: INITIAL_DATA,
-    category: 'default',
-    persist: true,
-    demoWhenEmpty: true,
+    emptyData: EMPTY_KUBEFLOW_DATA,
   })
 }
