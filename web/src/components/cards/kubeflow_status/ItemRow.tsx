@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import { CardAIActions } from '../../../lib/cards/CardComponents'
+import { ICON_COLOR_CLASS, BADGE_COLOR_CLASS } from '../shared/colorClasses'
 import type { KubeflowDisplayItem } from './types'
 
 function getStatusIcon(status: string) {
@@ -116,7 +117,9 @@ export function ItemRow({ item }: { item: KubeflowDisplayItem }) {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <span title={`${t('common:common.status')}: ${item.status}`}>
-            <StatusIcon className={`w-4 h-4 text-${color}-400`} />
+            <StatusIcon
+              className={`w-4 h-4 ${ICON_COLOR_CLASS[color] ?? ICON_COLOR_CLASS.orange}`}
+            />
           </span>
           <span
             className="text-sm text-foreground font-medium group-hover:text-purple-400"
@@ -146,7 +149,7 @@ export function ItemRow({ item }: { item: KubeflowDisplayItem }) {
             />
           )}
           <span
-            className={`text-xs px-1.5 py-0.5 rounded bg-${color}-500/20 text-${color}-400`}
+            className={`text-xs px-1.5 py-0.5 rounded ${BADGE_COLOR_CLASS[color] ?? BADGE_COLOR_CLASS.orange}`}
             title={`${t('common:common.status')}: ${item.status}`}
           >
             {item.status}
