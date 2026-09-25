@@ -43,23 +43,9 @@ export type SortTranslationKey =
   | 'cards:openkruiseStatus.updated'
 
 // Static Tailwind class maps so the JIT can statically detect the classes.
-export const ICON_COLOR_CLASS: Record<string, string> = {
-  green: 'text-green-400',
-  red: 'text-red-400',
-  blue: 'text-blue-400',
-  yellow: 'text-yellow-400',
-  gray: 'text-gray-400',
-  orange: 'text-orange-400',
-}
-
-export const BADGE_COLOR_CLASS: Record<string, string> = {
-  green: 'bg-green-500/20 text-green-400',
-  red: 'bg-red-500/20 text-red-400',
-  blue: 'bg-blue-500/20 text-blue-400',
-  yellow: 'bg-yellow-500/20 text-yellow-400',
-  gray: 'bg-gray-500/20 text-gray-400',
-  orange: 'bg-orange-500/20 text-orange-400',
-}
+// Now shared across status-card rows; re-exported here to preserve the
+// existing `from './types'` import surface used by ItemRow and tests.
+export { ICON_COLOR_CLASS, BADGE_COLOR_CLASS } from '../shared/colorClasses'
 
 // Named constants for relative-time formatting (previously magic numbers).
 export const MS_PER_SECOND = 1000
