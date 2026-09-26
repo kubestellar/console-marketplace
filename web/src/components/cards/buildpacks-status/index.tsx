@@ -1,15 +1,9 @@
-import { useMemo } from 'react'
 import { Package } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import { CardSearchInput, CardPaginationFooter } from '../../../lib/cards/CardComponents'
-import { useCardData } from '../../../lib/cards/cardHooks'
-import { useCardLoadingState } from '../CardDataContext'
-import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
-import { useDemoMode } from '../../../hooks/useDemoMode'
-import { useGlobalFilters } from '../../../hooks/useGlobalFilters'
-import { useTranslation } from 'react-i18next'
-import { type BuildpacksDemoImage } from './demoData'
+import { useCardShell } from '../../../lib/cards/useCardShell'
+import { type BuildpacksDemoImage, type BuildpacksDemoData } from './demoData'
 import { useBuildpacksStatus } from './useBuildpacksStatus'
 
 export type { BuildpacksDemoImage }
@@ -25,50 +19,37 @@ const STATUS_COLORS: Record<string, string> = {
   unknown: 'text-muted-foreground',
 }
 
+function toDisplayRows(raw: BuildpacksDemoData): BuildpacksDisplayRow[] {
+  return raw.images.map(image => ({ ...image, id: `${image.cluster}/${image.name}` }))
+}
+
+const hasAnyData = (raw: BuildpacksDemoData) => raw.images.length > 0
+
 export function BuildpacksStatus() {
-  const { t } = useTranslation(['cards', 'common'])
-  const { isDemoMode } = useDemoMode()
-  const { selectedClusters } = useGlobalFilters()
-
   const {
-    data,
-    isLoading,
-    isRefreshing,
-    isFailed,
-    isDemoFallback,
-  } = useBuildpacksStatus()
-  const isDemoData = isDemoMode || isDemoFallback
-  const rawImages = data.images
-
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading,
-    isRefreshing,
-    hasAnyData: rawImages.length > 0,
-    isFailed,
-    isDemoData,
-  })
-
-  const allRows = useMemo<BuildpacksDisplayRow[]>(
-    () => rawImages.map(image => ({ ...image, id: `${image.cluster}/${image.name}` })),
-    [rawImages],
-  )
-
-  const globalFiltered = useClusterFilteredRows(allRows, selectedClusters)
-
-  const {
-    items: displayRows,
-    totalItems,
-    currentPage,
-    totalPages,
-    itemsPerPage,
-    goToPage,
-    needsPagination,
-    filters,
-    containerRef,
-    containerStyle,
-  } = useCardData<BuildpacksDisplayRow>(globalFiltered, {
-    filter: { searchFields: ['name', 'namespace', 'builder', 'status'] },
-    sort: { defaultField: 'status', defaultDirection: 'asc' },
+    t,
+    showSkeleton,
+    showEmptyState,
+    card: {
+      items: displayRows,
+      totalItems,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      goToPage,
+      needsPagination,
+      filters,
+      containerRef,
+      containerStyle,
+    },
+  } = useCardShell<BuildpacksDemoData, BuildpacksDisplayRow>({
+    useStatus: useBuildpacksStatus,
+    toRows: toDisplayRows,
+    hasAnyData,
+    cardOptions: {
+      filter: { searchFields: ['name', 'namespace', 'builder', 'status'] },
+      sort: { defaultField: 'status', defaultDirection: 'asc' },
+    },
   })
 
   if (showSkeleton) {
