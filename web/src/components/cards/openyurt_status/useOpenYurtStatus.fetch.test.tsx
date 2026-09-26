@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { OPENYURT_DEMO_DATA } from './demoData'
 import { useOpenYurtStatus, type OpenYurtStatus as OpenYurtStatusData, type UseOpenYurtStatusResult } from './useOpenYurtStatus'
-import { createCacheMocks, jsonResponse } from '../../../test/cacheMock'
+import { createCacheMocks, jsonResponse, rejectRawFetch, routeAuthFetchByPath } from '../../../test/cacheMock'
 
 const { mockUseCache, mockAuthFetch, mockFetch, lastCacheOptions } = createCacheMocks<OpenYurtStatusData>()
 
@@ -19,7 +19,8 @@ vi.mock('../../../lib/cache', () => ({
 }))
 
 vi.mock('../../../lib/api', () => ({
-  authFetch: (...args: unknown[]) => mockAuthFetch(...args),
+  authFetch: (input: RequestInfo | URL, init?: RequestInit) =>
+    routeAuthFetchByPath(mockFetch, mockAuthFetch)(input, init),
 }))
 
 const defaultCacheResult: UseOpenYurtStatusResult = {
@@ -36,7 +37,7 @@ const defaultCacheResult: UseOpenYurtStatusResult = {
 describe('useOpenYurtStatus fetch/error paths', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('fetch', rejectRawFetch())
     mockUseCache.mockReturnValue(defaultCacheResult)
   })
 
@@ -128,6 +129,31 @@ describe('useOpenYurtStatus fetch/error paths', () => {
     expect(data.controllerPods).toEqual({ ready: 0, total: 0 })
     expect(data.fetchError).toBeNull()
     expect(mockAuthFetch).not.toHaveBeenCalled()
+  })
+
+  it('sends pod detection through authFetch rather than raw fetch (issue #813)', async () => {
+    renderHook(() => useOpenYurtStatus())
+
+    mockFetch
+      .mockResolvedValueOnce(jsonResponse({ pods: [] }))
+      .mockResolvedValueOnce(jsonResponse({ pods: [] }))
+
+    const data = await lastCacheOptions().fetcher()
+
+    // The global fetch stub rejects; a raw fetch(...) call would surface as a
+    // pods fetchError instead of a clean not-installed result.
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+    expect(data.fetchError).toBeNull()
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      1,
+      '/api/mcp/pods?labelSelector=app.kubernetes.io%2Fname%3Dyurt-manager',
+      expect.objectContaining({ headers: { Accept: 'application/json' } }),
+    )
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      '/api/mcp/pods',
+      expect.objectContaining({ headers: { Accept: 'application/json' } }),
+    )
   })
 
   it('returns a scoped pods fetch error when pod discovery fails', async () => {
