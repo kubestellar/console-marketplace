@@ -1,15 +1,9 @@
-import { useMemo } from 'react'
 import { Radio } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../ui/ClusterBadge'
 import { CardSearchInput, CardPaginationFooter } from '../../../lib/cards/CardComponents'
-import { useCardData } from '../../../lib/cards/cardHooks'
-import { useCardLoadingState } from '../CardDataContext'
-import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
-import { useDemoMode } from '../../../hooks/useDemoMode'
-import { useGlobalFilters } from '../../../hooks/useGlobalFilters'
-import { useTranslation } from 'react-i18next'
-import { type CoreDNSDemoServer } from './demoData'
+import { useCardShell } from '../../../lib/cards/useCardShell'
+import { type CoreDNSDemoServer, type CoreDNSDemoData } from './demoData'
 import { useCoreDNSStatus } from './useCoreDNSStatus'
 
 export type { CoreDNSDemoServer }
@@ -25,53 +19,41 @@ const STATUS_COLORS: Record<string, string> = {
   unknown: 'text-muted-foreground',
 }
 
+function toDisplayRows(raw: CoreDNSDemoData): CoreDNSDisplayRow[] {
+  return raw.servers.map(server => ({
+    ...server,
+    id: `${server.cluster}/${server.name}`,
+  }))
+}
+
+const hasAnyData = (raw: CoreDNSDemoData) => raw.servers.length > 0 || raw.zones.length > 0
+
 export function CoreDNSStatus() {
-  const { t } = useTranslation(['cards', 'common'])
-  const { isDemoMode } = useDemoMode()
-  const { selectedClusters } = useGlobalFilters()
-
   const {
-    data: rawData,
-    isLoading,
-    isRefreshing,
-    isFailed,
-    isDemoFallback,
-  } = useCoreDNSStatus()
-  const isDemoData = isDemoMode || isDemoFallback
-
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading,
-    isRefreshing,
-    hasAnyData: rawData.servers.length > 0 || rawData.zones.length > 0,
-    isFailed,
-    isDemoData,
-  })
-
-  const allRows = useMemo<CoreDNSDisplayRow[]>(
-    () =>
-      rawData.servers.map(server => ({
-        ...server,
-        id: `${server.cluster}/${server.name}`,
-      })),
-    [rawData],
-  )
-
-  const globalFiltered = useClusterFilteredRows(allRows, selectedClusters)
-
-  const {
-    items: displayRows,
-    totalItems,
-    currentPage,
-    totalPages,
-    itemsPerPage,
-    goToPage,
-    needsPagination,
-    filters,
-    containerRef,
-    containerStyle,
-  } = useCardData<CoreDNSDisplayRow>(globalFiltered, {
-    filter: { searchFields: ['name', 'namespace', 'version', 'status'] },
-    sort: { defaultField: 'status', defaultDirection: 'asc' },
+    t,
+    raw: rawData,
+    showSkeleton,
+    showEmptyState,
+    card: {
+      items: displayRows,
+      totalItems,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      goToPage,
+      needsPagination,
+      filters,
+      containerRef,
+      containerStyle,
+    },
+  } = useCardShell<CoreDNSDemoData, CoreDNSDisplayRow>({
+    useStatus: useCoreDNSStatus,
+    toRows: toDisplayRows,
+    hasAnyData,
+    cardOptions: {
+      filter: { searchFields: ['name', 'namespace', 'version', 'status'] },
+      sort: { defaultField: 'status', defaultDirection: 'asc' },
+    },
   })
 
   if (showSkeleton) {

@@ -46,9 +46,13 @@ vi.mock('../../../hooks/useGlobalFilters', () => ({
   useGlobalFilters: () => mockUseGlobalFilters(),
 }))
 
+// Real `useTranslation().t` is referentially stable across renders; keep the
+// stub stable too so memoised row mapping keyed on `t` is not invalidated.
+const stableT = (key: string) => key
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: stableT,
     i18n: { language: 'en', changeLanguage: vi.fn() },
   }),
 }))

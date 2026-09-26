@@ -12,7 +12,7 @@ interface CardDataSort {
   comparators?: Record<string, (a: unknown, b: unknown) => number>
 }
 
-interface CardDataOptions {
+export interface CardDataOptions {
   filter?: CardDataFilter
   sort?: CardDataSort
   defaultLimit?: number | 'unlimited'

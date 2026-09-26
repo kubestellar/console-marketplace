@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import {
   ShieldCheck,
   ShieldOff,
@@ -13,12 +12,7 @@ import { ClusterBadge } from '../ui/ClusterBadge'
 import {
   CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'
-import { useCardData } from '../../../lib/cards/cardHooks'
-import { useCardLoadingState } from '../CardDataContext'   // required hook #1
-import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
-import { useDemoMode } from '../../../hooks/useDemoMode'    // required hook #2
-import { useGlobalFilters } from '../../../hooks/useGlobalFilters' // required hook #3
-import { useTranslation } from 'react-i18next'           // required hook #4
+import { useCardShell } from '../../../lib/cards/useCardShell'
 import {
   type NotaryDemoData,
   type NotaryDemoClusterStatus,
@@ -45,61 +39,42 @@ interface NotaryDisplayRow {
   trustPolicies: NotaryDemoTrustPolicy[]
 }
 
+/** Flatten clusters into display rows */
+function toDisplayRows(raw: NotaryDemoData): NotaryDisplayRow[] {
+  return raw.clusters.map(c => ({
+    id: c.cluster,
+    cluster: c.cluster,
+    installed: c.installed,
+    signedImages: c.signedImages,
+    unsignedImages: c.unsignedImages,
+    trustPolicies: c.trustPolicies,
+  }))
+}
+
+const hasAnyData = (raw: NotaryDemoData) => raw.clusters.length > 0
+
 export function NotaryStatus({ config: _config }: NotaryStatusProps) {
-  // required hook #4 — every user-facing string goes through t()
-  const { t } = useTranslation(['cards', 'common'])
-
-  // --- required hook #2 ---
-  const { isDemoMode } = useDemoMode()
-
-  // --- required hook #3 ---
-  const { selectedClusters } = useGlobalFilters()
-
   const {
-    data: rawData,
-    isLoading,
-    isRefreshing,
-    isFailed,
-    isDemoFallback,
-  } = useNotaryStatus()
-  const isDemoData = isDemoMode || isDemoFallback // required pattern #5
-
-  // --- required hook #1 + pattern #5: wire isDemoData into useCardLoadingState ---
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading,
-    isRefreshing,
-    hasAnyData: rawData.clusters.length > 0,
-    isFailed,
-    isDemoData,
+    t,
+    showSkeleton,
+    showEmptyState,
+    rows: globalFiltered,
+    card: {
+      items: displayRows,
+      totalItems,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      goToPage,
+      needsPagination,
+      containerRef,
+      containerStyle,
+    },
+  } = useCardShell<NotaryDemoData, NotaryDisplayRow, 'cluster'>({
+    useStatus: useNotaryStatus,
+    toRows: toDisplayRows,
+    hasAnyData,
   })
-
-  // Flatten clusters into display rows
-  const allRows = useMemo<NotaryDisplayRow[]>(() => {
-    return rawData.clusters.map(c => ({
-      id: c.cluster,
-      cluster: c.cluster,
-      installed: c.installed,
-      signedImages: c.signedImages,
-      unsignedImages: c.unsignedImages,
-      trustPolicies: c.trustPolicies,
-    }))
-  }, [rawData])
-
-  // required hook #3 — filter rows by selectedClusters from global filters
-  const globalFiltered = useClusterFilteredRows(allRows, selectedClusters)
-
-  // Shared card data hook (pagination)
-  const {
-    items: displayRows,
-    totalItems,
-    currentPage,
-    totalPages,
-    itemsPerPage,
-    goToPage,
-    needsPagination,
-    containerRef,
-    containerStyle,
-  } = useCardData<NotaryDisplayRow, 'cluster'>(globalFiltered)
 
   // Summary totals (computed across the global-filtered set, before pagination)
   const totalSigned   = globalFiltered.reduce((s: number, r: NotaryDisplayRow) => s + r.signedImages,          0)
