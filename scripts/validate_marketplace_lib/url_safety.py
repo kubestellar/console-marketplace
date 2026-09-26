@@ -199,7 +199,10 @@ class _PinnedHTTPSConnection(http.client.HTTPSConnection):
                     sock.close()
                     sock = None
         if sock is None:
-            raise last_err
+            # Every candidate raised, so last_err is set; the fallback only
+            # exists to keep the raise well-typed for static analysis.
+            raise last_err if last_err is not None else OSError(
+                f"could not connect to any address for host {self.host!r}")
 
         self.sock = sock
         server_hostname = self.host
@@ -216,7 +219,12 @@ class _PinnedHTTPSHandler(urllib.request.HTTPSHandler):
         return self.do_open(_PinnedHTTPSConnection, req, context=self._context)
 
 
+# ``ProxyHandler({})`` displaces the default environment-driven proxy handler
+# so ``HTTPS_PROXY``/``https_proxy`` never turns the pinned connection into a
+# CONNECT tunnel to a (possibly private, always separately-resolving) proxy.
+# The validator therefore always resolves and pins the origin host itself.
 _no_redirect_opener = urllib.request.build_opener(
+    urllib.request.ProxyHandler({}),
     _NoRedirectHandler(),
     _PinnedHTTPSHandler(context=ssl.create_default_context()),
 )

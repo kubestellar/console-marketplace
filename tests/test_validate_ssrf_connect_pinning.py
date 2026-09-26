@@ -51,6 +51,41 @@ class TestOpenerWiring(unittest.TestCase):
         # The stock handler must be displaced, otherwise urllib may pick it.
         self.assertNotIn("HTTPSHandler", handlers)
 
+    def test_opener_has_no_environment_proxy_handler(self):
+        # ``ProxyHandler({})`` displaces build_opener's default, env-driven
+        # ProxyHandler; with no proxies configured it registers no
+        # ``*_open`` methods, so no ProxyHandler may remain in the chain.
+        handlers = [type(h).__name__ for h in _no_redirect_opener.handlers]
+        self.assertNotIn("ProxyHandler", handlers)
+
+    def test_https_proxy_env_does_not_redirect_pinned_connection(self):
+        # With HTTPS_PROXY exported, a default opener would resolve and
+        # connect to the proxy; ours must still resolve and pin the origin.
+        req = urllib.request.Request(URL, method="HEAD")
+        with (
+            patch.dict(os.environ, {"HTTPS_PROXY": "http://127.0.0.1:3128",
+                                    "https_proxy": "http://127.0.0.1:3128"}),
+            patch("socket.getaddrinfo", return_value=_addrinfo(PUBLIC_IP, 443)) as gai,
+            patch("socket.socket") as sock_cls,
+            patch.object(_PinnedHTTPSConnection, "getresponse") as getresponse,
+        ):
+            resp = MagicMock()
+            resp.status = 200
+            resp.reason = "OK"
+            resp.msg = {}
+            resp.read.return_value = b""
+            getresponse.return_value = resp
+            handler = next(h for h in _no_redirect_opener.handlers
+                           if isinstance(h, _PinnedHTTPSHandler))
+            handler._context = MagicMock()
+            handler._context.wrap_socket.return_value = MagicMock()
+            try:
+                _no_redirect_opener.open(req, timeout=10)
+            except Exception:
+                pass  # only the connection target matters here
+        self.assertEqual(gai.call_args.args[0], HOST)
+        sock_cls.return_value.connect.assert_called_once_with((PUBLIC_IP, 443))
+
     def test_handler_opens_with_pinned_connection_class(self):
         handler = _PinnedHTTPSHandler(context=MagicMock())
         req = urllib.request.Request(URL, method="HEAD")
