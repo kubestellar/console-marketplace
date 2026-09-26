@@ -73,7 +73,7 @@ async function fetchCR(
 }
 
 async function fetchPods(url: string): Promise<BackendPodInfo[]> {
-  const resp = await fetch(url, {
+  const resp = await authFetch(url, {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(FETCH_DEFAULT_TIMEOUT_MS),
   })
