@@ -53,10 +53,11 @@ aspirational, already-healthy state:
   re-verify against the workflow file (not just this note) before relying on it for an
   active incident. `scorecard.yml`'s GCR-billing-gate outage (documented in the
   runbook's [Current Status](./scheduled-scan-alert-gap.md#current-status)) is a
-  separate problem that this alert mechanism only makes *visible*, not fixed — as of
-  2026-09-18 its `push`-triggered runs have recovered, but the weekly
-  `schedule`-triggered leg has not yet reconfirmed that; see the runbook's dated
-  update before assuming it is fully closed.
+  separate problem that this alert mechanism only makes *visible*, not fixed —
+  as of 2026-09-26 both the `push`-triggered runs and the weekly
+  `schedule`-triggered leg (run 35567533814, 2026-09-21T06:13:34Z) have
+  reconfirmed recovery; see the runbook's dated update for the outage's full
+  closure.
 - **SLO 7** depends on the same class of workflow-file change as SLO 3: a validated
   diff exists (adding a final `if: always()` summary step to `fuzz.yml`'s `fuzz-json`
   job) but eight prior automated attempts to push it were all rejected by GitHub for
