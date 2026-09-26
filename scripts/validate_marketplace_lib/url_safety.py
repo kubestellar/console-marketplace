@@ -2,9 +2,11 @@
 
 Extracted from scripts/validate-marketplace.py (see issue #670).
 """
+import http.client
 import ipaddress
 import os
 import socket
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -144,7 +146,80 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
     http_error_308 = http_error_301
 
 
-_no_redirect_opener = urllib.request.build_opener(_NoRedirectHandler())
+class DisallowedAddressError(Exception):
+    """Raised at connect time when a hostname re-resolves to a non-public address.
+
+    Deliberately *not* an ``OSError`` subclass: ``urllib.request``'s
+    ``do_open`` wraps ``OSError`` into ``URLError`` (which
+    :func:`check_download_urls` reports as a soft "unreachable" warning). A
+    connect-time SSRF rejection must surface as a hard error instead, so it
+    propagates unwrapped.
+    """
+
+
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    """HTTPSConnection that vets *and pins* the address it connects to.
+
+    The stock connection performs its own ``getaddrinfo`` inside ``connect()``
+    — a second lookup, independent of the one done by
+    :func:`_is_safe_resolved_host`. An attacker-controlled resolver can answer
+    the first lookup with a public address and the second with a private one
+    (DNS rebinding). This subclass closes that gap by resolving once here,
+    classifying every candidate address, and then connecting to the vetted
+    numeric address directly. TLS SNI and certificate verification still use
+    the original hostname.
+    """
+
+    def connect(self):
+        infos = socket.getaddrinfo(self.host, self.port, type=socket.SOCK_STREAM)
+        if not infos:
+            raise DisallowedAddressError(
+                f"host {self.host!r} did not resolve to any address")
+        for info in infos:
+            ok, reason = _classify_ip_literal(info[4][0])
+            if not ok:
+                raise DisallowedAddressError(
+                    f"host {self.host!r} resolved to disallowed address at "
+                    f"connect time: {reason}")
+
+        sock = None
+        last_err = None
+        for family, socktype, proto, _canon, sockaddr in infos:
+            try:
+                sock = socket.socket(family, socktype, proto)
+                if self.timeout is not None:
+                    sock.settimeout(self.timeout)
+                if self.source_address:
+                    sock.bind(self.source_address)
+                sock.connect(sockaddr)
+                break
+            except OSError as e:
+                last_err = e
+                if sock is not None:
+                    sock.close()
+                    sock = None
+        if sock is None:
+            raise last_err
+
+        self.sock = sock
+        server_hostname = self.host
+        if self._tunnel_host:
+            self._tunnel()
+            server_hostname = self._tunnel_host
+        self.sock = self._context.wrap_socket(sock, server_hostname=server_hostname)
+
+
+class _PinnedHTTPSHandler(urllib.request.HTTPSHandler):
+    """HTTPSHandler that routes every request through :class:`_PinnedHTTPSConnection`."""
+
+    def https_open(self, req):
+        return self.do_open(_PinnedHTTPSConnection, req, context=self._context)
+
+
+_no_redirect_opener = urllib.request.build_opener(
+    _NoRedirectHandler(),
+    _PinnedHTTPSHandler(context=ssl.create_default_context()),
+)
 
 
 def check_download_urls(base, results):
@@ -154,10 +229,16 @@ def check_download_urls(base, results):
     1. Offline URL guard (:func:`_is_safe_download_url`) — scheme + IP-literal
        + metadata-host + string-prefix checks.
     2. DNS-resolution guard (:func:`_is_safe_resolved_host`) — every A/AAAA
-       record for the host must be a public address.
+       record for the host must be a public address. This is a fast-fail
+       pre-filter; the authoritative check is layer 4.
     3. Redirect follow disabled — a 3xx response is treated as a non-200
        result rather than being followed, so the guard cannot be bypassed by
        an attacker-controlled 302 to an internal target.
+    4. Connect-time address pinning (:class:`_PinnedHTTPSConnection`) — the
+       transport resolves the host once, re-classifies every address, and
+       connects to the vetted numeric address, so a resolver that answers
+       differently on the second lookup (DNS rebinding) cannot redirect the
+       socket to a private target.
     """
     data, err = load_json(os.path.join(base, "registry.json"))
     if err:
@@ -194,6 +275,9 @@ def check_download_urls(base, results):
         except urllib.error.HTTPError as e:
             results.error("download-url",
                          f"'{item_id}' URL returned {e.code}: {url}")
+        except DisallowedAddressError as e:
+            results.error("download-url",
+                          f"'{item_id}' downloadUrl rejected: {e}")
         except Exception as e:
             results.warn("download-url",
                         f"'{item_id}' URL unreachable: {e}")
