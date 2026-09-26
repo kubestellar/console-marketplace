@@ -79,7 +79,10 @@ from validate_marketplace_lib.url_safety import (
     _classify_ip_literal,
     _is_safe_resolved_host,
     _NoRedirectHandler,
+    _PinnedHTTPSConnection,
+    _PinnedHTTPSHandler,
     _no_redirect_opener,
+    DisallowedAddressError,
     check_download_urls,
 )
 from validate_marketplace_lib.report import (
