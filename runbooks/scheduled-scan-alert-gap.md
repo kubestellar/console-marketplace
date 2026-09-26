@@ -67,6 +67,16 @@ content incidents. See [`SLO.md`](./SLO.md#slis-and-slos) for SLI/SLO 5 and 6.
 > reconfirmed this independently — the last `schedule` run (2026-09-14) was still a
 > failure — so do not mark this fully resolved until that scheduled run is also
 > green.
+>
+> **Update 2026-09-26: fully resolved.** The 2026-09-21T06:13:34Z weekly
+> `schedule`-triggered run (run
+> [35567533814](https://github.com/kubestellar/console-marketplace/actions/runs/35567533814))
+> completed with `conclusion: success` — the GCR billing gate outage is confirmed
+> cleared on both trigger types. No `workflow-failure`-labeled issue is open for
+> `scorecard.yml`, `fuzz.yml`, `codeql.yml`, or `stale.yml` as of this writing, and
+> `workflow-failure-issue.yml`'s own runs all show `conclusion: skipped` (its
+> guard correctly finding nothing to report), consistent with every monitored
+> scheduled workflow currently passing.
 
 ## When to Use This Runbook
 
