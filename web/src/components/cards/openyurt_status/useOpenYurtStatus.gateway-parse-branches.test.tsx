@@ -23,7 +23,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { OPENYURT_DEMO_DATA } from './demoData'
 import { useOpenYurtStatus, type OpenYurtStatus as OpenYurtStatusData, type UseOpenYurtStatusResult } from './useOpenYurtStatus'
-import { createCacheMocks, jsonResponse } from '../../../test/cacheMock'
+import { createCacheMocks, jsonResponse, rejectRawFetch, routeAuthFetchByPath } from '../../../test/cacheMock'
 
 const { mockUseCache, mockAuthFetch, mockFetch, lastCacheOptions } = createCacheMocks<OpenYurtStatusData>()
 
@@ -32,7 +32,8 @@ vi.mock('../../../lib/cache', () => ({
 }))
 
 vi.mock('../../../lib/api', () => ({
-  authFetch: (...args: unknown[]) => mockAuthFetch(...args),
+  authFetch: (input: RequestInfo | URL, init?: RequestInit) =>
+    routeAuthFetchByPath(mockFetch, mockAuthFetch)(input, init),
 }))
 
 const defaultCacheResult: UseOpenYurtStatusResult = {
@@ -60,7 +61,7 @@ const yurtManagerPodsPayload = {
 describe('useOpenYurtStatus — parseGateway branch coverage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('fetch', rejectRawFetch())
     mockUseCache.mockReturnValue(defaultCacheResult)
   })
 
@@ -153,7 +154,7 @@ describe('useOpenYurtStatus — parseGateway branch coverage', () => {
 describe('useOpenYurtStatus — fetchPods branch coverage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('fetch', rejectRawFetch())
     mockUseCache.mockReturnValue(defaultCacheResult)
   })
 

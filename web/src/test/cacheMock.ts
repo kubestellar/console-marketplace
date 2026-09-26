@@ -69,3 +69,39 @@ export function createCacheMocks<T>() {
 
   return { mockUseCache, mockAuthFetch, mockFetch, lastCacheOptions }
 }
+
+/** Path prefix of the backend pod-listing endpoint used by card detection fetches. */
+export const MCP_PODS_PATH = '/api/mcp/pods'
+
+/**
+ * Builds an `authFetch` mock implementation that routes `/api/mcp/pods`
+ * requests to `mockFetch` and everything else (custom-resource lookups) to
+ * `mockAuthFetch`. Card fetchers must send every request through `authFetch`
+ * so the console parent can inject credentials (see issue #813); this keeps
+ * pod and CR response queues independent in tests without reordering them.
+ *
+ * Example:
+ *
+ *   vi.mock('../../../lib/api', () => ({
+ *     authFetch: (input: RequestInfo | URL, init?: RequestInit) =>
+ *       routeAuthFetchByPath(mockFetch, mockAuthFetch)(input, init),
+ *   }))
+ */
+export function routeAuthFetchByPath(
+  mockFetch: (input: RequestInfo | URL, init?: RequestInit) => unknown,
+  mockAuthFetch: (input: RequestInfo | URL, init?: RequestInit) => unknown,
+) {
+  return (input: RequestInfo | URL, init?: RequestInit) =>
+    String(input).startsWith(MCP_PODS_PATH) ? mockFetch(input, init) : mockAuthFetch(input, init)
+}
+
+/**
+ * Returns a global `fetch` stub that rejects. Install with
+ * `vi.stubGlobal('fetch', rejectRawFetch())` in suites whose fetchers must
+ * use `authFetch` exclusively, so a regression to raw `fetch` fails loudly.
+ */
+export function rejectRawFetch() {
+  return vi.fn((input: RequestInfo | URL) =>
+    Promise.reject(new Error(`raw fetch(${String(input)}) called; card fetchers must use authFetch`)),
+  )
+}
