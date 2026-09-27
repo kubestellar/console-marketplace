@@ -8,8 +8,13 @@
 // runbooks/SLO.md, and the health / node-count derivations.
 //
 // `fetchCR`, `fetchPods`, and `CRFetchError` are module-private, so they are
-// asserted through `fetchOpenYurtStatus` via the `authFetch` / global `fetch`
-// mock call arguments and the returned `fetchError`.
+// asserted through `fetchOpenYurtStatus` via the `authFetch` mock call
+// arguments and the returned `fetchError`.
+//
+// Since #815 every request — pod discovery as well as the CR lookups — goes
+// through `authFetch`, so one mock queue is consumed in call order:
+// labeled pods, [unlabeled pods fallback], nodepools, gateways. The global
+// `fetch` is stubbed only to assert it is never reached directly.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,7 +24,7 @@ import { INITIAL_DATA, fetchOpenYurtStatus } from './fetch'
 import type { BackendPodInfo, CRItem } from './parse'
 
 const mockAuthFetch = vi.fn()
-const mockFetch = vi.fn()
+const mockGlobalFetch = vi.fn()
 
 vi.mock('../../../lib/api', () => ({
   authFetch: (...args: unknown[]) => mockAuthFetch(...args),
@@ -70,14 +75,19 @@ function gatewayItem(name: string): CRItem {
 
 /** Queues a successful labeled-pod discovery response so tests can focus on the CR step. */
 function stubLabeledPods(pods: BackendPodInfo[] = [readyYurtManagerPod]): void {
-  mockFetch.mockResolvedValueOnce(jsonResponse({ pods }))
+  mockAuthFetch.mockResolvedValueOnce(jsonResponse({ pods }))
 }
 
-/** Queues nodepools then gateways CR responses (in the order fetchOpenYurtStatus issues them). */
+/** Queues nodepools then gateways CR responses (in the order fetchOpenYurtStatus issues them, after pods). */
 function stubCRs(nodePools: CRItem[] = [], gateways: CRItem[] = []): void {
   mockAuthFetch
     .mockResolvedValueOnce(jsonResponse({ items: nodePools }))
     .mockResolvedValueOnce(jsonResponse({ items: gateways }))
+}
+
+/** URLs requested through authFetch, in call order. */
+function requestedUrls(): string[] {
+  return mockAuthFetch.mock.calls.map(call => call[0] as string)
 }
 
 describe('fetch.ts — INITIAL_DATA', () => {
@@ -100,24 +110,26 @@ describe('fetchOpenYurtStatus', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('fetch', mockGlobalFetch)
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
+    // #815 contract: nothing in fetch.ts may bypass authFetch.
+    expect(mockGlobalFetch).not.toHaveBeenCalled()
     consoleErrorSpy.mockRestore()
     vi.unstubAllGlobals()
   })
 
   describe('pod discovery (fetchPods)', () => {
-    it('requests the labeled yurt-manager pods with the JSON accept header and a bounded timeout', async () => {
+    it('requests the labeled yurt-manager pods through authFetch with the JSON accept header and a bounded timeout', async () => {
       stubLabeledPods()
       stubCRs()
 
       await fetchOpenYurtStatus()
 
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-      const [url, init] = mockFetch.mock.calls[0] as [string, RequestInit]
+      expect(requestedUrls()).toEqual([LABELED_PODS_PATH, NODEPOOLS_CR_PATH, GATEWAYS_CR_PATH])
+      const [url, init] = mockAuthFetch.mock.calls[0] as [string, RequestInit]
       expect(url).toBe(LABELED_PODS_PATH)
       expect(init.headers).toEqual({ Accept: 'application/json' })
       expect(init.signal).toBeInstanceOf(AbortSignal)
@@ -140,7 +152,7 @@ describe('fetchOpenYurtStatus', () => {
 
       await fetchOpenYurtStatus('edge/cluster 1')
 
-      expect(mockFetch.mock.calls[0][0]).toBe(`${LABELED_PODS_PATH}&cluster=edge%2Fcluster%201`)
+      expect(mockAuthFetch.mock.calls[0][0]).toBe(`${LABELED_PODS_PATH}&cluster=edge%2Fcluster%201`)
     })
 
     it('uses the labeled result directly (still filtered) when it is non-empty', async () => {
@@ -150,12 +162,13 @@ describe('fetchOpenYurtStatus', () => {
 
       const result = await fetchOpenYurtStatus()
 
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      // No unlabeled fallback request between the labeled pods call and the CRs.
+      expect(requestedUrls()).toEqual([LABELED_PODS_PATH, NODEPOOLS_CR_PATH, GATEWAYS_CR_PATH])
       expect(result.controllerPods).toEqual({ ready: 1, total: 1 })
     })
 
     it('falls back to the unlabeled pod list filtered through isOpenYurtControllerPod', async () => {
-      mockFetch
+      mockAuthFetch
         .mockResolvedValueOnce(jsonResponse({ pods: [] }))
         .mockResolvedValueOnce(jsonResponse({
           pods: [
@@ -168,28 +181,31 @@ describe('fetchOpenYurtStatus', () => {
 
       const result = await fetchOpenYurtStatus('c1')
 
-      expect(mockFetch).toHaveBeenCalledTimes(2)
-      expect(mockFetch.mock.calls[0][0]).toBe(`${LABELED_PODS_PATH}&cluster=c1`)
-      expect(mockFetch.mock.calls[1][0]).toBe(`${UNLABELED_PODS_PATH}?cluster=c1`)
+      expect(requestedUrls()).toEqual([
+        `${LABELED_PODS_PATH}&cluster=c1`,
+        `${UNLABELED_PODS_PATH}?cluster=c1`,
+        `${NODEPOOLS_CR_PATH}&cluster=c1`,
+        `${GATEWAYS_CR_PATH}&cluster=c1`,
+      ])
       expect(result.controllerPods).toEqual({ ready: 2, total: 2 })
     })
 
     it('treats a body without a pods field as an empty list (falls back, then not-installed)', async () => {
-      mockFetch
+      mockAuthFetch
         .mockResolvedValueOnce(jsonResponse({}))
         .mockResolvedValueOnce(jsonResponse({}))
 
       const result = await fetchOpenYurtStatus()
 
-      expect(mockFetch).toHaveBeenCalledTimes(2)
-      expect(mockAuthFetch).not.toHaveBeenCalled()
+      // Both pod requests are made, but no CR request follows.
+      expect(requestedUrls()).toEqual([LABELED_PODS_PATH, UNLABELED_PODS_PATH])
       expect(result.health).toBe('not-installed')
       expect(result.fetchError).toBeNull()
       expect(consoleErrorSpy).not.toHaveBeenCalled()
     })
 
     it('treats a non-array pods field as an empty list', async () => {
-      mockFetch
+      mockAuthFetch
         .mockResolvedValueOnce(jsonResponse({ pods: 'not-an-array' }))
         .mockResolvedValueOnce(jsonResponse({ pods: { name: 'yurt-manager-0' } }))
 
@@ -200,13 +216,13 @@ describe('fetchOpenYurtStatus', () => {
     })
 
     it('returns not-installed without touching CRs when no controller pods match', async () => {
-      mockFetch
+      mockAuthFetch
         .mockResolvedValueOnce(jsonResponse({ pods: [] }))
         .mockResolvedValueOnce(jsonResponse({ pods: [{ name: 'coredns-0', status: 'Running', ready: '1/1' }] }))
 
       const result = await fetchOpenYurtStatus()
 
-      expect(mockAuthFetch).not.toHaveBeenCalled()
+      expect(requestedUrls()).toEqual([LABELED_PODS_PATH, UNLABELED_PODS_PATH])
       expect(result).toMatchObject({
         health: 'not-installed',
         controllerPods: { ready: 0, total: 0 },
@@ -217,11 +233,12 @@ describe('fetchOpenYurtStatus', () => {
     })
 
     it('maps a non-OK pods response to an HTTP <status> <statusText> pods fetchError and logs the summary record', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({}, { ok: false, status: 403, statusText: 'Forbidden' }))
+      mockAuthFetch.mockResolvedValueOnce(jsonResponse({}, { ok: false, status: 403, statusText: 'Forbidden' }))
 
       const result = await fetchOpenYurtStatus()
 
-      expect(mockAuthFetch).not.toHaveBeenCalled()
+      // A failed labeled request short-circuits: no fallback, no CR requests.
+      expect(requestedUrls()).toEqual([LABELED_PODS_PATH])
       expect(result).toMatchObject({
         health: 'not-installed',
         controllerPods: INITIAL_DATA.controllerPods,
@@ -241,7 +258,7 @@ describe('fetchOpenYurtStatus', () => {
     })
 
     it('surfaces a rejected pods fetch (network/timeout) as a pods fetchError', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('The operation was aborted due to timeout'))
+      mockAuthFetch.mockRejectedValueOnce(new Error('The operation was aborted due to timeout'))
 
       const result = await fetchOpenYurtStatus()
 
@@ -257,7 +274,7 @@ describe('fetchOpenYurtStatus', () => {
     })
 
     it('stringifies a non-Error rejection reason for the pods fetchError', async () => {
-      mockFetch.mockRejectedValueOnce('socket hang up')
+      mockAuthFetch.mockRejectedValueOnce('socket hang up')
 
       const result = await fetchOpenYurtStatus()
 
@@ -270,7 +287,7 @@ describe('fetchOpenYurtStatus', () => {
     })
 
     it('surfaces a failure in the unlabeled fallback request as a pods fetchError', async () => {
-      mockFetch
+      mockAuthFetch
         .mockResolvedValueOnce(jsonResponse({ pods: [] }))
         .mockResolvedValueOnce(jsonResponse({}, { ok: false, status: 500, statusText: 'Internal Server Error' }))
 
@@ -287,9 +304,9 @@ describe('fetchOpenYurtStatus', () => {
 
       await fetchOpenYurtStatus()
 
-      expect(mockAuthFetch).toHaveBeenCalledTimes(2)
-      const [nodePoolUrl, nodePoolInit] = mockAuthFetch.mock.calls[0] as [string, RequestInit]
-      const [gatewayUrl, gatewayInit] = mockAuthFetch.mock.calls[1] as [string, RequestInit]
+      expect(requestedUrls()).toEqual([LABELED_PODS_PATH, NODEPOOLS_CR_PATH, GATEWAYS_CR_PATH])
+      const [nodePoolUrl, nodePoolInit] = mockAuthFetch.mock.calls[1] as [string, RequestInit]
+      const [gatewayUrl, gatewayInit] = mockAuthFetch.mock.calls[2] as [string, RequestInit]
       expect(nodePoolUrl).toBe(NODEPOOLS_CR_PATH)
       expect(gatewayUrl).toBe(GATEWAYS_CR_PATH)
       for (const init of [nodePoolInit, gatewayInit]) {
@@ -304,8 +321,8 @@ describe('fetchOpenYurtStatus', () => {
 
       await fetchOpenYurtStatus('prod-east')
 
-      expect(mockAuthFetch.mock.calls[0][0]).toBe(`${NODEPOOLS_CR_PATH}&cluster=prod-east`)
-      expect(mockAuthFetch.mock.calls[1][0]).toBe(`${GATEWAYS_CR_PATH}&cluster=prod-east`)
+      expect(mockAuthFetch.mock.calls[1][0]).toBe(`${NODEPOOLS_CR_PATH}&cluster=prod-east`)
+      expect(mockAuthFetch.mock.calls[2][0]).toBe(`${GATEWAYS_CR_PATH}&cluster=prod-east`)
     })
 
     it('treats a CR body without items as an empty list', async () => {
@@ -438,7 +455,7 @@ describe('fetchOpenYurtStatus', () => {
 
   describe('OPENYURT_STATUS_FETCH_SUMMARY record contract', () => {
     it('emits exactly the {resource, status, reason} keys and never the response body', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse(
+      mockAuthFetch.mockResolvedValueOnce(jsonResponse(
         { secret: 'do-not-log' },
         { ok: false, status: 500, statusText: 'Internal Server Error' },
       ))
