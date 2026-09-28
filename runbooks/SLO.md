@@ -20,11 +20,11 @@ should be detected and resolved, not any request-latency/availability target.
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | `.github/workflows/workflow-failure-issue.yml`'s `workflow_run` trigger, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **met**: mechanism is live and closed [issue #573](https://github.com/kubestellar/console-marketplace/issues/573); not yet observed firing on a real failure (see [Current Status](./scheduled-scan-alert-gap.md#current-status)) |
 | 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | Same `workflow-failure-issue.yml` mechanism as SLO 5, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **met**: closed [issue #607](https://github.com/kubestellar/console-marketplace/issues/607); not yet observed firing on a real failure |
-| 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo` lines in the raw step log | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **not yet met**: fix is a validated, ready-to-apply diff blocked on the same `workflows` permission gap as SLO 3; see [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
-| 8 | Whether a completed `validate-json.yml` run left a bounded, machine-readable record of what it checked (registry entries checked, dashboards checked, error count, pass/fail) | Every run's Summary tab shows this record | None today — only free-text `echo`/`print` lines in the raw step log | [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) — **not yet met**: the underlying logic is extracted into a tested, standalone `scripts/validate_json_summary.py`, but wiring it into the workflow is blocked on the same `workflows` permission gap as SLO 3/7; see [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
-| 9 | Whether a completed `python-unit-tests.yml` / `ts-unit-tests.yml` run left a bounded, machine-readable record of pass/fail counts | Every run's Summary tab shows this record | Python: root `conftest.py` `pytest_terminal_summary`/`pytest_sessionfinish` hook (no workflow edit needed). TS: none today | [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md) — **partially met**: Python side closed via merged [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) fix (`conftest.py`); TS side still blocked on the same `workflows` permission gap as SLO 3/7/8 — a ready-to-apply diff for `ts-unit-tests.yml` is preserved in the runbook for a maintainer |
+| 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | `Fuzzing observability summary` step calling `scripts/fuzz_summary.py`, `if: always()` | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **met**: applied in commit `378cfdf`, closing [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
+| 8 | Whether a completed `validate-json.yml` run left a bounded, machine-readable record of what it checked (registry entries checked, dashboards checked, error count, pass/fail) | Every run's Summary tab shows this record | `Validate JSON observability summary` step calling `scripts/validate_json_summary.py`, `if: always()` | [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) — **met**: applied in commit `378cfdf`, closing [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
+| 9 | Whether a completed `python-unit-tests.yml` / `ts-unit-tests.yml` run left a bounded, machine-readable record of pass/fail counts | Every run's Summary tab shows this record | Python: root `conftest.py` `pytest_terminal_summary`/`pytest_sessionfinish` hook (no workflow edit needed). TS: `TypeScript unit test observability summary` step, `if: always()` | [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md) — **met**: Python side closed via merged [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) fix (`conftest.py`); TS side applied in commit `cd698b0`, also closing #636 |
 
-## Why SLOs 2, 3, 7, 8, and 9 (TS half) Are Reported as Unmet
+## Why SLOs 2 and 3 Are Reported as Unmet
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
@@ -58,28 +58,25 @@ aspirational, already-healthy state:
   `schedule`-triggered leg (run 35567533814, 2026-09-21T06:13:34Z) have
   reconfirmed recovery; see the runbook's dated update for the outage's full
   closure.
-- **SLO 7** depends on the same class of workflow-file change as SLO 3: a validated
-  diff exists (adding a final `if: always()` summary step to `fuzz.yml`'s `fuzz-json`
-  job) but eight prior automated attempts to push it were all rejected by GitHub for
-  lacking the `workflows` App permission — see
-  [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) for the preserved,
-  ready-to-apply diff and [issue #597](https://github.com/kubestellar/console-marketplace/issues/597).
-- **SLO 8** is the same class of gap as SLO 7, for `validate-json.yml` instead of
-  `fuzz.yml`: the check logic has been extracted into a tested, standalone
-  `scripts/validate_json_summary.py` (unit tests in
-  `tests/test_validate_json_summary.py`), but wiring a call to it into
-  `validate-json.yml`'s `validate` job needs the same `workflows` App permission
-  automated PRs from this project do not carry — see
+- **SLO 7** and **SLO 8** are now met: the ready-to-apply diffs were applied
+  directly to `.github/workflows/fuzz.yml` and `.github/workflows/validate-json.yml`
+  in commit `378cfdf` ("wire step-summary into fuzz.yml and validate-json.yml"),
+  landed by a differently-scoped automation run that carries the `workflows`
+  GitHub App permission — not by telemetry. See
+  [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) and
   [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) for the
-  ready-to-apply step and [issue #621](https://github.com/kubestellar/console-marketplace/issues/621).
-- **SLO 9** is met on its Python half: a merged `conftest.py` hook (closing
+  applied diffs, and [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) /
+  [issue #621](https://github.com/kubestellar/console-marketplace/issues/621), both closed.
+- **SLO 9** is met on both halves. Its Python half was met first: a merged
+  `conftest.py` hook (closing
   [issue #636](https://github.com/kubestellar/console-marketplace/issues/636))
   writes a structured summary for every `python-unit-tests.yml` run with no
-  workflow-file edit required. Its TypeScript half is the same class of gap as
-  SLO 3/7/8: `ts-unit-tests.yml` needs a workflow-file change automated PRs cannot
-  land — see
+  workflow-file edit required. Its TypeScript half was the same class of gap as
+  SLO 7/8 and is now closed the same way: the ready-to-apply diff was applied to
+  `.github/workflows/ts-unit-tests.yml` in commit `cd698b0` ("add CI summary to
+  ts-unit-tests.yml") — see
   [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md)
-  for the preserved, ready-to-apply diff.
+  for both applied diffs.
 
 ## Reviewing These SLOs
 
@@ -88,9 +85,9 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2, SLO 3, SLO 7, SLO 8, or the TS half of SLO 9 as met until
-the corresponding gap above is actually closed — verify by re-reading the referenced
-workflow/settings, not by assuming a linked issue was resolved. SLO 5 and SLO 6 are
-marked met above because their mechanism (`workflow-failure-issue.yml`) is merged and
-present on `main` today — re-verify that file still exists and still lists all four
-workflow names before relying on this note.
+Do not mark SLO 2 or SLO 3 as met until the corresponding gap above is actually
+closed — verify by re-reading the referenced workflow/settings, not by assuming a
+linked issue was resolved. SLO 5, SLO 6, SLO 7, SLO 8, and SLO 9 are marked met above
+because their mechanisms are merged and present on `main` today — re-verify the
+referenced workflow file(s) still contain the summary/alert step(s) before relying on
+this note.
