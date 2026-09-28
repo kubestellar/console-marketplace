@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Server } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
-import { ClusterBadge } from '../ui/ClusterBadge'
+import { ClusterBadge } from '../../ui/ClusterBadge'
 import {
   CardSearchInput,
   CardControlsRow,

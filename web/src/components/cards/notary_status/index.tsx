@@ -8,7 +8,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
-import { ClusterBadge } from '../ui/ClusterBadge'
+import { ClusterBadge } from '../../ui/ClusterBadge'
 import {
   CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'

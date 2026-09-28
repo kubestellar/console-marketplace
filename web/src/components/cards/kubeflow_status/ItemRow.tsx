@@ -1,60 +1,19 @@
 import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle,
   ChevronRight,
   Server,
   Play,
+  Clock,
   FlaskConical,
   BookOpen,
   Cpu,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { ClusterBadge } from '../ui/ClusterBadge'
+import { ClusterBadge } from '../../ui/ClusterBadge'
 import { CardAIActions } from '../../../lib/cards/CardComponents'
 import { ICON_COLOR_CLASS, BADGE_COLOR_CLASS } from '../shared/colorClasses'
+import { getStatusIcon, getStatusColor } from '../shared/statusVocabulary'
+import { formatRelativeTime } from '../shared/timeOffsets'
 import type { KubeflowDisplayItem } from './types'
-
-function getStatusIcon(status: string) {
-  switch (status) {
-    case 'succeeded':
-    case 'healthy':
-      return CheckCircle
-    case 'failed':
-    case 'error':
-      return XCircle
-    case 'running':
-    case 'active':
-    case 'building':
-      return Play
-    case 'pending':
-    case 'created':
-      return Clock
-    default:
-      return AlertTriangle
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'succeeded':
-    case 'healthy':
-      return 'green'
-    case 'failed':
-    case 'error':
-      return 'red'
-    case 'running':
-    case 'active':
-    case 'building':
-      return 'blue'
-    case 'pending':
-    case 'created':
-      return 'yellow'
-    default:
-      return 'orange'
-  }
-}
 
 function getCategoryIcon(category: string) {
   switch (category) {
@@ -71,16 +30,8 @@ function getCategoryIcon(category: string) {
   }
 }
 
-function formatTime(timestamp: string, t: ReturnType<typeof useTranslation>['t']) {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  if (diff < 3600000)
-    return `${Math.max(1, Math.floor(diff / 60000))}m ${t('kubeflowStatus.ago')}`
-  if (diff < 86400000)
-    return `${Math.floor(diff / 3600000)}h ${t('kubeflowStatus.ago')}`
-  return `${Math.floor(diff / 86400000)}d ${t('kubeflowStatus.ago')}`
-}
+const KUBEFLOW_STATUS_ICON = { building: Play, created: Clock }
+const KUBEFLOW_STATUS_COLOR = { building: 'blue', created: 'yellow' }
 
 /** A single Kubeflow resource row within the resource list. */
 export function ItemRow({ item }: { item: KubeflowDisplayItem }) {
@@ -101,9 +52,9 @@ export function ItemRow({ item }: { item: KubeflowDisplayItem }) {
     }
   }
 
-  const StatusIcon = getStatusIcon(item.status)
+  const StatusIcon = getStatusIcon(item.status, KUBEFLOW_STATUS_ICON)
   const CategoryIcon = getCategoryIcon(item.category)
-  const color = getStatusColor(item.status)
+  const color = getStatusColor(item.status, KUBEFLOW_STATUS_COLOR)
 
   return (
     <div
@@ -182,7 +133,9 @@ export function ItemRow({ item }: { item: KubeflowDisplayItem }) {
           className="ml-auto shrink-0 whitespace-nowrap"
           title={new Date(item.timestamp).toLocaleString()}
         >
-          {formatTime(item.timestamp, t)}
+          {formatRelativeTime(item.timestamp, t('kubeflowStatus.ago'), {
+            subMinute: 'clampToOneMinute',
+          })}
         </span>
       </div>
     </div>

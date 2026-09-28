@@ -10,7 +10,7 @@
  *   import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../test/cardTestHelpers'
  *
  *   vi.mock('../ui/Skeleton', () => mockSkeletonModule('coredns-skeleton'))
- *   vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
+ *   vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
  *   vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
  */
 
