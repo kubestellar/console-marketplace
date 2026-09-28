@@ -45,11 +45,13 @@ import { ItemRow } from './ItemRow'
 import {
   ICON_COLOR_CLASS,
   BADGE_COLOR_CLASS,
-  MS_PER_MINUTE,
-  MS_PER_HOUR,
-  MS_PER_DAY,
   type OpenKruiseDisplayItem,
 } from './types'
+import {
+  ONE_MINUTE_MS as MS_PER_MINUTE,
+  ONE_HOUR_MS as MS_PER_HOUR,
+  ONE_DAY_MS as MS_PER_DAY,
+} from '../shared/timeOffsets'
 
 const NOW = new Date('2026-06-01T12:00:00.000Z')
 

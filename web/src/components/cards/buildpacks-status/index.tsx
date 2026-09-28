@@ -1,6 +1,6 @@
 import { Package } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
-import { ClusterBadge } from '../ui/ClusterBadge'
+import { ClusterBadge } from '../../ui/ClusterBadge'
 import { CardSearchInput, CardPaginationFooter } from '../../../lib/cards/CardComponents'
 import { useCardShell } from '../../../lib/cards/useCardShell'
 import { type BuildpacksDemoImage, type BuildpacksDemoData } from './demoData'

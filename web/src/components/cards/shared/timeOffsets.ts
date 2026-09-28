@@ -40,3 +40,30 @@ export function hoursAgoIso(n: number): string {
 export function daysAgoIso(n: number): string {
   return new Date(Date.now() - n * ONE_DAY_MS).toISOString()
 }
+
+export interface FormatRelativeTimeOptions {
+  /**
+   * How to render timestamps less than a minute old:
+   * 'lessThanOne' -> `<1m ago` (default), 'clampToOneMinute' -> `1m ago`.
+   */
+  subMinute?: 'lessThanOne' | 'clampToOneMinute'
+}
+
+/** Format an ISO timestamp as a compact "5m ago" / "3h ago" / "2d ago" string. */
+export function formatRelativeTime(
+  timestamp: string,
+  agoLabel: string,
+  opts: FormatRelativeTimeOptions = {},
+): string {
+  const diff = Date.now() - new Date(timestamp).getTime()
+  if (diff < ONE_MINUTE_MS) {
+    return opts.subMinute === 'clampToOneMinute'
+      ? `1m ${agoLabel}`
+      : `<1m ${agoLabel}`
+  }
+  if (diff < ONE_HOUR_MS)
+    return `${Math.floor(diff / ONE_MINUTE_MS)}m ${agoLabel}`
+  if (diff < ONE_DAY_MS)
+    return `${Math.floor(diff / ONE_HOUR_MS)}h ${agoLabel}`
+  return `${Math.floor(diff / ONE_DAY_MS)}d ${agoLabel}`
+}

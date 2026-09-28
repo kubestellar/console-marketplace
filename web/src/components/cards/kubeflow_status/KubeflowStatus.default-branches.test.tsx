@@ -38,7 +38,7 @@ vi.mock('../../../hooks/useMCP', () => ({
 
 vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
-vi.mock('../ui/ClusterBadge', () => mockClusterBadgeModule())
+vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('kubeflow'),

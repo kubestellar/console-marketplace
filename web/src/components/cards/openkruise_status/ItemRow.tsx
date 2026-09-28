@@ -1,11 +1,7 @@
 import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle,
   ChevronRight,
   Server,
-  Play,
+  Clock,
   Layers,
   Database,
   HardDrive,
@@ -20,56 +16,20 @@ import { CardAIActions } from '../../../lib/cards/CardComponents'
 import {
   ICON_COLOR_CLASS,
   BADGE_COLOR_CLASS,
-  MS_PER_MINUTE,
-  MS_PER_HOUR,
-  MS_PER_DAY,
   type OpenKruiseDisplayItem,
 } from './types'
+import { getStatusIcon, getStatusColor } from '../shared/statusVocabulary'
+import { formatRelativeTime } from '../shared/timeOffsets'
 
-type TFunctionCards = ReturnType<typeof useTranslation>['t']
-
-function getStatusIcon(status: string) {
-  switch (status) {
-    case 'succeeded':
-    case 'healthy':
-      return CheckCircle
-    case 'failed':
-    case 'error':
-      return XCircle
-    case 'running':
-    case 'active':
-      return Play
-    case 'updating':
-    case 'pending':
-      return Clock
-    case 'suspended':
-    case 'paused':
-      return PauseCircle
-    default:
-      return AlertTriangle
-  }
+const OPENKRUISE_STATUS_ICON = {
+  updating: Clock,
+  suspended: PauseCircle,
+  paused: PauseCircle,
 }
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'succeeded':
-    case 'healthy':
-      return 'green'
-    case 'failed':
-    case 'error':
-      return 'red'
-    case 'running':
-    case 'active':
-      return 'blue'
-    case 'updating':
-    case 'pending':
-      return 'yellow'
-    case 'suspended':
-    case 'paused':
-      return 'gray'
-    default:
-      return 'orange'
-  }
+const OPENKRUISE_STATUS_COLOR = {
+  updating: 'yellow',
+  suspended: 'gray',
+  paused: 'gray',
 }
 
 function getCategoryIcon(category: string) {
@@ -89,18 +49,6 @@ function getCategoryIcon(category: string) {
     default:
       return Server
   }
-}
-
-function formatTime(timestamp: string, t: TFunctionCards) {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  if (diff < MS_PER_MINUTE) return `<1m ${t('openkruiseStatus.ago')}`
-  if (diff < MS_PER_HOUR)
-    return `${Math.max(1, Math.floor(diff / MS_PER_MINUTE))}m ${t('openkruiseStatus.ago')}`
-  if (diff < MS_PER_DAY)
-    return `${Math.floor(diff / MS_PER_HOUR)}h ${t('openkruiseStatus.ago')}`
-  return `${Math.floor(diff / MS_PER_DAY)}d ${t('openkruiseStatus.ago')}`
 }
 
 /** A single OpenKruise resource row within the resource list. */
@@ -126,9 +74,9 @@ export function ItemRow({ item }: { item: OpenKruiseDisplayItem }) {
     }
   }
 
-  const StatusIcon = getStatusIcon(item.status)
+  const StatusIcon = getStatusIcon(item.status, OPENKRUISE_STATUS_ICON)
   const CategoryIcon = getCategoryIcon(item.category)
-  const color = getStatusColor(item.status)
+  const color = getStatusColor(item.status, OPENKRUISE_STATUS_COLOR)
   const isFailedLike =
     item.status === 'failed' ||
     item.status === 'error' ||
@@ -216,7 +164,7 @@ export function ItemRow({ item }: { item: OpenKruiseDisplayItem }) {
           className="ml-auto shrink-0 whitespace-nowrap"
           title={new Date(item.timestamp).toLocaleString()}
         >
-          {formatTime(item.timestamp, t)}
+          {formatRelativeTime(item.timestamp, t('openkruiseStatus.ago'))}
         </span>
       </div>
     </div>
