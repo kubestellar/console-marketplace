@@ -74,12 +74,12 @@ jobs:
 
       - name: TypeScript unit test observability summary
         if: always()
+        env:
+          VITEST_OUTCOME: ${{ steps.vitest-run.outcome }}
+          TESTS_PASSED: ${{ steps.vitest-run.outputs.tests_passed || 0 }}
+          TESTS_FAILED: ${{ steps.vitest-run.outputs.tests_failed || 0 }}
+          TEST_FILES_SUMMARY: ${{ steps.vitest-run.outputs.test_files_summary || 'N/A' }}
         run: |
-          VITEST_OUTCOME="${{ steps.vitest-run.outcome }}"
-          TESTS_PASSED="${{ steps.vitest-run.outputs.tests_passed || 0 }}"
-          TESTS_FAILED="${{ steps.vitest-run.outputs.tests_failed || 0 }}"
-          TEST_FILES_SUMMARY="${{ steps.vitest-run.outputs.test_files_summary || 'N/A' }}"
-
           if [ "$VITEST_OUTCOME" = "success" ]; then
             OVERALL_STATUS="pass"
           else
