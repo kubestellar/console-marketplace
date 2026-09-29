@@ -12,6 +12,7 @@ on:
       - "CodeQL Analysis"
       - "OpenSSF Scorecard"
       - "Stale Issues"
+      - "Marketplace Auto-QA"
     types:
       - completed
 
