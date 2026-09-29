@@ -8,13 +8,12 @@ import {
   CardControlsRow,
   CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'
-import { useCardData } from '../../../lib/cards/cardHooks'
-import { useCardLoadingState } from '../CardDataContext'
-import { useDemoMode } from '../../../hooks/useDemoMode'
-import { useGlobalFilters } from '../../../hooks/useGlobalFilters'
-import { useTranslation } from 'react-i18next'
-import { useOpenKruiseStatus } from './useOpenKruiseStatus'
-import { useDisplayItems } from './useDisplayItems'
+import { useCardShell } from '../../../lib/cards/useCardShell'
+import {
+  useOpenKruiseStatus,
+  type OpenKruiseStatus as OpenKruiseStatusData,
+} from './useOpenKruiseStatus'
+import { mapToDisplayItems } from './useDisplayItems'
 import { ItemRow } from './ItemRow'
 import {
   SORT_OPTIONS_KEYS,
@@ -30,8 +29,65 @@ interface OpenKruiseStatusProps {
   }
 }
 
+// The card renders skeleton/empty when the raw data has no resources at
+// all, across all six OpenKruise resource families.
+const hasAnyData = (raw: OpenKruiseStatusData) =>
+  raw.cloneSets.length > 0 ||
+  raw.advancedStatefulSets.length > 0 ||
+  raw.advancedDaemonSets.length > 0 ||
+  raw.sidecarSets.length > 0 ||
+  raw.broadcastJobs.length > 0 ||
+  raw.advancedCronJobs.length > 0
+
 export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
-  const { t } = useTranslation(['cards', 'common'])
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption>(
+    '' as CategoryOption,
+  )
+
+  const {
+    t,
+    raw: rawData,
+    showSkeleton,
+    showEmptyState,
+    rows: globalFiltered,
+    card: {
+      items: displayItems,
+      totalItems,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      goToPage,
+      needsPagination,
+      setItemsPerPage,
+      filters: {
+        search: localSearch,
+        setSearch: setLocalSearch,
+        localClusterFilter,
+        toggleClusterFilter,
+        clearClusterFilter,
+        availableClusters,
+        showClusterFilter,
+        setShowClusterFilter,
+        clusterFilterRef,
+      },
+      sorting: { sortBy, setSortBy, sortDirection, setSortDirection },
+      containerRef,
+      containerStyle,
+    },
+  } = useCardShell<OpenKruiseStatusData, OpenKruiseDisplayItem, SortByOption>({
+    useStatus: useOpenKruiseStatus,
+    toRows: mapToDisplayItems,
+    hasAnyData,
+    // Apply the in-card resource-type selector *after* the global cluster
+    // filter and *before* pagination, so the page counts match the visible
+    // list. `globalFiltered` (returned as `rows`) still reflects the
+    // pre-category set for the summary badges below.
+    filterRows: rows =>
+      selectedCategory
+        ? rows.filter(item => item.category === selectedCategory)
+        : rows,
+  })
+
   const SORT_OPTIONS = useMemo(
     () =>
       SORT_OPTIONS_KEYS.map(opt => ({
@@ -41,66 +97,7 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
     [t],
   )
 
-  // --- Required hooks ---
-  const { isDemoMode } = useDemoMode()
-  const { selectedClusters } = useGlobalFilters()
-
-  const [selectedCategory, setSelectedCategory] = useState<CategoryOption>(
-    '' as CategoryOption,
-  )
-
-  // Live data comes from useOpenKruiseStatus (backed by useCache). It falls
-  // back to OPENKRUISE_DEMO_DATA via useCache's demoWhenEmpty path when the
-  // fetcher fails or returns nothing, so the card always has something to
-  // render.
-  const {
-    data: rawData,
-    isLoading: dataLoading,
-    isDemoFallback,
-  } = useOpenKruiseStatus()
-
-  // isDemoData is true whenever we're showing demo-sourced data — explicit
-  // demo mode or the live fetcher fell back.
-  const isDemoData = isDemoMode || isDemoFallback
-
-  const { showSkeleton, showEmptyState } = useCardLoadingState({ isLoading: dataLoading, isDemoData })
-
-  // Transform every OpenKruise resource into a unified display item, then
-  // apply the global cluster filter and the resource-type selector.
-  const { globalFiltered, categoryFiltered } = useDisplayItems(
-    rawData,
-    t,
-    selectedClusters,
-    selectedCategory,
-  )
-
-  // Shared card data hook (filter, sort, paginate)
-  const {
-    items: displayItems,
-    totalItems,
-    currentPage,
-    totalPages,
-    itemsPerPage,
-    goToPage,
-    needsPagination,
-    setItemsPerPage,
-    filters: {
-      search: localSearch,
-      setSearch: setLocalSearch,
-      localClusterFilter,
-      toggleClusterFilter,
-      clearClusterFilter,
-      availableClusters,
-      showClusterFilter,
-      setShowClusterFilter,
-      clusterFilterRef,
-    },
-    sorting: { sortBy, setSortBy, sortDirection, setSortDirection },
-    containerRef,
-    containerStyle,
-  } = useCardData<OpenKruiseDisplayItem, SortByOption>(categoryFiltered)
-
-  // Summary counts (from global+category filtered set, before search)
+  // Summary counts (from global-filtered set, before category + search)
   const healthyCount = globalFiltered.filter(
     i => i.status === 'healthy' || i.status === 'succeeded',
   ).length
