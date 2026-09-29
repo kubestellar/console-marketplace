@@ -7,13 +7,11 @@ import {
   Server,
   Wifi,
 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 import { Skeleton, SkeletonStats, SkeletonList } from '../../ui/Skeleton'
 import { CardSearchInput } from '../../../lib/cards/CardComponents'
-import { useCardLoadingState } from '../CardDataContext'
-import { useDemoMode } from '../../../hooks/useDemoMode'
+import { useCardShell, type ClusterScopedRow } from '../../../lib/cards/useCardShell'
 import { useGlobalFilters } from '../../../hooks/useGlobalFilters'
-import { useOpenYurtStatus } from './useOpenYurtStatus'
+import { useOpenYurtStatus, type OpenYurtStatus as OpenYurtStatusData } from './useOpenYurtStatus'
 import { StatTile, NodePoolRow, GatewayRow, DemoBadge, useFormatRelativeTime } from './components'
 
 interface OpenYurtStatusProps {
@@ -26,23 +24,42 @@ interface OpenYurtStatusProps {
 // Main component
 // ---------------------------------------------------------------------------
 
+// The card renders node pools / gateways from `raw` directly (the fetch is
+// already scoped to one cluster), so the shell's row pipeline is unused.
+const toRows = (): ClusterScopedRow[] => []
+
+const hasAnyData = (raw: OpenYurtStatusData) =>
+  (raw.nodePools?.length ?? 0) > 0 ||
+  (raw.gateways?.length ?? 0) > 0 ||
+  (raw.controllerPods?.total ?? 0) > 0
+
 export function OpenYurtStatus({ config }: OpenYurtStatusProps = {}) {
-  const { t } = useTranslation('cards')
-  const { isDemoMode } = useDemoMode()
   const { selectedClusters } = useGlobalFilters()
   const formatRelativeTime = useFormatRelativeTime()
 
   // Resolve the cluster for cluster-scoped endpoints. Config wins, then the
   // first globally-selected cluster, else undefined (single-cluster context).
   const cluster = config?.cluster ?? selectedClusters?.[0]
+  const useClusterStatus = () => useOpenYurtStatus(cluster)
 
   const {
-    data,
-    isLoading,
+    t,
+    raw: data,
+    isDemoData,
+    isDemoMode,
     isRefreshing,
     isFailed,
-    isDemoFallback,
-  } = useOpenYurtStatus(cluster)
+    showSkeleton,
+    showEmptyState,
+  } = useCardShell<
+    OpenYurtStatusData,
+    ClusterScopedRow
+  >({
+    useStatus: useClusterStatus,
+    toRows,
+    hasAnyData,
+    translationNs: 'cards',
+  })
 
   const [search, setSearch] = useState('')
 
@@ -50,19 +67,7 @@ export function OpenYurtStatus({ config }: OpenYurtStatusProps = {}) {
   const gateways = data.gateways || []
   const controllerPods = data.controllerPods || { ready: 0, total: 0 }
   const fetchError = data.fetchError ?? null
-
-  // isDemoData is true whenever we're showing demo-sourced data — either the
-  // user flipped demo mode explicitly, or the live fetcher failed/returned
-  // nothing and useCache fell back to OPENYURT_DEMO_DATA. Mirrors the
-  // pattern from Resource Quota / Ingress (PRs #9356, #9357).
-  const isDemoData = isDemoMode || isDemoFallback
-
-  const hasAnyData =
-    nodePools.length > 0 ||
-    gateways.length > 0 ||
-    controllerPods.total > 0
-
-  const { showSkeleton, showEmptyState } = useCardLoadingState({ isLoading, hasAnyData, isFailed })
+  const hasData = hasAnyData(data)
 
   const stats = {
     totalPools: nodePools.length,
@@ -98,7 +103,7 @@ export function OpenYurtStatus({ config }: OpenYurtStatusProps = {}) {
   }
 
   // ── Hard error with no cached data: render a scoped error message ────────
-  if (showEmptyState && isFailed && !hasAnyData && !isDemoData) {
+  if (showEmptyState && isFailed && !hasData && !isDemoData) {
     const msg = fetchError
       ? t(`openyurt.fetchError_${fetchError.resource}`, {
           defaultValue:
