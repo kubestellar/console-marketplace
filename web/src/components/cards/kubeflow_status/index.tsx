@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Server } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../../ui/ClusterBadge'
@@ -7,14 +7,11 @@ import {
   CardControlsRow,
   CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'
-import { useCardData } from '../../../lib/cards/cardHooks'
-import { useCardLoadingState } from '../CardDataContext'
-import { useDemoMode } from '../../../hooks/useDemoMode'
-import { useGlobalFilters } from '../../../hooks/useGlobalFilters'
-import { useTranslation } from 'react-i18next'
+import { useCardShell } from '../../../lib/cards/useCardShell'
 import { useKubeflowStatus } from './useKubeflowStatus'
-import { useDisplayItems } from './useDisplayItems'
+import { mapToDisplayItems } from './useDisplayItems'
 import { ItemRow } from './ItemRow'
+import type { KubeflowDemoData } from './demoData'
 import {
   SORT_OPTIONS_KEYS,
   type CategoryOption,
@@ -29,8 +26,61 @@ interface KubeflowStatusProps {
   }
 }
 
-export function KubeflowStatus({ config }: KubeflowStatusProps) {
-  const { t } = useTranslation(['cards', 'common'])
+// The card renders skeleton/empty when the raw data has no resources at all.
+const hasAnyData = (raw: KubeflowDemoData) =>
+  raw.pipelineRuns.length > 0 ||
+  raw.experiments.length > 0 ||
+  raw.notebooks.length > 0 ||
+  raw.trainingJobs.length > 0
+
+export function KubeflowStatus({ config: _config }: KubeflowStatusProps) {
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption>(
+    '' as CategoryOption,
+  )
+
+  const {
+    t,
+    showSkeleton,
+    showEmptyState,
+    rows: globalFiltered,
+    card: {
+      items: displayItems,
+      totalItems,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      goToPage,
+      needsPagination,
+      setItemsPerPage,
+      filters: {
+        search: localSearch,
+        setSearch: setLocalSearch,
+        localClusterFilter,
+        toggleClusterFilter,
+        clearClusterFilter,
+        availableClusters,
+        showClusterFilter,
+        setShowClusterFilter,
+        clusterFilterRef,
+      },
+      sorting: { sortBy, setSortBy, sortDirection, setSortDirection },
+      containerRef,
+      containerStyle,
+    },
+  } = useCardShell<KubeflowDemoData, KubeflowDisplayItem, SortByOption>({
+    useStatus: useKubeflowStatus,
+    toRows: mapToDisplayItems,
+    hasAnyData,
+    // Apply the in-card resource-type selector *after* the global cluster
+    // filter and *before* pagination, so the page counts match the visible
+    // list. `globalFiltered` (returned as `rows`) still reflects the
+    // pre-category set for the summary badges below.
+    filterRows: rows =>
+      selectedCategory
+        ? rows.filter(item => item.category === selectedCategory)
+        : rows,
+  })
+
   const SORT_OPTIONS = useMemo(
     () =>
       SORT_OPTIONS_KEYS.map(opt => ({
@@ -40,77 +90,7 @@ export function KubeflowStatus({ config }: KubeflowStatusProps) {
     [t],
   )
 
-  // --- 1. useCardLoadingState  (required hook #1) ---
-  // --- 2. useDemoMode          (required hook #2) ---
-  // --- 3. useGlobalFilters     (required hook #3) ---
-  // --- 4. useTranslation       (required hook #4, already called above) ---
-  // --- 5. isDemoData wiring    (required pattern #5, see below) ---
-
-  const { isDemoMode } = useDemoMode()
-  const { selectedClusters } = useGlobalFilters()
-
-  const [selectedCategory, setSelectedCategory] = useState<CategoryOption>(
-    '' as CategoryOption,
-  )
-
-  // Live data comes from useKubeflowStatus (backed by useCache). It falls
-  // back to KUBEFLOW_DEMO_DATA via useCache's demoWhenEmpty path when the
-  // fetcher fails or returns nothing, so the card always has something to
-  // render.
-  const {
-    data: rawData,
-    isLoading: dataLoading,
-    isRefreshing: dataRefreshing,
-    isDemoFallback,
-  } = useKubeflowStatus()
-
-  // isDemoData is true whenever we're showing demo-sourced data — explicit
-  // demo mode or the live fetcher fell back.
-  const isDemoData = isDemoMode || isDemoFallback
-
-  // #1 + #5  Report loading / demo state to CardWrapper
-  const { showSkeleton, showEmptyState } = useCardLoadingState({
-    isLoading: dataLoading,
-    isRefreshing: dataRefreshing,
-    isDemoData,
-  })
-
-  // #3  Transform every Kubeflow resource into a unified display item,
-  // then apply the global cluster filter and the resource-type selector.
-  const { globalFiltered, categoryFiltered } = useDisplayItems(
-    rawData,
-    t,
-    selectedClusters,
-    selectedCategory,
-  )
-
-  // Shared card data hook (filter, sort, paginate) --------------------
-  const {
-    items: displayItems,
-    totalItems,
-    currentPage,
-    totalPages,
-    itemsPerPage,
-    goToPage,
-    needsPagination,
-    setItemsPerPage,
-    filters: {
-      search: localSearch,
-      setSearch: setLocalSearch,
-      localClusterFilter,
-      toggleClusterFilter,
-      clearClusterFilter,
-      availableClusters,
-      showClusterFilter,
-      setShowClusterFilter,
-      clusterFilterRef,
-    },
-    sorting: { sortBy, setSortBy, sortDirection, setSortDirection },
-    containerRef,
-    containerStyle,
-  } = useCardData<KubeflowDisplayItem, SortByOption>(categoryFiltered)
-
-  // Summary counts (from global+category filtered set, before search)
+  // Summary counts (from global-filtered set, before category + search)
   const activeCount = globalFiltered.filter(
     i =>
       i.status === 'running' ||

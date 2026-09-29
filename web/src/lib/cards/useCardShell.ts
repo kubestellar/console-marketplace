@@ -34,6 +34,18 @@ export interface CardShellOptions<TRaw, TRow extends ClusterScopedRow> {
   cardOptions?: CardDataOptions
   /** i18n namespaces for `useTranslation`. Defaults to `['cards', 'common']`. */
   translationNs?: string | string[]
+  /**
+   * Optional filter applied *after* the global cluster selector and *before*
+   * `useCardData`. Used by cards that expose an in-card category / type
+   * selector (e.g. `kubeflow_status` filtering by resource kind). The shell
+   * still returns the pre-filter `rows` for card-level aggregates so a card
+   * can show "5 of 12" style summaries.
+   *
+   * The predicate is invoked inside a `useMemo(rows, filterRows)`; passing a
+   * new function identity each render is fine — it re-runs whenever the
+   * cluster-filtered rows or the predicate change.
+   */
+  filterRows?: (rows: TRow[]) => TRow[]
 }
 
 /**
@@ -84,7 +96,7 @@ export function useCardShell<
   TRow extends ClusterScopedRow,
   SortKey extends string = string,
 >(options: CardShellOptions<TRaw, TRow>): CardShellResult<TRaw, TRow, SortKey> {
-  const { useStatus, toRows, hasAnyData, cardOptions, translationNs } = options
+  const { useStatus, toRows, hasAnyData, cardOptions, translationNs, filterRows } = options
 
   const { t } = useTranslation(translationNs ?? [...DEFAULT_TRANSLATION_NAMESPACES])
   const { isDemoMode } = useDemoMode()
@@ -103,7 +115,11 @@ export function useCardShell<
 
   const allRows = useMemo(() => toRows(raw, t), [raw, t, toRows])
   const rows = useClusterFilteredRows(allRows, selectedClusters)
-  const card = useCardData<TRow, SortKey>(rows, cardOptions)
+  const filteredRows = useMemo(
+    () => (filterRows ? filterRows(rows) : rows),
+    [rows, filterRows],
+  )
+  const card = useCardData<TRow, SortKey>(filteredRows, cardOptions)
 
   return { t, raw, isDemoData, isDemoMode, isRefreshing, isFailed, showSkeleton, showEmptyState, rows, card }
 }

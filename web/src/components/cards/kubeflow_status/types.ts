@@ -2,9 +2,9 @@
  * Shared types and constants for the Kubeflow status card.
  *
  * Extracted from index.tsx so the display-item shape and sort-option types
- * can be reused by the mapping hook (useDisplayItems.ts) and the
- * presentational row component (ItemRow.tsx) without pulling in the full
- * container component.
+ * can be reused by the pure `mapToDisplayItems` helper (useDisplayItems.ts)
+ * and the presentational row component (ItemRow.tsx) without pulling in the
+ * full container component.
  */
 
 import type { CardDisplayItem } from '../shared/CardDisplayItem'

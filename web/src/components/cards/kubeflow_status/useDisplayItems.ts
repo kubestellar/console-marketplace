@@ -1,6 +1,4 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useClusterFilteredRows } from '../shared/useClusterFilteredRows'
 import type { KubeflowDemoData } from './demoData'
 import type { KubeflowDisplayItem } from './types'
 
@@ -12,7 +10,9 @@ type TFunction = ReturnType<typeof useTranslation>['t']
  * the card renders.
  *
  * Kept as a standalone function (rather than inline in a useMemo) so it can
- * be unit tested without mounting the component.
+ * be unit tested without mounting the component. The `KubeflowStatus` card
+ * plugs this directly into `useCardShell`'s `toRows`; the shell then applies
+ * the global cluster filter, the in-card resource-type filter, and pagination.
  */
 export function mapToDisplayItems(
   rawData: KubeflowDemoData,
@@ -93,27 +93,4 @@ export function mapToDisplayItems(
   }
 
   return items
-}
-
-/**
- * Transforms raw Kubeflow data into display items, then applies the global
- * cluster filter and the resource-type (category) selector. Sorting and
- * search are handled downstream by the shared `useCardData` hook.
- */
-export function useDisplayItems(
-  rawData: KubeflowDemoData,
-  t: TFunction,
-  selectedClusters: string[] | undefined,
-  selectedCategory: string,
-) {
-  const allItems = useMemo(() => mapToDisplayItems(rawData, t), [rawData, t])
-
-  const globalFiltered = useClusterFilteredRows(allItems, selectedClusters)
-
-  const categoryFiltered = useMemo(() => {
-    if (!selectedCategory) return globalFiltered
-    return globalFiltered.filter(item => item.category === selectedCategory)
-  }, [globalFiltered, selectedCategory])
-
-  return { allItems, globalFiltered, categoryFiltered }
 }
