@@ -99,4 +99,30 @@ describe('useGlobalFilters', () => {
 
     expect(result.current.selectedClusters).toEqual([])
   })
+
+  it('setSelectedClusters accepts a functional updater that receives the current selection', () => {
+    const { result } = renderHook(() => useGlobalFilters())
+
+    act(() => {
+      result.current.setSelectedClusters(['cluster-a'])
+    })
+    act(() => {
+      result.current.setSelectedClusters((current) => [...current, 'cluster-b'])
+    })
+
+    expect(result.current.selectedClusters).toEqual(['cluster-a', 'cluster-b'])
+  })
+
+  it('toggleCluster, setSelectedClusters and clearSelectedClusters keep stable references across renders', () => {
+    const { result, rerender } = renderHook(() => useGlobalFilters())
+    const firstToggle = result.current.toggleCluster
+    const firstSet = result.current.setSelectedClusters
+    const firstClear = result.current.clearSelectedClusters
+
+    rerender()
+
+    expect(result.current.toggleCluster).toBe(firstToggle)
+    expect(result.current.setSelectedClusters).toBe(firstSet)
+    expect(result.current.clearSelectedClusters).toBe(firstClear)
+  })
 })

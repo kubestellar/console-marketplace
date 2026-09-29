@@ -29,4 +29,15 @@ describe('useClusters (marketplace stub)', () => {
     const { result } = renderHook(() => useClusters())
     await expect(result.current.refetch()).resolves.toBeUndefined()
   })
+
+  it('remains idle after refetch — a rerender still observes empty/non-loading/non-error state', async () => {
+    const { result, rerender } = renderHook(() => useClusters())
+
+    await expect(result.current.refetch()).resolves.toBeUndefined()
+    rerender()
+
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.error).toBeNull()
+    expect(result.current.clusters).toEqual([])
+  })
 })
