@@ -49,6 +49,10 @@ export interface CardShellResult<TRaw, TRow extends ClusterScopedRow, SortKey ex
   raw: TRaw
   /** `isDemoMode || isDemoFallback` — true whenever demo-sourced data is on screen. */
   isDemoData: boolean
+  /** Explicit demo-mode toggle (excludes `isDemoFallback`). */
+  isDemoMode: boolean
+  isRefreshing: boolean
+  isFailed: boolean
   showSkeleton: boolean
   showEmptyState: boolean
   /** All rows after the global cluster selector, before search / sort / paging. */
@@ -101,5 +105,5 @@ export function useCardShell<
   const rows = useClusterFilteredRows(allRows, selectedClusters)
   const card = useCardData<TRow, SortKey>(rows, cardOptions)
 
-  return { t, raw, isDemoData, showSkeleton, showEmptyState, rows, card }
+  return { t, raw, isDemoData, isDemoMode, isRefreshing, isFailed, showSkeleton, showEmptyState, rows, card }
 }
