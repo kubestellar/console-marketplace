@@ -7,18 +7,12 @@
  * container component.
  */
 
+import type { CardDisplayItem } from '../shared/CardDisplayItem'
+
 /** Unified display item that all four Kubeflow resource types map into. */
-export interface KubeflowDisplayItem {
-  id: string
-  name: string
-  namespace: string
-  cluster: string
-  category: 'pipeline' | 'experiment' | 'notebook' | 'training'
-  status: string
-  primaryDetail: string
-  secondaryDetail: string
-  timestamp: string
-}
+export type KubeflowDisplayItem = CardDisplayItem<
+  'pipeline' | 'experiment' | 'notebook' | 'training'
+>
 
 export type CategoryOption = '' | 'pipeline' | 'experiment' | 'notebook' | 'training'
 export type SortByOption = 'status' | 'name' | 'category' | 'timestamp'

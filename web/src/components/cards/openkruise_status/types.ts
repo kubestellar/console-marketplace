@@ -7,24 +7,17 @@
  * without pulling in the full container component.
  */
 
+import type { CardDisplayItem } from '../shared/CardDisplayItem'
+
 /** Unified display item that all OpenKruise resource types map into. */
-export interface OpenKruiseDisplayItem {
-  id: string
-  name: string
-  namespace: string
-  cluster: string
-  category:
-    | 'cloneset'
-    | 'statefulset'
-    | 'daemonset'
-    | 'sidecarset'
-    | 'broadcastjob'
-    | 'cronjob'
-  status: string
-  primaryDetail: string
-  secondaryDetail: string
-  timestamp: string
-}
+export type OpenKruiseDisplayItem = CardDisplayItem<
+  | 'cloneset'
+  | 'statefulset'
+  | 'daemonset'
+  | 'sidecarset'
+  | 'broadcastjob'
+  | 'cronjob'
+>
 
 export type CategoryOption =
   | ''
