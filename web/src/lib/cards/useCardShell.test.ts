@@ -205,4 +205,41 @@ describe('useCardShell', () => {
     rerender()
     expect(result.current.rows).toBe(first)
   })
+
+  it('applies filterRows between the global cluster selector and card pagination', () => {
+    const useStatus = () => statusResult()
+    const { result } = renderHook(() =>
+      useCardShell<FakeRaw, FakeRow>({
+        useStatus,
+        toRows,
+        hasAnyData,
+        filterRows: rows => rows.filter(r => r.name !== 'b'),
+      }),
+    )
+
+    // `rows` stays pre-filter so cards can compute aggregates over the
+    // cluster-filtered set. Only `card` sees the post-filter list.
+    expect(result.current.rows.map(r => r.name)).toEqual(['a', 'b', 'c'])
+    expect(result.current.card.items.map(r => r.name)).toEqual(['a', 'c'])
+    expect(result.current.card.totalItems).toBe(2)
+  })
+
+  it('re-runs filterRows when the predicate changes', () => {
+    const useStatus = () => statusResult()
+    const { result, rerender } = renderHook(
+      ({ keep }: { keep: string }) =>
+        useCardShell<FakeRaw, FakeRow>({
+          useStatus,
+          toRows,
+          hasAnyData,
+          filterRows: rows => rows.filter(r => r.name === keep),
+        }),
+      { initialProps: { keep: 'a' } },
+    )
+
+    expect(result.current.card.items.map(r => r.name)).toEqual(['a'])
+
+    rerender({ keep: 'c' })
+    expect(result.current.card.items.map(r => r.name)).toEqual(['c'])
+  })
 })
