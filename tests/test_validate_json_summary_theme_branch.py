@@ -13,25 +13,10 @@ check on themes/<id>.json is the only regression guard the summary
 script has for theme installability. That is a real invariant, so
 the arm needs a runtime test regardless of how small it looks.
 """
-import importlib.util
 import json
 import os
-import sys
 
-
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_json_summary_theme",
-        os.path.join(scripts_dir, "validate_json_summary.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+from scripts import validate_json_summary as _mod
 
 
 def _write(path, content):

@@ -8,28 +8,12 @@ more" math), the empty errors/warnings case, and the manifest shape.
 """
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
-import sys
 
 import pytest
 
-
-def _load_module():
-    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    scripts_dir = os.path.join(repo_root, "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "auto_qa_report",
-        os.path.join(scripts_dir, "auto_qa_report.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+from scripts import auto_qa_report as _mod
 
 
 def _finding(category, message):

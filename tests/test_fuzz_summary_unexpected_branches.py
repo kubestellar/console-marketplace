@@ -22,7 +22,6 @@ Uncovered lines closed (per `pytest --cov=scripts/fuzz_summary.py`):
   162-166  — run_edge_cases, unexpected error branch
   240      — sys.exit(main()) __main__ guard
 """
-import importlib.util
 import json
 import os
 import runpy
@@ -30,20 +29,7 @@ import sys
 
 import pytest
 
-
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "fuzz_summary_extra",
-        os.path.join(scripts_dir, "fuzz_summary.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+from scripts import fuzz_summary as _mod
 
 
 class _RaisingJson:

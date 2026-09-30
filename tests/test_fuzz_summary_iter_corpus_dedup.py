@@ -15,24 +15,9 @@ matches twice and the dedup branch runs.
 """
 from __future__ import annotations
 
-import importlib.util
 import os
-import sys
 
-
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "fuzz_summary_dedup",
-        os.path.join(scripts_dir, "fuzz_summary.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+from scripts import fuzz_summary as _mod
 
 
 class TestIterCorpusFilesDedup:
