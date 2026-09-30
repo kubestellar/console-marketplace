@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "updatedAt": "2026-08-30T06:36:35Z",
+  "updatedAt": "2026-09-30T07:08:40Z",
   "items": [
     {
       "id": "sre-overview",
@@ -121,7 +121,7 @@
     {
       "id": "midnight-blue",
       "name": "Midnight Blue",
-      "description": "Deep blue theme with navy tones and teal accents \u2014 a calmer alternative to the default space theme.",
+      "description": "Deep blue theme with navy tones and teal accents — a calmer alternative to the default space theme.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/themes/midnight-blue.json",
@@ -143,7 +143,7 @@
     {
       "id": "amber-glow",
       "name": "Amber Glow",
-      "description": "Warm amber and orange tones on a dark background \u2014 cozy and easy on the eyes for late-night ops.",
+      "description": "Warm amber and orange tones on a dark background — cozy and easy on the eyes for late-night ops.",
       "author": "community",
       "version": "1.0.0",
       "downloadUrl": "https://raw.githubusercontent.com/kubestellar/console-marketplace/56de485a64b85316429ad5d82db018a12c1df2fd/themes/amber-glow.json",
