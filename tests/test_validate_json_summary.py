@@ -6,31 +6,13 @@ Covers the standalone CI-observability summary script for the
 runbooks/validate-json-ci-summary-gap.md for why), so these tests exercise
 it directly against synthetic fixture repos.
 """
-import importlib.util
 import json
 import os
-import sys
 import tempfile
 
 import pytest
 
-
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "validate_json_summary",
-        os.path.join(scripts_dir, "validate_json_summary.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    # dataclasses' field-type resolution needs the module registered in
-    # sys.modules *before* exec, otherwise it can't resolve its own module
-    # globals for postponed annotations (`from __future__ import annotations`).
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+from scripts import validate_json_summary as _mod
 
 
 def _write(path, content):

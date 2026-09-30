@@ -6,27 +6,12 @@ script is not wired into any workflow (see
 runbooks/fuzz-yml-ci-summary-gap.md for why), so these tests exercise it
 directly against synthetic fixture repos and the fixed edge-case list.
 """
-import importlib.util
 import json
 import os
-import sys
 
 import pytest
 
-
-def _load_module():
-    scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    spec = importlib.util.spec_from_file_location(
-        "fuzz_summary",
-        os.path.join(scripts_dir, "fuzz_summary.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_mod = _load_module()
+from scripts import fuzz_summary as _mod
 
 
 def _write(path, content):
