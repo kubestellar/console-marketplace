@@ -7,10 +7,19 @@ import re
 
 from .ts_parsing import find_json_files, load_json
 
+# Single source of truth for the two on-disk directories that hold
+# `kc-card-preset-v1` assets (see issue #853): `presets/` is the CNCF
+# project catalog (`cncf-*.json`, wider schema); `card-presets/` is the
+# curated first-party bundle (narrow 4-key schema). Every check that
+# needs to iterate "all card presets" must glob PRESET_DIRS instead of
+# re-listing the two paths, so a future third preset directory (or a
+# renamed one) can't silently drop out of half the checks.
+PRESET_DIRS = ["presets/*.json", "card-presets/*.json"]
+
 
 def check_json_syntax(base, results):
     """Validate all JSON files parse correctly."""
-    patterns = ["registry.json", "presets/*.json", "card-presets/*.json",
+    patterns = ["registry.json", *PRESET_DIRS,
                 "dashboards/*/dashboard.json", "themes/*.json"]
     files = find_json_files(base, patterns)
 
@@ -25,7 +34,7 @@ def check_json_syntax(base, results):
 
 def check_preset_schema(base, results):
     """Validate card preset format."""
-    files = find_json_files(base, ["presets/*.json", "card-presets/*.json"])
+    files = find_json_files(base, PRESET_DIRS)
 
     for f in files:
         data, err = load_json(f)
@@ -181,8 +190,7 @@ def check_theme_schema(base, results):
 
 def check_naming_conventions(base, results):
     """All card_type values must use snake_case (underscores, not hyphens)."""
-    files = find_json_files(base, ["presets/*.json", "card-presets/*.json",
-                                    "dashboards/*/dashboard.json"])
+    files = find_json_files(base, [*PRESET_DIRS, "dashboards/*/dashboard.json"])
     for f in files:
         data, err = load_json(f)
         rel = os.path.relpath(f, base)
@@ -292,8 +300,7 @@ def check_registry_consistency(base, results):
 def get_all_marketplace_card_types(base):
     """Collect all card_type values referenced in marketplace JSON."""
     card_types = set()
-    files = find_json_files(base, ["presets/*.json", "card-presets/*.json",
-                                    "dashboards/*/dashboard.json"])
+    files = find_json_files(base, [*PRESET_DIRS, "dashboards/*/dashboard.json"])
     for f in files:
         data, err = load_json(f)
         if err:

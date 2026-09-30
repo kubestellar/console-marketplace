@@ -26,10 +26,10 @@ console-marketplace/
 │   ├── sre-overview/
 │   │   └── dashboard.json
 │   └── ...
-├── presets/                   # Preset catalog entries
+├── presets/                   # CNCF project catalog entries (cncf-*.json)
 │   ├── cncf-kubernetes.json
 │   └── ...
-├── card-presets/              # Individual card presets
+├── card-presets/              # General-purpose card presets (non-CNCF)
 │   ├── pod-health-monitor.json
 │   └── ...
 ├── themes/                    # Custom themes
