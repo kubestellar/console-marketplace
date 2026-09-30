@@ -52,13 +52,19 @@ import os
 import sys
 from dataclasses import dataclass, field
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from validate_marketplace_lib.checks_schema import PRESET_DIRS  # noqa: E402
+
 # Bounded, fixed list of this repo's own JSON surfaces -- never derived from
-# user input -- matching the corpus glob already used by fuzz.yml.
+# user input -- matching the corpus glob already used by fuzz.yml. The
+# `presets/*.json` and `card-presets/*.json` entries come from
+# `PRESET_DIRS` (single source of truth, see issue #853) so this corpus
+# list can't drift from the quality-gate's own preset globs.
 CORPUS_GLOBS = [
     "registry.json",
     "dashboards/*/dashboard.json",
-    "presets/*.json",
-    "card-presets/*.json",
+    *PRESET_DIRS,
 ]
 
 # Bounded, fixed list of edge cases -- identical to the ones fuzz.yml's

@@ -55,6 +55,20 @@ python3 scripts/validate-marketplace.py --mode static
 
 Card presets add a single card to the user's current dashboard.
 
+There are two directories that hold `kc-card-preset-v1` files, and which
+one you use depends on what you're contributing:
+
+| Directory | Use for | Naming | Schema |
+|---|---|---|---|
+| `card-presets/` | General-purpose presets: KubeStellar-native, partner integrations, operational recipes — anything that isn't a CNCF project catalog entry | kebab-case (e.g. `pod-health-monitor.json`) | Fixed 4 keys: `format`, `card_type`, `title`, `config` |
+| `presets/` | CNCF project catalog entries only (one preset per CNCF project, curated centrally) | `cncf-<project>.json` | `kc-card-preset-v1` plus CNCF-specific metadata (`description`, `category`, `cncfProject`, etc.) |
+
+If you are not adding a CNCF project catalog entry, use `card-presets/`.
+Both directories are checked by the same validator globs (see
+`PRESET_DIRS` in `scripts/validate_marketplace_lib/checks_schema.py`), so
+either location is validated identically for the shared `kc-card-preset-v1`
+requirements.
+
 ### Step 1: Create the Preset JSON
 
 Create a file under `card-presets/`:
