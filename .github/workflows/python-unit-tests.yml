@@ -6,12 +6,18 @@ on:
     paths:
       - 'scripts/**'
       - 'tests/**'
+      - 'conftest.py'
+      - 'pytest.ini'
+      - '.coveragerc'
       - '.github/workflows/python-unit-tests.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/**'
       - 'tests/**'
+      - 'conftest.py'
+      - 'pytest.ini'
+      - '.coveragerc'
       - '.github/workflows/python-unit-tests.yml'
   workflow_dispatch:
 
