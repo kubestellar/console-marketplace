@@ -25,7 +25,7 @@ def check_card_type_existence(base, console_path, results):
 
     # Merge all registry sources: legacy RAW_CARD_COMPONENTS, descriptor-based
     # registry, and the newer CardRegistryCategory sub-files.
-    console_types = get_all_console_card_types(cards_dir)
+    console_types = get_all_console_card_types(cards_dir, results=results)
     marketplace_types = get_all_marketplace_card_types(base)
 
     known = set()
@@ -113,7 +113,9 @@ def check_is_demo_data_wiring(base, console_path, known_types, results):
             try:
                 with open(mf) as f:
                     content = f.read()
-            except Exception:
+            except Exception as e:
+                results.warn("isDemoData",
+                            f"could not read `{os.path.relpath(mf, console_path)}`: {e}")
                 continue
 
             if "useCardLoadingState" in content:
@@ -165,7 +167,9 @@ def check_consecutive_failures(base, console_path, known_types, results):
             try:
                 with open(mf) as f:
                     content = f.read()
-            except Exception:
+            except Exception as e:
+                results.warn("consecutiveFailures",
+                            f"could not read `{os.path.relpath(mf, console_path)}`: {e}")
                 continue
 
             if re.search(r"useCached\w+", content):
@@ -248,13 +252,13 @@ def check_cors_proxy(base, console_path, known_types, results):
                      glob.glob(os.path.join(hooks_dir, "**/*.tsx"), recursive=True)
 
         for hf in hook_files:
+            rel = os.path.relpath(hf, rel_root)
             try:
                 with open(hf) as f:
                     content = f.read()
-            except Exception:
+            except Exception as e:
+                results.warn("cors", f"could not read `{rel}`: {e}")
                 continue
-
-            rel = os.path.relpath(hf, rel_root)
 
             for pat in patterns:
                 matches = re.findall(pat, content)

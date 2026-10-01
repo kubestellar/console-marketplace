@@ -131,10 +131,11 @@ class TestCheckCorsProxy:
 
 
 class TestCheckCorsProxyCoverage:
-    def test_unreadable_hook_file_is_swallowed(self, tmp_path, monkeypatch):
+    def test_unreadable_hook_file_is_reported(self, tmp_path, monkeypatch):
         # A marketplace hook with a fetch() call would normally trigger a
-        # CORS warning; if the file can't be read, the OSError branch must
-        # swallow the failure without warning or crash.
+        # CORS warning; if the file can't be read, the failure itself must
+        # be reported (not silently dropped) so the gap in coverage is
+        # visible in the scan output.
         console = _make_console(tmp_path, card_types=[])
         base = _make_marketplace(
             tmp_path,
@@ -153,5 +154,6 @@ class TestCheckCorsProxyCoverage:
         monkeypatch.setattr(builtins, "open", fake_open)
         r = _mod.Results()
         _mod.check_cors_proxy(str(base), str(console), set(), r)
-        # No CORS warning because the file couldn't be scanned.
-        assert not any("cors" in cat for cat, _ in r.warnings)
+        # The read failure is reported under the "cors" category; the
+        # content-based CORS pattern never gets evaluated for this file.
+        assert any(cat == "cors" for cat, _ in r.warnings)

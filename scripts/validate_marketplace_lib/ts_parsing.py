@@ -108,7 +108,7 @@ def parse_card_descriptors(descriptors_ts_path):
     return set(re.findall(r"^\s*id:\s*['\"]([\w-]+)['\"]\s*,", content, re.MULTILINE))
 
 
-def parse_sub_registry_categories(cards_dir):
+def parse_sub_registry_categories(cards_dir, results=None):
     """Extract card type keys from CardRegistryCategory sub-files.
 
     The console splits RAW_CARD_COMPONENTS across multiple category files
@@ -116,6 +116,12 @@ def parse_sub_registry_categories(cards_dir):
     exports a CardRegistryCategory whose `components` object is keyed by
     snake_case card type.  Without scanning these files, every card defined
     in a sub-registry appears "not found" even though it is fully registered.
+
+    `results` is optional (callers that don't track findings can omit it),
+    but when given, an unreadable sub-registry file is recorded as a
+    warning instead of being silently dropped — otherwise every card type
+    it defines would spuriously fail the "not found in console registry"
+    check with no trace of the real cause in the scan output.
     """
     card_types = set()
     for path in glob.glob(os.path.join(cards_dir, "cardRegistry.*.ts")):
@@ -124,7 +130,11 @@ def parse_sub_registry_categories(cards_dir):
         try:
             with open(path) as f:
                 content = f.read()
-        except OSError:
+        except OSError as e:
+            if results is not None:
+                results.warn("card-type",
+                            f"could not read sub-registry `{os.path.basename(path)}`: "
+                            f"{e} — card types it defines may appear missing")
             continue
 
         # Locate the `components: {` block and extract snake_case card type keys.
@@ -153,7 +163,7 @@ def parse_sub_registry_categories(cards_dir):
     return card_types
 
 
-def get_all_console_card_types(cards_dir):
+def get_all_console_card_types(cards_dir, results=None):
     """Collect every registered card type from the console card registry.
 
     Merges three sources so that cards are found regardless of which
@@ -161,6 +171,10 @@ def get_all_console_card_types(cards_dir):
       1. RAW_CARD_COMPONENTS block in cardRegistry.ts (legacy static map)
       2. CardDescriptor ids in cardDescriptors.registry.ts
       3. CardRegistryCategory components in cardRegistry.*.ts sub-files
+
+    `results` is forwarded to the sub-registry parser so an unreadable
+    sub-registry file is recorded as a warning rather than silently
+    dropped; omit it for callers that don't track findings.
     """
     registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
     descriptors_ts = os.path.join(cards_dir, "cardDescriptors.registry.ts")
@@ -169,7 +183,7 @@ def get_all_console_card_types(cards_dir):
         types |= parse_card_registry(registry_ts)
     if os.path.isfile(descriptors_ts):
         types |= parse_card_descriptors(descriptors_ts)
-    types |= parse_sub_registry_categories(cards_dir)
+    types |= parse_sub_registry_categories(cards_dir, results=results)
     return types
 
 

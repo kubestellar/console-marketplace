@@ -134,6 +134,36 @@ class TestParseSubRegistryCategoriesNoComponentsBlock(unittest.TestCase):
             # in both cases the call must return without raising.
             self.assertIsInstance(types, set)
 
+    def test_unreadable_file_is_reported_when_results_given(self):
+        """An OSError is surfaced as a warning instead of silently dropped.
+
+        Without visibility, every card type the unreadable sub-registry
+        defines would spuriously fail the "not found in console registry"
+        check with no trace of the real cause.
+        """
+        import builtins
+        import tempfile
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "cardRegistry.badperm.ts")
+            with open(path, "w") as f:
+                f.write("components: { should_be_ignored: X };\n")
+
+            real_open = builtins.open
+
+            def fake_open(p, *a, **kw):
+                if str(p) == path:
+                    raise OSError("boom")
+                return real_open(p, *a, **kw)
+
+            results = Results()
+            with mock.patch("builtins.open", side_effect=fake_open):
+                types = parse_sub_registry_categories(d, results=results)
+
+            self.assertEqual(types, set())
+            self.assertTrue(any(cat == "card-type" for cat, _ in results.warnings))
+
 
 class TestCheckDashboardSchemaSkipsMalformedJson(unittest.TestCase):
     """``check_dashboard_schema`` skips a dashboard.json that fails to parse."""
