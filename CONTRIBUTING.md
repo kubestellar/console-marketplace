@@ -287,6 +287,22 @@ await fetch('/api/dashboards/import', {
 })
 ```
 
+### Bumping the console pin
+
+`ts-unit-tests.yml`, `marketplace-quality.yml`, and `marketplace-auto-qa.yml` each
+sparse-checkout a small slice of `kubestellar/console` and pin it to an explicit
+commit SHA via `ref:` on the `actions/checkout` step, so CI is reproducible and
+doesn't silently break when console's default branch moves.
+
+Bump all three pins together (they should stay in sync) whenever you make a
+marketplace-side change that relies on a newer console card/hook/locale
+contract:
+
+1. Find the console commit you need: `git -C /path/to/console rev-parse main`
+   (or the SHA of the specific console PR that introduced the contract change).
+2. Update the `ref:` value in all three workflows above to that SHA.
+3. Open a PR with just that change and confirm the affected workflows pass.
+
 ### 4. Run TypeScript unit tests when changing `web/src/**`
 
 PRs that touch `web/src/**` (plus `vitest.marketplace.config.ts` or `.github/workflows/ts-unit-tests.yml`) run the **TypeScript Unit Tests** workflow. Those tests reuse shared Vitest/Vite config and npm dependencies from `kubestellar/console`, so you need a local Console checkout even though the tests live in this repo.
