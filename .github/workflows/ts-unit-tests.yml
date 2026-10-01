@@ -13,6 +13,10 @@ on:
       - 'vitest.marketplace.config.ts'
       - '.github/workflows/ts-unit-tests.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
@@ -30,6 +34,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: kubestellar/console
+          ref: 425902f6132e317a9c9611b3d6f21b21aca75012  # bump: see CONTRIBUTING.md § Bumping the console pin
           path: console-parent
           sparse-checkout: |
             web/package.json
