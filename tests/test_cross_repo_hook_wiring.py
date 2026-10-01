@@ -160,7 +160,7 @@ class TestCheckIsDemoDataWiringCoverage:
         # No warning because the only mentions live in skipped files.
         assert not r.warnings
 
-    def test_unreadable_component_file_is_swallowed(self, tmp_path, monkeypatch):
+    def test_unreadable_component_file_is_reported(self, tmp_path, monkeypatch):
         console = _make_console(
             tmp_path,
             card_types=["cluster_health"],
@@ -179,12 +179,12 @@ class TestCheckIsDemoDataWiringCoverage:
 
         monkeypatch.setattr(builtins, "open", fake_open)
         r = _mod.Results()
-        # The OSError branch must swallow the failure. No hook was
-        # observed (because the file couldn't be read) so no warning
-        # is emitted.
+        # The OSError branch must not silently drop the failure: the
+        # unreadable file is reported as an isDemoData warning so the scan
+        # doesn't quietly skip it.
         _mod.check_is_demo_data_wiring(str(base), str(console),
                                        {"cluster_health"}, r)
-        assert not r.warnings
+        assert any(cat == "isDemoData" for cat, _ in r.warnings)
 
 
 # ── Coverage-gap regression tests for consecutive failures ──────────────────
@@ -218,7 +218,7 @@ class TestCheckConsecutiveFailuresCoverage:
         # No warning because ``useCached*`` only appears in skipped files.
         assert not r.warnings
 
-    def test_unreadable_component_file_is_swallowed(self, tmp_path, monkeypatch):
+    def test_unreadable_component_file_is_reported(self, tmp_path, monkeypatch):
         console = _make_console(
             tmp_path,
             card_types=["cluster_health"],
@@ -239,5 +239,5 @@ class TestCheckConsecutiveFailuresCoverage:
         r = _mod.Results()
         _mod.check_consecutive_failures(str(base), str(console),
                                         {"cluster_health"}, r)
-        # OSError swallowed → uses_cached stays False → no warning.
-        assert not r.warnings
+        # The unreadable file is now reported, not silently swallowed.
+        assert any(cat == "consecutiveFailures" for cat, _ in r.warnings)

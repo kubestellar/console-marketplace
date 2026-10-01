@@ -74,7 +74,7 @@ def check_cncf_coverage(base, console_path, results):
     cards_dir = os.path.join(console_path, "web/src/components/cards")
     registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
     if os.path.isfile(registry_ts):
-        console_types = get_all_console_card_types(cards_dir)
+        console_types = get_all_console_card_types(cards_dir, results=results)
 
     cncf_files = find_json_files(base, ["presets/cncf-*.json"])
     missing = []
@@ -105,7 +105,7 @@ def generate_quality_table(base, console_path, known_types, results):
         return ""
 
     cards_dir = os.path.join(console_path, "web/src/components/cards")
-    console_types = get_all_console_card_types(cards_dir)
+    console_types = get_all_console_card_types(cards_dir, results=results)
     marketplace_types = get_all_marketplace_card_types(base)
 
     lines = [
