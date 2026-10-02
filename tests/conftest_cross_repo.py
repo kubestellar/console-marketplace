@@ -38,11 +38,6 @@ def _write_json(path, obj):
     path.write_text(json.dumps(obj))
 
 
-def _write_text(path, text):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text)
-
-
 def _messages(records):
     return [m for _, m in records]
 
