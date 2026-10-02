@@ -16,7 +16,7 @@ a standalone, unit-testable script, and emits:
 
 The underlying schema/consistency rules (dashboard `format`/`name`/`cards`
 fields, per-card `card_type`/`position`, per-type expected registry file
-paths, and the `downloadUrl` "/main/..." regex) are shared with
+paths, and the `downloadUrl` ref-path regex) are shared with
 `validate_marketplace_lib.checks_schema` -- the canonical implementation used
 by `validate-marketplace.py` -- instead of being re-derived here a third time
 (see issue #789). This script keeps its own message wording and
