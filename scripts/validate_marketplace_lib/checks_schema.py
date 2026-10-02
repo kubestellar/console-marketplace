@@ -239,13 +239,25 @@ def expected_registry_paths(item_id, item_type):
 
 
 def registry_download_url_path(url):
-    """Extract the path after '/main/' from a registry `downloadUrl`, or None.
+    """Extract the repo-relative path from a registry `downloadUrl`, or None.
 
     Shared regex used by every schema-check site to validate that
     `downloadUrl` points at a real file in the repo.
+
+    Handles both ref forms the registry uses on raw.githubusercontent.com
+    URLs — the literal `main` branch and a 40-hex commit SHA (the nightly
+    regen script pins every entry to a single SHA; see issue #870, where
+    the SHA form silently skipped this cross-check for all entries) — plus
+    the legacy bare `/main/<path>` fallback for non-GitHub-raw URLs.
     """
     if not url:
         return None
+    m = re.search(
+        r"raw\.githubusercontent\.com/[^/]+/[^/]+/(?:main|[0-9a-f]{40})/(.+)$",
+        url,
+    )
+    if m:
+        return m.group(1)
     m = re.search(r"/main/(.+)$", url)
     return m.group(1) if m else None
 
