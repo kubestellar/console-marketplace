@@ -66,4 +66,6 @@ validation that already exists binding.
 
 Addresses security findings tracked in issue #376 (branch protection) and #377 (mandatory code review),
 and the release-safeguard gap tracked in issue #560 (PR-time content gates were documented as
-non-blocking).
+non-blocking). Applying this document's `policy.json` to the live branch protection settings
+on `main` is a separate, still-pending administrator action tracked in issue #866 — closing
+#560 fixed only the recommendation documented here, not the live setting.
