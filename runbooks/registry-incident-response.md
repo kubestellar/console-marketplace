@@ -37,12 +37,14 @@ merge to `main` and a user seeing the result. Use this runbook when any of the f
   still reached `main` (e.g., merged before checks completed, or merged with failing checks —
   see note below).
 
-> **Note:** As of [#560](https://github.com/kubestellar/console-marketplace/issues/560),
+> **Note:** As of [#560](https://github.com/kubestellar/console-marketplace/issues/560)
+> (closed — the documented recommendation itself was fixed),
 > `.github/branch-protection-policy.md` recommends making these checks merge-blocking
 > (`required_status_checks` naming `static-validation`, `card-quality-gate`, `validate`).
 > Until a repository administrator applies that policy to the live branch protection
-> settings, don't assume a merge to `main` implies the checks passed — verify directly
-> (see below).
+> settings — a separate, still-open action tracked in
+> [#866](https://github.com/kubestellar/console-marketplace/issues/866) — don't assume a
+> merge to `main` implies the checks passed — verify directly (see below).
 
 ---
 
