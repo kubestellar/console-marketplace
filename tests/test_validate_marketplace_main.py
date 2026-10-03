@@ -39,13 +39,15 @@ def _load_module():
 
 _mod_empty = _load_module()
 
-def _make_marketplace(tmp_path):
+def _make_marketplace(tmp_path, registry=None):
     base = tmp_path / "marketplace"
     base.mkdir()
-    (base / "registry.json").write_text(json.dumps({
-        "presets": [], "themes": [], "dashboards": [],
-        "updatedAt": datetime.now(timezone.utc).isoformat(),
-    }))
+    if registry is None:
+        registry = {
+            "presets": [], "themes": [], "dashboards": [],
+            "updatedAt": datetime.now(timezone.utc).isoformat(),
+        }
+    (base / "registry.json").write_text(json.dumps(registry))
     return base
 
 def _make_console_with_registry(tmp_path):
