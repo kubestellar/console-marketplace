@@ -117,6 +117,33 @@ class TestDashboardSchema:
         _mod.check_dashboard_schema(str(tmp_path), r)
         assert "dashboard-grid" in _categories(r.errors)
 
+    def test_negative_position_flagged(self, tmp_path):
+        d = self._valid()
+        d["cards"] = [
+            {"card_type": "cpu_usage", "position": {"x": -1, "y": 0, "w": 1, "h": 1}},
+            {"card_type": "mem_usage", "position": {"x": 0, "y": -2, "w": 1, "h": 1}},
+        ]
+        _write(tmp_path / "dashboards" / "negative" / "dashboard.json", d)
+        r = Results()
+        _mod.check_dashboard_schema(str(tmp_path), r)
+        msgs = _messages(r.errors)
+        assert "dashboard-grid" in _categories(r.errors)
+        assert any("negative position" in m for m in msgs)
+
+    def test_zero_or_negative_size_flagged(self, tmp_path):
+        d = self._valid()
+        d["cards"] = [
+            {"card_type": "cpu_usage", "position": {"x": 0, "y": 0, "w": 0, "h": 4}},
+            {"card_type": "mem_usage", "position": {"x": 0, "y": 0, "w": 4, "h": -3}},
+        ]
+        _write(tmp_path / "dashboards" / "badsize" / "dashboard.json", d)
+        r = Results()
+        _mod.check_dashboard_schema(str(tmp_path), r)
+        msgs = _messages(r.errors)
+        assert "dashboard-grid" in _categories(r.errors)
+        assert any("width must be at least 1" in m for m in msgs)
+        assert any("height must be at least 1" in m for m in msgs)
+
 
 # ── check_theme_schema ─────────────────────────────────────────────
 
@@ -198,4 +225,41 @@ class TestThemeSchema:
         msgs = _messages(r.warnings)
         assert any("font.family" in m for m in msgs)
         assert any("monoFamily" in m for m in msgs)
+
+
+# ── check_naming_conventions ────────────────────────────────────────
+
+
+class TestNamingConventions:
+    def test_hyphenated_card_type_flagged(self, tmp_path):
+        _write(tmp_path / "presets" / "bad.json", {
+            "format": "kc-card-preset-v1",
+            "card_type": "cpu-usage",
+            "title": "CPU",
+        })
+        r = Results()
+        _mod.check_naming_conventions(str(tmp_path), r)
+        assert any("hyphens" in m for m in _messages(r.errors))
+
+    def test_non_string_card_type_does_not_crash(self, tmp_path):
+        _write(tmp_path / "presets" / "bad.json", {
+            "format": "kc-card-preset-v1",
+            "card_type": 123,
+            "title": "Broken",
+        })
+        r = Results()
+        _mod.check_naming_conventions(str(tmp_path), r)
+        msgs = _messages(r.errors)
+        assert any("not a string" in m for m in msgs)
+
+    def test_non_string_card_type_in_dashboard_card(self, tmp_path):
+        _write(tmp_path / "dashboards" / "bad" / "dashboard.json", {
+            "format": "kc-dashboard-v1",
+            "name": "Bad",
+            "cards": [{"card_type": 123, "position": {"x": 0, "y": 0, "w": 4, "h": 4}}],
+        })
+        r = Results()
+        _mod.check_naming_conventions(str(tmp_path), r)
+        msgs = _messages(r.errors)
+        assert any("not a string" in m for m in msgs)
 

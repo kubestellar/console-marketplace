@@ -85,13 +85,33 @@ def card_field_issues(card):
     }
 
 
-def grid_overflow(pos):
-    """Return True if position `pos` overflows the 12-column grid."""
+def grid_position_issues(pos):
+    """Return the list of grid-validation problems for position `pos`.
+
+    An empty list means the position is valid: `x`/`y` are non-negative,
+    `w`/`h` are at least 1, and the card fits within the 12-column grid.
+    Non-numeric coordinates are ignored (they cannot be validated
+    arithmetically), so callers never crash on malformed types.
+    """
     x = pos.get("x", 0)
+    y = pos.get("y", 0)
     w = pos.get("w", 0)
-    if isinstance(x, (int, float)) and isinstance(w, (int, float)):
-        return x + w > 12
-    return False
+    h = pos.get("h", 0)
+    if not all(isinstance(v, (int, float)) for v in (x, y, w, h)):
+        return []
+
+    issues = []
+    if x < 0:
+        issues.append(f"x({x}) < 0 (negative position)")
+    if y < 0:
+        issues.append(f"y({y}) < 0 (negative position)")
+    if w < 1:
+        issues.append(f"w({w}) < 1 (width must be at least 1)")
+    if h < 1:
+        issues.append(f"h({h}) < 1 (height must be at least 1)")
+    if x + w > 12:
+        issues.append(f"x({x}) + w({w}) = {x + w} > 12 (grid overflow)")
+    return issues
 
 
 def check_dashboard_schema(base, results):
@@ -134,11 +154,10 @@ def check_dashboard_schema(base, results):
                     results.error("dashboard-schema",
                                  f"`{rel}` cards[{i}]: position missing '{key}'")
 
-            if grid_overflow(pos):
+            for problem in grid_position_issues(pos):
                 results.error("dashboard-grid",
                              f"`{rel}` cards[{i}] ({card.get('card_type', '?')}): "
-                             f"x({pos.get('x', 0)}) + w({pos.get('w', 0)}) = "
-                             f"{pos.get('x', 0)+pos.get('w', 0)} > 12 (grid overflow)")
+                             f"{problem}")
 
 
 def check_theme_schema(base, results):
@@ -206,6 +225,13 @@ def check_naming_conventions(base, results):
                 card_types.append(card["card_type"])
 
         for ct in card_types:
+            if not isinstance(ct, str):
+                results.error(
+                    "naming",
+                    f"`{rel}`: card_type {ct!r} is not a string — "
+                    f"must be a snake_case string",
+                )
+                continue
             if "-" in ct:
                 suggested = ct.replace("-", "_")
                 results.error("naming",
