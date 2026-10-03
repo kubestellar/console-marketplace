@@ -87,12 +87,26 @@ describe('openkruise_status/mapToDisplayItems', () => {
       expect(item.secondaryDetail).toBe('app:v9')
     })
 
-    it('falls back to the raw image when it contains no slashes', () => {
+    it('renders the raw image unchanged when it contains no slashes', () => {
+      // 'bareimg'.split('/').pop() is the truthy string 'bareimg' itself, so
+      // this does NOT exercise the `|| cs.image` fallback branch below -- it
+      // only confirms the no-slash case still produces the right string.
       const [item] = mapToDisplayItems(
         makeData({ cloneSets: [cs({ image: 'bareimg' })] }),
         t,
       )
       expect(item.secondaryDetail).toBe('bareimg')
+    })
+
+    it('falls back to the raw (empty) image when split(\'/\').pop() is falsy', () => {
+      // A trailing slash makes the last path segment an empty string, which
+      // is the only way `.split('/').pop() || cs.image` actually takes its
+      // right-hand branch.
+      const [item] = mapToDisplayItems(
+        makeData({ cloneSets: [cs({ image: 'registry.io/team/' })] }),
+        t,
+      )
+      expect(item.secondaryDetail).toBe('registry.io/team/')
     })
   })
 
@@ -125,6 +139,33 @@ describe('openkruise_status/mapToDisplayItems', () => {
       )
       expect(item.secondaryDetail).toBe('db:v3')
     })
+
+    it('falls back to the raw (empty) image when split(\'/\').pop() is falsy', () => {
+      // Mirrors the cloneSets arm's fallback case: a trailing slash makes
+      // `.split('/').pop()` return an empty (falsy) string, exercising the
+      // `|| ss.image` right-hand branch.
+      const [item] = mapToDisplayItems(
+        makeData({
+          advancedStatefulSets: [
+            {
+              name: 'ss-a',
+              namespace: 'db',
+              cluster: 'east',
+              replicas: 3,
+              readyReplicas: 2,
+              updatedReplicas: 2,
+              podManagementPolicy: 'Parallel',
+              updateStrategy: 'RollingUpdate',
+              status: 'updating',
+              image: 'gcr.io/example/',
+              updatedAt: '2026-01-01T00:00:00Z',
+            },
+          ],
+        }),
+        t,
+      )
+      expect(item.secondaryDetail).toBe('gcr.io/example/')
+    })
   })
 
   describe('advancedDaemonSets arm', () => {
@@ -155,6 +196,32 @@ describe('openkruise_status/mapToDisplayItems', () => {
         '3/4 openkruiseStatus.nodes \u2022 Surging',
       )
       expect(item.secondaryDetail).toBe('agent:v2')
+    })
+
+    it('falls back to the raw (empty) image when split(\'/\').pop() is falsy', () => {
+      // Mirrors the cloneSets/statefulSets fallback cases for the `|| ds.image`
+      // right-hand branch.
+      const [item] = mapToDisplayItems(
+        makeData({
+          advancedDaemonSets: [
+            {
+              name: 'ds-a',
+              namespace: 'system',
+              cluster: 'west',
+              desiredScheduled: 4,
+              currentScheduled: 4,
+              numberReady: 3,
+              updatedScheduled: 4,
+              rollingUpdateType: 'Surging',
+              status: 'updating',
+              image: 'gcr.io/example/',
+              updatedAt: '2026-01-01T00:00:00Z',
+            },
+          ],
+        }),
+        t,
+      )
+      expect(item.secondaryDetail).toBe('gcr.io/example/')
     })
   })
 
