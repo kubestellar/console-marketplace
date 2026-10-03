@@ -218,6 +218,20 @@ def get_registry_entries(data):
     return data.get("items", []) + data.get("presets", [])
 
 
+# registry.json `id` values are embedded directly into filesystem paths by
+# `expected_registry_paths` (e.g. `dashboards/<id>/dashboard.json`). An id
+# containing path separators or traversal sequences (`../`, an absolute
+# leading `/`) would let a PR-authored registry entry make the file-existence
+# checks below probe paths outside the expected asset directories. Restrict
+# ids to the charset the registry's own naming convention already uses.
+_SAFE_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+def is_safe_registry_id(item_id):
+    """Return True if `item_id` is safe to embed in a filesystem path."""
+    return bool(_SAFE_ID_RE.match(item_id))
+
+
 def expected_registry_paths(item_id, item_type):
     """Return candidate relative file paths a registry entry of `item_type`
     is expected to have on disk (relative to the marketplace repo root).
@@ -280,6 +294,15 @@ def check_registry_consistency(base, results):
         if item_id in seen_ids:
             results.error("registry", f"Duplicate id '{item_id}' in registry.json")
         seen_ids.add(item_id)
+
+        # Reject ids that aren't safe to embed in a filesystem path (path
+        # traversal / absolute-path guard) before any path is constructed
+        # from it below.
+        if not is_safe_registry_id(item_id):
+            results.error("registry",
+                         f"Registry entry id '{item_id}' contains characters "
+                         f"other than letters, digits, '_' and '-'")
+            continue
 
         # File existence check based on type
         expected = expected_registry_paths(item_id, item_type)
