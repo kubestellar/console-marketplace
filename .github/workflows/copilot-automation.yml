@@ -18,6 +18,13 @@ concurrency:
 
 jobs:
   copilot-automation:
+    # Only invoke the shared reusable workflow for the single trusted case:
+    # a manual dispatch, or a pull_request_target event whose PR author is
+    # the exact Copilot coding agent login. This guards against the shared
+    # workflow's overbroad identity check (substring match on "copilot" or
+    # "[bot]"), which would otherwise let any attacker-controlled username
+    # containing "copilot" or any bot account bypass DCO gating.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.user.login == 'Copilot'
     permissions:
       contents: write
       pull-requests: write
