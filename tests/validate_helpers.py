@@ -1,8 +1,9 @@
 """Shared helpers for the ``check_*`` validator test modules.
 
 Loads ``scripts/validate-marketplace.py`` once and exposes the module plus
-small fixture-writing helpers used across the ``test_validate_check_*``
-test files (see issue #554 — split of test_validate_check_functions.py).
+small fixture-writing helpers used across the function-named validator
+test modules (``test_validate_marketplace_*.py``; see issue #882 —
+consolidation of the coverage-pass-named test files).
 """
 import importlib.util
 import json
