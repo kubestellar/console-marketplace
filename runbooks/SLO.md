@@ -23,6 +23,7 @@ should be detected and resolved, not any request-latency/availability target.
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | `Fuzzing observability summary` step calling `scripts/fuzz_summary.py`, `if: always()` | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **met**: applied in commit `378cfdf`, closing [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
 | 8 | Whether a completed `validate-json.yml` run left a bounded, machine-readable record of what it checked (registry entries checked, dashboards checked, error count, pass/fail) | Every run's Summary tab shows this record | `Validate JSON observability summary` step calling `scripts/validate_json_summary.py`, `if: always()` | [`validate-json-ci-summary-gap.md`](./validate-json-ci-summary-gap.md) — **met**: applied in commit `378cfdf`, closing [issue #621](https://github.com/kubestellar/console-marketplace/issues/621) |
 | 9 | Whether a completed `python-unit-tests.yml` / `ts-unit-tests.yml` run left a bounded, machine-readable record of pass/fail counts | Every run's Summary tab shows this record | Python: root `conftest.py` `pytest_terminal_summary`/`pytest_sessionfinish` hook (no workflow edit needed). TS: `TypeScript unit test observability summary` step, `if: always()` | [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md) — **met**: Python side closed via merged [issue #636](https://github.com/kubestellar/console-marketplace/issues/636) fix (`conftest.py`); TS side applied in commit `cd698b0`, also closing #636 |
+| 10 | Time from a `push`-to-`main` CI failure on `python-unit-tests.yml` / `ts-unit-tests.yml` / `codeql.yml` / `scorecard.yml` to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | None yet — `workflow-failure-issue.yml`'s `if:` guard only matches `schedule`/`workflow_dispatch` events, and the two unit-test workflows aren't even in its `workflows:` watch list | [`main-push-ci-failure-gap.md`](./main-push-ci-failure-gap.md) — **not met**: confirmed by a real undetected incident (commit `27b7773` broke `main` for ~2h40m on 2026-10-03, caught only by manual follow-up in [issue #884](https://github.com/kubestellar/console-marketplace/issues/884)); ready-to-apply diff posted in [issue #890](https://github.com/kubestellar/console-marketplace/issues/890) — requires the `workflows` GitHub App permission to apply |
 
 ## Why SLO 2 Is Reported as Unmet
 
@@ -84,6 +85,20 @@ aspirational, already-healthy state:
   ts-unit-tests.yml") — see
   [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md)
   for both applied diffs.
+
+- **SLO 10** is not met: `workflow-failure-issue.yml` only alerts on
+  `schedule`/`workflow_dispatch` runs of its five watched workflows, and does not
+  watch `python-unit-tests.yml` / `ts-unit-tests.yml` at all. A real incident —
+  commit `27b7773` breaking `Python Unit Tests` on a `main` push for ~2h40m on
+  2026-10-03 — went undetected by any automation; a human/agent noticed it
+  independently and filed [issue #884](https://github.com/kubestellar/console-marketplace/issues/884).
+  The ready-to-apply diff (extend the `workflows:` list and the `if:` guard to
+  also match `push` events to `main`) is posted in
+  [issue #890](https://github.com/kubestellar/console-marketplace/issues/890),
+  but applying it requires the `workflows` GitHub App permission that routine
+  operations/quality agents do not hold — see
+  [`main-push-ci-failure-gap.md`](./main-push-ci-failure-gap.md) for detail and
+  the manual-fallback detection command in the meantime.
 
 ## Reviewing These SLOs
 
