@@ -100,4 +100,22 @@ describe('useClusterFilteredRows', () => {
     )
     expect(result.current).toEqual([{ cluster: 'b', name: 'second', extra: false }])
   })
+
+  it('returns a new array (not the input) when filtering is applied', () => {
+    const { result } = renderHook(() => useClusterFilteredRows(rows, ['east']))
+    expect(result.current).not.toBe(rows)
+  })
+
+  it('recomputes when the rows reference changes', () => {
+    const clusters = ['east']
+    const { result, rerender } = renderHook(
+      ({ r }: { r: Row[] }) => useClusterFilteredRows(r, clusters),
+      { initialProps: { r: rows } },
+    )
+    const first = result.current
+    const nextRows: Row[] = [...rows, { cluster: 'east', id: 5 }]
+    rerender({ r: nextRows })
+    expect(result.current).not.toBe(first)
+    expect(result.current.map(r => r.id)).toEqual([1, 3, 5])
+  })
 })
