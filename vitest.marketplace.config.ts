@@ -15,6 +15,7 @@ export default {
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'html'],
+      include: [`${MARKETPLACE_ROOT}/src/**/*.{ts,tsx}`],
       exclude: [
         `${MARKETPLACE_ROOT}/src/**/*.{test,spec}.{ts,tsx}`,
         `${MARKETPLACE_ROOT}/src/**/__tests__/**`,
