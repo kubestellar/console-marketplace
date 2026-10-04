@@ -1,10 +1,13 @@
 name: Open Issue on Workflow Failure
 
-# Closes the scheduled-scan alert gap tracked in issue #573 and #607: fuzz.yml,
-# codeql.yml, and scorecard.yml (weekly) plus stale.yml (daily) had no failure
+# Closes the scheduled-scan alert gap tracked in issue #573 and #607, and the
+# main-push CI failure gap tracked in issue #890: fuzz.yml, codeql.yml,
+# scorecard.yml (weekly), stale.yml (daily), Marketplace Auto-QA, and
+# python-unit-tests.yml / ts-unit-tests.yml (push-to-main) had no failure
 # notification of any kind, so a red run was only visible by manually checking
-# the Actions tab. See runbooks/scheduled-scan-alert-gap.md for the triage and
-# recovery procedure this alert links to.
+# the Actions tab. See runbooks/scheduled-scan-alert-gap.md and
+# runbooks/main-push-ci-failure-gap.md for the triage and recovery procedures
+# this alert links to.
 on:
   workflow_run:
     workflows:
@@ -13,6 +16,8 @@ on:
       - "OpenSSF Scorecard"
       - "Stale Issues"
       - "Marketplace Auto-QA"
+      - "Python Unit Tests"
+      - "TypeScript Unit Tests"
     types:
       - completed
 
@@ -27,7 +32,9 @@ jobs:
     if: >-
       github.event.workflow_run.conclusion == 'failure' &&
       (github.event.workflow_run.event == 'schedule' ||
-       github.event.workflow_run.event == 'workflow_dispatch')
+       github.event.workflow_run.event == 'workflow_dispatch' ||
+       (github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'))
     steps:
       - name: Check for existing open issue
         id: check
@@ -107,7 +114,7 @@ jobs:
         run: |
           gh label create "workflow-failure" \
             --repo "$REPOSITORY" \
-            --description "Automated: scheduled workflow failed" \
+            --description "Automated: monitored workflow failed" \
             --color "d93f0b" \
             2>/dev/null || true
 
@@ -134,10 +141,16 @@ jobs:
           RUN_URL: ${{ github.event.workflow_run.html_url }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           WORKFLOW_FILE: ${{ github.event.workflow_run.path }}
+          WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           FAILED_JOBS: ${{ steps.details.outputs.failed_jobs }}
         run: |
           BODY_FILE="$GITHUB_WORKSPACE/workflow-failure-issue.md"
           TITLE="Workflow failure: ${WORKFLOW_NAME}"
+          RUNBOOK="scheduled-scan-alert-gap.md"
+          if [ "$WORKFLOW_EVENT" = "push" ]; then
+            RUNBOOK="main-push-ci-failure-gap.md"
+          fi
 
           {
             printf '## Workflow Failure\n\n'
@@ -147,12 +160,14 @@ jobs:
             printf '| **Workflow** | `%s` |\n' "$WORKFLOW_NAME"
             printf '| **Run** | [#%s](%s) |\n' "$RUN_ID" "$RUN_URL"
             printf '| **File** | `%s` |\n' "$WORKFLOW_FILE"
+            printf '| **Trigger** | `%s` |\n' "$WORKFLOW_EVENT"
+            printf '| **Branch** | `%s` |\n' "$HEAD_BRANCH"
             printf '| **Time** | %s |\n' "$(date -u '+%Y-%m-%d %H:%M UTC')"
             if [ -n "$FAILED_JOBS" ]; then
               printf '| **Failed jobs** | `%s` |\n' "$FAILED_JOBS"
             fi
             printf '\n### Runbook\n'
-            printf 'See [runbooks/scheduled-scan-alert-gap.md](https://github.com/%s/blob/main/runbooks/scheduled-scan-alert-gap.md) for triage and recovery steps.\n' "$REPOSITORY"
+            printf 'See [runbooks/%s](https://github.com/%s/blob/main/runbooks/%s) for triage and recovery steps.\n' "$RUNBOOK" "$REPOSITORY" "$RUNBOOK"
             printf '\n### Next Steps\n'
             printf '1. Check the [failed run](%s) for error details\n' "$RUN_URL"
             printf '2. Fix the underlying issue\n'

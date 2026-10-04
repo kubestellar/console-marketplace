@@ -10,18 +10,17 @@
 ## Scope Note
 
 This runbook covers CI workflows that run on `push` to `main` (i.e. after a PR has
-already merged) but have **no automated failure alert** — distinct from
+already merged) and are now covered by an automated failure alert — distinct from
 [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md), which covers the same
 workflows' `schedule`/`workflow_dispatch` legs, and already-alerted via
 `.github/workflows/workflow-failure-issue.yml`.
 
 `python-unit-tests.yml` and `ts-unit-tests.yml` both run on `pull_request` **and**
 `push: branches: [main]` (so a merge that passed PR checks on a stale base, or a direct
-push, can still break `main`). `codeql.yml` and `scorecard.yml` are already in
-`workflow-failure-issue.yml`'s `workflows:` watch list, but that job's `if:` condition
-only matches `github.event.workflow_run.event == 'schedule'` or `'workflow_dispatch'` —
-it explicitly excludes `push` — so a push-triggered failure on any of these four
-workflows produces **zero** automated notification today.
+push, can still break `main`). `.github/workflows/workflow-failure-issue.yml` now
+watches those unit-test workflows, plus the already-watched CodeQL and Scorecard
+workflows, and opens/comments on a `workflow-failure` issue when their `push` run fails
+on `main`.
 
 ## Current Status
 
@@ -39,15 +38,14 @@ restoring green at run
 [37107961200](https://github.com/kubestellar/console-marketplace/actions/runs/37107961200)
 (07:55:24Z). The detection step in that window was entirely manual.
 
-**Fix is not yet applied** — see the tracking issue linked from
-[`SLO.md`](./SLO.md#slis-and-slos) for the ready-to-apply diff. Editing
-`.github/workflows/workflow-failure-issue.yml` requires the `workflows` GitHub App
-permission, which this finding's filing agent does not hold; a human or an
-appropriately-permissioned agent must apply it.
+**Gap closed for monitored `main` pushes.** `.github/workflows/workflow-failure-issue.yml`
+now includes `Python Unit Tests` and `TypeScript Unit Tests` in its `workflow_run`
+watch list and allows failed `push` runs only when
+`github.event.workflow_run.head_branch == 'main'`.
 
-## Detecting a Failure Today (Manual Fallback)
+## Detecting a Failure Manually
 
-Until the alert is wired up, check for a red `main` push run directly:
+If the alert is delayed or unavailable, check for a red `main` push run directly:
 
 ```bash
 gh run list --repo kubestellar/console-marketplace --branch main --event push \
