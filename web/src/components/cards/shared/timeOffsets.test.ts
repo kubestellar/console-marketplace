@@ -109,4 +109,12 @@ describe('shared/timeOffsets relative-timestamp helpers', () => {
   it('treats negative n as a timestamp in the future (helpers do not clamp)', () => {
     expect(secondsAgoIso(-10)).toBe(new Date(NOW + 10 * ONE_SECOND_MS).toISOString())
   })
+
+  it('reads Date.now() on each call so results shift with the clock', () => {
+    const first = secondsAgoIso(0)
+    vi.setSystemTime(NOW + ONE_MINUTE_MS)
+    const second = secondsAgoIso(0)
+    expect(second).not.toBe(first)
+    expect(second).toBe(new Date(NOW + ONE_MINUTE_MS).toISOString())
+  })
 })
