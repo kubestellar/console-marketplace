@@ -39,6 +39,10 @@ import os
 import sys
 from collections import defaultdict
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from step_summary_io import write_step_summary  # noqa: E402
+
 # Truncation limits for the two report views. Kept as named constants (were
 # inline magic numbers `30` and `20` in the original heredoc) so the two
 # nearly-identical loops below can't silently drift out of sync again.
@@ -160,12 +164,7 @@ def main(argv: list | None = None) -> int:
         f"### Marketplace Auto-QA: {error_count} error(s), {warn_count} warning(s)\n"
         f"\n{grouped_md}"
     )
-    step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if step_summary:
-        with open(step_summary, "a", encoding="utf-8") as fh:
-            fh.write(summary)
-    else:
-        print(summary)
+    write_step_summary(summary)
 
     return 0
 

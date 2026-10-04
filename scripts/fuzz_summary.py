@@ -54,6 +54,7 @@ from dataclasses import dataclass, field
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from step_summary_io import write_step_summary  # noqa: E402
 from validate_marketplace_lib.checks_schema import PRESET_DIRS  # noqa: E402
 
 # Bounded, fixed list of this repo's own JSON surfaces -- never derived from
@@ -229,13 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     run_corpus_fuzzing(args.repo_root, result)
     run_edge_cases(result)
 
-    summary_md = render_summary_md(result)
-    step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if step_summary:
-        with open(step_summary, "a", encoding="utf-8") as fh:
-            fh.write(summary_md)
-    else:
-        print(summary_md)
+    write_step_summary(render_summary_md(result))
 
     print(render_summary_json(result))
 
