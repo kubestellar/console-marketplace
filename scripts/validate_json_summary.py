@@ -53,6 +53,8 @@ from dataclasses import dataclass, field
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from step_summary_io import write_step_summary  # noqa: E402
+
 # Reuse the canonical schema-check logic (issue #789) instead of
 # re-deriving the same `format`/`name`/`cards`/`card_type`/`position` rules,
 # per-type expected-file mapping, and downloadUrl regex a third time. Each
@@ -205,13 +207,7 @@ def main(argv: list[str] | None = None) -> int:
 
     result = run_validation(args.repo_root)
 
-    summary_md = render_summary_md(result)
-    step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if step_summary:
-        with open(step_summary, "a", encoding="utf-8") as fh:
-            fh.write(summary_md)
-    else:
-        print(summary_md)
+    write_step_summary(render_summary_md(result))
 
     print(render_summary_json(result))
 
