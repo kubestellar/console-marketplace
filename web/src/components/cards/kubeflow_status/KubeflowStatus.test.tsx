@@ -23,7 +23,7 @@ vi.mock('../../../hooks/useMCP', () => ({
 
 vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
-vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
+vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule('kubeflow-cluster-badge'))
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('kubeflow'),
@@ -351,6 +351,64 @@ describe('KubeflowStatus', () => {
     render(<KubeflowStatus />)
 
     expect(screen.getByText('kubeflowStatus.noResources')).toBeTruthy()
+  })
+
+  it('renders the single-cluster badge when exactly one cluster is selected', () => {
+    // Rendered with an empty item list so the only `ClusterBadge` on the
+    // page is the scope badge under test, not a per-row badge.
+    mockUseCardData.mockImplementation(() => ({
+      ...createCardDataResult([]),
+      filters: {
+        ...createCardDataResult([]).filters,
+        localClusterFilter: ['gke-staging'],
+      },
+    }))
+
+    render(<KubeflowStatus />)
+
+    expect(screen.getByTestId('kubeflow-cluster-badge')).toHaveTextContent('gke-staging')
+  })
+
+  it('renders the cluster count badge when more than one cluster is selected', () => {
+    mockUseCardData.mockImplementation(() => ({
+      ...createCardDataResult([]),
+      filters: {
+        ...createCardDataResult([]).filters,
+        localClusterFilter: ['gke-staging', 'aks-dev-eu'],
+      },
+    }))
+
+    render(<KubeflowStatus />)
+
+    expect(screen.queryByTestId('kubeflow-cluster-badge')).toBeNull()
+    expect(screen.getByText('common:common.nClusters')).toBeTruthy()
+  })
+
+  it('suppresses pagination controls when the unlimited items-per-page view is active', () => {
+    const cardDataResult = createCardDataResult([
+      {
+        cluster: 'gke-staging',
+        id: 'pipeline-1',
+        name: 'pipeline-alpha',
+        namespace: 'ml',
+        category: 'pipeline',
+        status: 'running',
+        primaryDetail: 'pipeline-alpha',
+        secondaryDetail: 'experiment-alpha',
+        timestamp: '2026-05-31T00:00:00.000Z',
+      },
+    ])
+
+    mockUseCardData.mockReturnValue({
+      ...cardDataResult,
+      itemsPerPage: 'unlimited',
+      needsPagination: true,
+      totalPages: 5,
+    })
+
+    render(<KubeflowStatus />)
+
+    expect(screen.queryByTestId('kubeflow-next-page')).toBeNull()
   })
 
   it('renders training-job rows with the training icon and label', () => {
