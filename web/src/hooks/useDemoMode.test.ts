@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDemoMode } from './useDemoMode'
 
@@ -95,5 +95,49 @@ describe('useDemoMode', () => {
 
     expect(result.current.toggleDemoMode).toBe(initialToggle)
     expect(result.current.setDemoMode).toBe(initialSet)
+  })
+
+  it('falls back to false and logs a bounded record when localStorage.getItem throws', () => {
+    const getItemSpy = vi
+      .spyOn(window.localStorage, 'getItem')
+      .mockImplementation(() => {
+        throw new DOMException('denied', 'SecurityError')
+      })
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { result } = renderHook(() => useDemoMode())
+
+    expect(result.current.isDemoMode).toBe(false)
+    expect(errorSpy).toHaveBeenCalledWith(
+      'DEMO_MODE_STORAGE_SUMMARY:',
+      expect.objectContaining({ op: 'read', status: 'failed' })
+    )
+
+    getItemSpy.mockRestore()
+    errorSpy.mockRestore()
+  })
+
+  it('swallows a localStorage.setItem failure and logs a bounded record without crashing', () => {
+    const setItemSpy = vi
+      .spyOn(window.localStorage, 'setItem')
+      .mockImplementation(() => {
+        throw new DOMException('quota exceeded', 'QuotaExceededError')
+      })
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { result } = renderHook(() => useDemoMode())
+
+    act(() => {
+      result.current.toggleDemoMode()
+    })
+
+    expect(result.current.isDemoMode).toBe(true)
+    expect(errorSpy).toHaveBeenCalledWith(
+      'DEMO_MODE_STORAGE_SUMMARY:',
+      expect.objectContaining({ op: 'write', status: 'failed' })
+    )
+
+    setItemSpy.mockRestore()
+    errorSpy.mockRestore()
   })
 })
