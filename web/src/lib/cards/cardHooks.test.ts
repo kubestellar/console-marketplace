@@ -279,4 +279,38 @@ describe('useCardData', () => {
     act(() => result.current.sorting.setSortBy('priority'))
     expect(result.current.items.map(i => i.id)).toEqual([2, 3, 1])
   })
+
+  it('reports 0 total pages for an empty result set with an unlimited page size', () => {
+    const { result } = renderHook(() => useCardData([], { defaultLimit: 'unlimited' }))
+    expect(result.current.itemsPerPage).toBe('unlimited')
+    expect(result.current.totalItems).toBe(0)
+    expect(result.current.totalPages).toBe(0)
+  })
+
+  it('excludes items whose searched field is missing instead of matching on undefined', () => {
+    const rows: Item[] = [
+      { id: 1, name: 'alpha' },
+      { id: 2 }, // no `name` field at all
+    ]
+    const { result } = renderHook(() =>
+      useCardData(rows, { filter: { searchFields: ['name'] } }),
+    )
+
+    act(() => result.current.filters.setSearch('alpha'))
+    expect(result.current.items.map(i => i.id)).toEqual([1])
+
+    act(() => result.current.filters.setSearch('nonexistent-term'))
+    expect(result.current.items).toHaveLength(0)
+  })
+
+  it('falls back to searching every object key when no searchFields option is given', () => {
+    const rows: Item[] = [
+      { id: 1, name: 'alpha' },
+      { id: 2, name: 'bravo' },
+    ]
+    const { result } = renderHook(() => useCardData(rows))
+
+    act(() => result.current.filters.setSearch('alpha'))
+    expect(result.current.items.map(i => i.id)).toEqual([1])
+  })
 })

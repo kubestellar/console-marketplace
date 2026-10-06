@@ -96,6 +96,24 @@ describe('shared ItemRow — status overrides', () => {
   })
 })
 
+describe('shared ItemRow — unmapped color override falls back to orange classes', () => {
+  it('falls back to the orange icon/badge classes for a color key absent from the CSS maps', () => {
+    render(
+      <ItemRow
+        item={makeItem({ status: 'mystery' })}
+        getCategoryIcon={getCategoryIcon}
+        getCategoryLabel={getCategoryLabel}
+        statusColorOverrides={{ mystery: 'teal' }}
+        agoLabel="ago"
+        issueBuilder={issueBuilder}
+      />,
+    )
+    const badge = screen.getByText('mystery')
+    expect(badge.className).toContain('text-orange-400')
+    expect(badge.className).toContain('bg-orange-500/20')
+  })
+})
+
 describe('shared ItemRow — divergent AI-actions / red-background predicates', () => {
   it('can render AI actions for a status while withholding the red background', () => {
     const { container } = render(
