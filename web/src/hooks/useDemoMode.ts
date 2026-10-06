@@ -32,7 +32,9 @@ function readDemoMode(): boolean {
   }
 }
 
-function persistDemoMode(value: boolean) {
+// Exported only so the SSR guard is directly testable; the hook's effect
+// never runs during server render.
+export function persistDemoMode(value: boolean) {
   if (typeof window === 'undefined') {
     return
   }
