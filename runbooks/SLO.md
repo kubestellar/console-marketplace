@@ -86,19 +86,18 @@ aspirational, already-healthy state:
   [`python-ts-unit-tests-ci-summary-gap.md`](./python-ts-unit-tests-ci-summary-gap.md)
   for both applied diffs.
 
-- **SLO 10** is not met: `workflow-failure-issue.yml` only alerts on
-  `schedule`/`workflow_dispatch` runs of its five watched workflows, and does not
-  watch `python-unit-tests.yml` / `ts-unit-tests.yml` at all. A real incident —
-  commit `27b7773` breaking `Python Unit Tests` on a `main` push for ~2h40m on
-  2026-10-03 — went undetected by any automation; a human/agent noticed it
-  independently and filed [issue #884](https://github.com/kubestellar/console-marketplace/issues/884).
-  The ready-to-apply diff (extend the `workflows:` list and the `if:` guard to
-  also match `push` events to `main`) is posted in
-  [issue #890](https://github.com/kubestellar/console-marketplace/issues/890),
-  but applying it requires the `workflows` GitHub App permission that routine
-  operations/quality agents do not hold — see
-  [`main-push-ci-failure-gap.md`](./main-push-ci-failure-gap.md) for detail and
-  the manual-fallback detection command in the meantime.
+- **SLO 10** is now met: `workflow-failure-issue.yml`'s `workflows:` watch list
+  includes `Python Unit Tests` and `TypeScript Unit Tests`, and its `if:` guard
+  allows failed `push` runs when `head_branch == 'main'` (in addition to
+  `schedule`/`workflow_dispatch`), merged in
+  [PR #892](https://github.com/kubestellar/console-marketplace/pull/892), closing
+  [issue #890](https://github.com/kubestellar/console-marketplace/issues/890). The
+  gap was originally confirmed by a real undetected incident — commit `27b7773`
+  breaking `Python Unit Tests` on a `main` push for ~2h40m on 2026-10-03, caught
+  only by manual follow-up in
+  [issue #884](https://github.com/kubestellar/console-marketplace/issues/884) —
+  see [`main-push-ci-failure-gap.md`](./main-push-ci-failure-gap.md) for the
+  mechanism detail and manual-fallback detection command.
 
 ## Reviewing These SLOs
 
