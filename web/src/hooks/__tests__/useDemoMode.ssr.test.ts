@@ -1,7 +1,6 @@
 // The main useDemoMode.test.ts suite runs under jsdom with a real
 // window object, so the module's `typeof window === 'undefined'` SSR
-// guards at src/hooks/useDemoMode.ts:6-8 (readDemoMode) and 14-16
-// (persistDemoMode) stay uncovered. Any regression there would only
+// guards (readDemoMode and persistDemoMode) are exercised here. Any regression there would only
 // surface during a real server render (Next.js SSR / RSC boundary)
 // and would crash the mount with `ReferenceError: window is not
 // defined`.
@@ -41,18 +40,10 @@ describe('useDemoMode — SSR fast-path (window is undefined)', () => {
       html = renderToString(React.createElement(Probe))
     }).not.toThrow()
 
-    // readDemoMode() SSR arm returned false; the initial useEffect
-    // (which would call persistDemoMode()) does NOT fire during SSR,
-    // so we only assert the read side here. The persist SSR guard
-    // (persistDemoMode's `typeof window === 'undefined'` check) is NOT
-    // covered by the second test below, or by any other test in this
-    // suite: persistDemoMode is only reachable from useDemoMode's
-    // effect, which never runs in a server render, and the function is
-    // not exported for direct invocation. See
-    // https://github.com/kubestellar/console-marketplace/issues/909
-    // for closing that gap (it needs either an exported/testable seam
-    // on persistDemoMode or a documented coverage exclusion, which is
-    // a production-code decision outside a test-only change).
+    // readDemoMode() SSR arm returned false; the hook's effect does NOT
+    // fire during SSR, so only the read side is asserted here. The
+    // persistDemoMode SSR guard is covered by the dedicated test below,
+    // which calls the exported function directly.
     expect(html).toContain('false')
   })
 
@@ -68,5 +59,13 @@ describe('useDemoMode — SSR fast-path (window is undefined)', () => {
     // refactor moves readDemoMode() to module scope (a common
     // "read once on load" mistake), this import would throw.
     await expect(import('../useDemoMode')).resolves.toBeDefined()
+  })
+
+  it('persistDemoMode returns without throwing when window is undefined', async () => {
+    vi.stubGlobal('window', undefined)
+    expect(typeof window).toBe('undefined')
+
+    const { persistDemoMode } = await import('../useDemoMode')
+    expect(() => persistDemoMode(true)).not.toThrow()
   })
 })
