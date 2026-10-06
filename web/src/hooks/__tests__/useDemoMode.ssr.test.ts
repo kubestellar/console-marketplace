@@ -43,8 +43,16 @@ describe('useDemoMode — SSR fast-path (window is undefined)', () => {
 
     // readDemoMode() SSR arm returned false; the initial useEffect
     // (which would call persistDemoMode()) does NOT fire during SSR,
-    // so we only assert the read side here — the persist SSR guard is
-    // covered by the second test, which invokes it directly.
+    // so we only assert the read side here. The persist SSR guard
+    // (persistDemoMode's `typeof window === 'undefined'` check) is NOT
+    // covered by the second test below, or by any other test in this
+    // suite: persistDemoMode is only reachable from useDemoMode's
+    // effect, which never runs in a server render, and the function is
+    // not exported for direct invocation. See
+    // https://github.com/kubestellar/console-marketplace/issues/909
+    // for closing that gap (it needs either an exported/testable seam
+    // on persistDemoMode or a documented coverage exclusion, which is
+    // a production-code decision outside a test-only change).
     expect(html).toContain('false')
   })
 
