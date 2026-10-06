@@ -1,0 +1,25 @@
+name: Checkout console pin
+description: >
+  Sparse-checkout a slice of kubestellar/console at the shared pinned commit
+  used by marketplace-quality.yml, marketplace-auto-qa.yml, and
+  ts-unit-tests.yml. Centralizes the pin SHA in one file so bumping it only
+  requires one edit instead of three (see CONTRIBUTING.md § Bumping the
+  console pin).
+inputs:
+  path:
+    description: Directory to check the console checkout out into
+    required: true
+  sparse-checkout:
+    description: Newline-separated sparse-checkout paths, passed through verbatim
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Checkout console (sparse)
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: kubestellar/console
+        ref: 425902f6132e317a9c9611b3d6f21b21aca75012  # bump: see CONTRIBUTING.md § Bumping the console pin
+        path: ${{ inputs.path }}
+        sparse-checkout: ${{ inputs.sparse-checkout }}
+        sparse-checkout-cone-mode: false
