@@ -20,6 +20,7 @@ assignees: ''
 - [ ] Content incident (bad `registry.json`/preset/dashboard/theme reached `main`) — see [`runbooks/registry-incident-response.md`](../../runbooks/registry-incident-response.md)
 - [ ] Pipeline incident (a scheduled/unattended workflow crashed or stopped alerting) — see [`runbooks/auto-qa-pipeline-failure.md`](../../runbooks/auto-qa-pipeline-failure.md)
 - [ ] Scheduled scan/triage silent failure (`fuzz.yml`, `codeql.yml`, `scorecard.yml`, or `stale.yml` crashed or stopped alerting with no notification) — see [`runbooks/scheduled-scan-alert-gap.md`](../../runbooks/scheduled-scan-alert-gap.md)
+- [ ] Main-push CI failure (`python-unit-tests.yml`, `ts-unit-tests.yml`, or the `push`-triggered leg of `codeql.yml`/`scorecard.yml` broke `main` after PR checks passed) — see [`runbooks/main-push-ci-failure-gap.md`](../../runbooks/main-push-ci-failure-gap.md)
 - [ ] Other (describe below)
 
 ## Timeline
