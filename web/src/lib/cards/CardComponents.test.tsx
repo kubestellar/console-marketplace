@@ -142,6 +142,11 @@ describe('CardPaginationFooter', () => {
     render(<CardPaginationFooter {...baseProps} currentPage={3} />)
     expect(screen.getByLabelText('Next page')).toBeDisabled()
   })
+
+  it('renders a 0-start range when totalItems is 0', () => {
+    render(<CardPaginationFooter {...baseProps} totalItems={0} />)
+    expect(screen.getByText('0-0 of 0')).toBeInTheDocument()
+  })
 })
 
 describe('CardAIActions', () => {
