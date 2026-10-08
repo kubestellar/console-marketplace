@@ -19,10 +19,12 @@ The `main` branch of this repository must have the following protection rules en
 A repository administrator must apply these settings via the GitHub Settings > Branches UI, or via:
 
 ```bash
-gh api -X PUT "repos/kubestellar/console-marketplace/branches/main/protection" --input policy.json
+gh api -X PUT "repos/kubestellar/console-marketplace/branches/main/protection" --input .github/branch-protection-policy.json
 ```
 
-Where `policy.json` contains:
+The checked-in `.github/branch-protection-policy.json` is the source of truth for the
+settings below (keep it in sync with this block). Verify the result afterwards with
+`gh api repos/kubestellar/console-marketplace/branches/main/protection`. Contents:
 
 ```json
 {
@@ -66,7 +68,7 @@ validation that already exists binding.
 
 Addresses security findings tracked in issue #376 (branch protection) and #377 (mandatory code review),
 and the release-safeguard gap tracked in issue #560 (PR-time content gates were documented as
-non-blocking). Applying this document's `policy.json` to the live branch protection settings
+non-blocking). Applying this document's `.github/branch-protection-policy.json` to the live branch protection settings
 on `main` is a separate, still-pending administrator action tracked in issue #932 (the
 prior tracker, #866, was auto-closed by its own doc-currency fix PR before the live
 setting was applied — see #932 for details) — closing
