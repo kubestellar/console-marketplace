@@ -3,6 +3,7 @@ import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../../ui/ClusterBadge'
 import { CardSearchInput, CardPaginationFooter } from '../../../lib/cards/CardComponents'
 import { useCardShell } from '../../../lib/cards/useCardShell'
+import { ICON_COLOR_CLASS } from '../shared/colorClasses'
 import { type CoreDNSDemoServer, type CoreDNSDemoData } from './demoData'
 import { useCoreDNSStatus } from './useCoreDNSStatus'
 
@@ -12,11 +13,15 @@ interface CoreDNSDisplayRow extends CoreDNSDemoServer {
   id: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  running: 'text-green-400',
-  degraded: 'text-yellow-400',
-  down: 'text-red-400',
-  unknown: 'text-muted-foreground',
+// Maps this card's own status vocabulary onto the shared colour-name keys in
+// `ICON_COLOR_CLASS` instead of re-declaring the Tailwind literals locally
+// (the "unknown" status intentionally has no entry here — it falls through
+// to the same `text-muted-foreground` fallback as any unrecognised status,
+// matching pre-existing behavior).
+const STATUS_COLOR_KEY: Record<string, string> = {
+  running: 'green',
+  degraded: 'yellow',
+  down: 'red',
 }
 
 function toDisplayRows(raw: CoreDNSDemoData): CoreDNSDisplayRow[] {
@@ -119,7 +124,7 @@ export function CoreDNSStatus() {
               <ClusterBadge cluster={row.cluster} />
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className={STATUS_COLORS[row.status] ?? 'text-muted-foreground'}>
+              <span className={ICON_COLOR_CLASS[STATUS_COLOR_KEY[row.status]] ?? 'text-muted-foreground'}>
                 {row.status}
               </span>
               <span className="text-muted-foreground/50">·</span>
