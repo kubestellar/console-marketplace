@@ -12,6 +12,10 @@ inputs:
   sparse-checkout:
     description: Newline-separated sparse-checkout paths, passed through verbatim
     required: true
+  sparse-checkout-cone-mode:
+    description: Whether to use cone-mode sparse checkout
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -22,4 +26,4 @@ runs:
         ref: 425902f6132e317a9c9611b3d6f21b21aca75012  # bump: see CONTRIBUTING.md § Bumping the console pin
         path: ${{ inputs.path }}
         sparse-checkout: ${{ inputs.sparse-checkout }}
-        sparse-checkout-cone-mode: false
+        sparse-checkout-cone-mode: ${{ inputs.sparse-checkout-cone-mode }}

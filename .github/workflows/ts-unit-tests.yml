@@ -31,10 +31,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Checkout console (Vitest config and shared deps)
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: ./.github/actions/checkout-console-pin
         with:
-          repository: kubestellar/console
-          ref: 425902f6132e317a9c9611b3d6f21b21aca75012  # bump: see CONTRIBUTING.md § Bumping the console pin
           path: console-parent
           sparse-checkout: |
             web/package.json
@@ -43,6 +41,7 @@ jobs:
             web/tsconfig.json
             web/tsconfig.node.json
             web/src/test/setup.ts
+          sparse-checkout-cone-mode: 'true'
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -72,9 +71,11 @@ jobs:
           TESTS_LINE=$(grep -E '^ *Tests' /tmp/vitest-output.log | tail -1)
           TESTS_PASSED=$(echo "$TESTS_LINE" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || echo 0)
           TESTS_FAILED=$(echo "$TESTS_LINE" | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+' || echo 0)
-          echo "test_files_summary=${TEST_FILES_LINE:-N/A}" >> "$GITHUB_OUTPUT"
-          echo "tests_passed=${TESTS_PASSED:-0}" >> "$GITHUB_OUTPUT"
-          echo "tests_failed=${TESTS_FAILED:-0}" >> "$GITHUB_OUTPUT"
+          {
+            echo "test_files_summary=${TEST_FILES_LINE:-N/A}"
+            echo "tests_passed=${TESTS_PASSED:-0}"
+            echo "tests_failed=${TESTS_FAILED:-0}"
+          } >> "$GITHUB_OUTPUT"
           exit "$VITEST_EXIT"
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
