@@ -2,12 +2,12 @@
 """Structured CI-observability summary for the `validate-json.yml` workflow.
 
 `validate-json.yml`'s three steps ("Validate registry.json", "Validate
-dashboard files", "Validate dashboard format") only print free-text
-`echo`/`print` lines today: no step writes to `$GITHUB_STEP_SUMMARY`, and
-there is no single bounded, machine-readable record of what was checked.
-This mirrors the gap already closed for `scripts/validate-marketplace.py`
-(`MARKETPLACE_QUALITY_SUMMARY:` line) and flagged for `fuzz.yml` in
-runbooks/fuzz-yml-ci-summary-gap.md. See tracking issue #621.
+dashboard files", "Validate dashboard format") used to only print free-text
+`echo`/`print` lines, with no single bounded, machine-readable record of what
+was checked. That gap is now closed (see below), mirroring the same class of
+gap already closed for `scripts/validate-marketplace.py`
+(`MARKETPLACE_QUALITY_SUMMARY:` line) and `fuzz.yml`
+(`runbooks/fuzz-yml-ci-summary-gap.md`). See tracking issue #621 (closed).
 
 This module runs the same three checks the workflow already runs
 (registry.json parses, dashboards/*/dashboard.json files parse and match the
@@ -29,13 +29,13 @@ by `validate-marketplace.py` -- instead of being re-derived here a third time
     status) -- counts are bounded by this repo's own registry/dashboard
     file list, never by unbounded user input.
 
-Standalone by design: this script is NOT wired into `validate-json.yml`.
-Doing so requires editing a file under `.github/workflows/`, which needs
-the `workflows` GitHub App permission this project's automated PRs do not
-carry (confirmed blocker -- see runbooks/validate-json-ci-summary-gap.md
-for the ready-to-apply diff and the same rejection already hit for
-`fuzz.yml`). No exporter, metrics backend, or external data flow is added:
-stdout / $GITHUB_STEP_SUMMARY only.
+Wired in: `validate-json.yml`'s observability-summary step calls this
+script -- see runbooks/validate-json-ci-summary-gap.md for history (the
+original gap required a `.github/workflows/` edit that this project's
+automated-PR token could not carry; a differently-scoped automation run
+with the `workflows` permission applied it, the same way as `fuzz.yml`).
+No exporter, metrics backend, or external data flow is added: stdout /
+$GITHUB_STEP_SUMMARY only.
 
 Usage:
     python3 scripts/validate_json_summary.py [--repo-root PATH]

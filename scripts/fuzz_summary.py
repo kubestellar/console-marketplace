@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Structured CI-observability summary for the `fuzz.yml` workflow.
 
-`fuzz.yml`'s "Run fuzzing tests" and "Test edge cases" steps only print
-free-text `echo`/`print` lines today ("Fuzzing completed successfully - no
-crashes detected", "All edge case tests passed!"): no step writes to
-`$GITHUB_STEP_SUMMARY`, and there is no bounded, machine-readable record of
-what actually ran. This mirrors the gap already closed for
+`fuzz.yml`'s "Run fuzzing tests" and "Test edge cases" steps used to only
+print free-text `echo`/`print` lines ("Fuzzing completed successfully - no
+crashes detected", "All edge case tests passed!"), with no bounded,
+machine-readable record of what actually ran. That gap is now closed (see
+below), mirroring the same class of gap already closed for
 `scripts/validate-marketplace.py` (`MARKETPLACE_QUALITY_SUMMARY:` line) and
 `scripts/validate_json_summary.py` (`VALIDATE_JSON_SUMMARY:` line). See
-tracking issue #597 and `runbooks/fuzz-yml-ci-summary-gap.md` for the
-ready-to-apply workflow diff.
+tracking issue #597 (closed) and `runbooks/fuzz-yml-ci-summary-gap.md` for
+the applied workflow diff.
 
 This module re-implements the corpus-mutation testing and edge-case testing
 `fuzz.yml` already runs (mutating each of this repo's own fixed JSON
@@ -18,8 +18,7 @@ card-presets/*.json -- via truncation and extra-character insertion, plus a
 fixed list of JSON edge cases) as a standalone, unit-testable script. It does
 NOT invoke atheris itself (that remains a subprocess step in the workflow);
 instead it accepts that step's pass/fail result via `--fuzzer-status` /
-`FUZZER_STATUS` so the final summary can report on the whole job once wired.
-It emits:
+`FUZZER_STATUS` so the final summary can report on the whole job. It emits:
 
   - a bounded markdown table (written to $GITHUB_STEP_SUMMARY when set, else
     stdout)
@@ -29,13 +28,13 @@ It emits:
     fixed corpus-file list and fixed edge-case list, never by unbounded
     input.
 
-Standalone by design: this script is NOT wired into `fuzz.yml`. Doing so
-requires editing a file under `.github/workflows/`, which needs the
-`workflows` GitHub App permission this project's automated PRs do not carry
-(confirmed blocker -- see runbooks/fuzz-yml-ci-summary-gap.md for the
-ready-to-apply diff and the same rejection already hit for
-`validate-json.yml`). No exporter, metrics backend, or external data flow is
-added: stdout / $GITHUB_STEP_SUMMARY only.
+Wired in: `fuzz.yml`'s `Fuzzing observability summary` step (added by commit
+`378cfdf`) calls this script with `--fuzzer-status`, `if: always()` -- see
+runbooks/fuzz-yml-ci-summary-gap.md for history (the original gap required a
+`.github/workflows/` edit that this project's automated-PR token could not
+carry; a differently-scoped automation run with the `workflows` permission
+applied it). No exporter, metrics backend, or external data flow is added:
+stdout / $GITHUB_STEP_SUMMARY only.
 
 Usage:
     python3 scripts/fuzz_summary.py [--repo-root PATH] [--fuzzer-status pass|fail|unknown]
