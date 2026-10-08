@@ -15,7 +15,7 @@ should be detected and resolved, not any request-latency/availability target.
 | # | SLI (what we measure) | SLO (target) | Detection mechanism | Runbook |
 |---|---|---|---|---|
 | 1 | Time from a broken `registry.json`/preset/dashboard/theme merge landing on `main` to a filed `[Auto-QA]` finding | ≤ 24h (one nightly scan cycle) | `marketplace-auto-qa.yml` nightly scan (`0 6 * * *`) | [`registry-incident-response.md`](./registry-incident-response.md) |
-| 2 | Time from a PR-time check failure (`Validate JSON` / `Marketplace Quality Gate`) to that PR being blocked from merging | 0 (should never merge with failing checks) | PR status checks | [`registry-incident-response.md`](./registry-incident-response.md) — **not yet met**: checks are not merge-blocking today (the documented recommendation was fixed in [issue #560](https://github.com/kubestellar/console-marketplace/issues/560) (closed), but applying it to the *live* branch protection settings is a separate, still-pending admin action — tracked in [issue #866](https://github.com/kubestellar/console-marketplace/issues/866)) |
+| 2 | Time from a PR-time check failure (`Validate JSON` / `Marketplace Quality Gate`) to that PR being blocked from merging | 0 (should never merge with failing checks) | PR status checks | [`registry-incident-response.md`](./registry-incident-response.md) — **not yet met**: checks are not merge-blocking today (the documented recommendation was fixed in [issue #560](https://github.com/kubestellar/console-marketplace/issues/560) (closed), but applying it to the *live* branch protection settings is a separate, still-pending admin action — tracked in [issue #932](https://github.com/kubestellar/console-marketplace/issues/932); the prior tracker, #866, is closed — it was auto-closed by its own doc-currency fix PR before the live setting was ever applied, so do not treat #866's closed state as evidence either) |
 | 3 | Time from the nightly Auto-QA *pipeline itself* crashing (not a content finding) to an alert | ≤ 24h | `Alert on scan pipeline failure` step in `marketplace-auto-qa.yml`, merged in [PR #755](https://github.com/kubestellar/console-marketplace/pull/755) | [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) — **met**: mechanism is live and closed [issue #545](https://github.com/kubestellar/console-marketplace/issues/545); files/updates an `auto-qa:pipeline-failure`-labeled issue whenever the scan step fails (see [Current Status](./auto-qa-pipeline-failure.md#current-status)); not yet observed firing on a real failure |
 | 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | `.github/workflows/workflow-failure-issue.yml`'s `workflow_run` trigger, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **met**: mechanism is live and closed [issue #573](https://github.com/kubestellar/console-marketplace/issues/573); not yet observed firing on a real failure (see [Current Status](./scheduled-scan-alert-gap.md#current-status)) |
@@ -37,9 +37,13 @@ aspirational, already-healthy state:
   and is now closed for — the earlier, narrower gap of the *documented recommendation*
   itself defaulting to `required_status_checks: null`; it does not track, and was never
   intended to track, whether that corrected recommendation has actually been applied to
-  the live settings on `main`. That remaining, still-open admin action is tracked
-  separately in [issue #866](https://github.com/kubestellar/console-marketplace/issues/866)
-  — do not treat #560's closed state as evidence this SLO is met.
+  the live settings on `main`. [Issue #866](https://github.com/kubestellar/console-marketplace/issues/866)
+  was filed to replace #560 as that tracker, but was itself auto-closed by its own
+  doc-currency fix PR (#867) using a `Fixes #866` closing keyword — before the live
+  setting was ever applied or verified. That remaining, still-open admin action is now
+  tracked in [issue #932](https://github.com/kubestellar/console-marketplace/issues/932).
+  Do not treat #560's or #866's closed state as evidence this SLO is met; verify by
+  re-reading the live branch protection settings on `main` directly.
 - **SLO 3** is met: the `Alert on scan pipeline failure` step landed in
   `.github/workflows/marketplace-auto-qa.yml` in
   [PR #755](https://github.com/kubestellar/console-marketplace/pull/755), closing
