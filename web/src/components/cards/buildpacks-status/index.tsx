@@ -3,6 +3,7 @@ import { Skeleton } from '../ui/Skeleton'
 import { ClusterBadge } from '../../ui/ClusterBadge'
 import { CardSearchInput, CardPaginationFooter } from '../../../lib/cards/CardComponents'
 import { useCardShell } from '../../../lib/cards/useCardShell'
+import { ICON_COLOR_CLASS } from '../shared/colorClasses'
 import { type BuildpacksDemoImage, type BuildpacksDemoData } from './demoData'
 import { useBuildpacksStatus } from './useBuildpacksStatus'
 
@@ -12,11 +13,15 @@ interface BuildpacksDisplayRow extends BuildpacksDemoImage {
   id: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  succeeded: 'text-green-400',
-  failed: 'text-red-400',
-  building: 'text-yellow-400',
-  unknown: 'text-muted-foreground',
+// Maps this card's own status vocabulary onto the shared colour-name keys in
+// `ICON_COLOR_CLASS` instead of re-declaring the Tailwind literals locally
+// (the "unknown" status intentionally has no entry here — it falls through
+// to the same `text-muted-foreground` fallback as any unrecognised status,
+// matching pre-existing behavior).
+const STATUS_COLOR_KEY: Record<string, string> = {
+  succeeded: 'green',
+  failed: 'red',
+  building: 'yellow',
 }
 
 function toDisplayRows(raw: BuildpacksDemoData): BuildpacksDisplayRow[] {
@@ -100,7 +105,7 @@ export function BuildpacksStatus() {
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span>{row.namespace}</span>
               <span className="text-muted-foreground/50">·</span>
-              <span className={STATUS_COLORS[row.status] ?? 'text-muted-foreground'}>
+              <span className={ICON_COLOR_CLASS[STATUS_COLOR_KEY[row.status]] ?? 'text-muted-foreground'}>
                 {row.status}
               </span>
             </div>
