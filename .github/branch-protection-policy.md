@@ -19,6 +19,7 @@ The `main` branch of this repository must have the following protection rules en
 A repository administrator must apply these settings via the GitHub Settings > Branches UI, or via:
 
 ```bash
+scripts/apply-branch-protection.sh   # add --dry-run to preview; wraps the command below
 gh api -X PUT "repos/kubestellar/console-marketplace/branches/main/protection" --input .github/branch-protection-policy.json
 ```
 
