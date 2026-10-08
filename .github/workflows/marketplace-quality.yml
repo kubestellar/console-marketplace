@@ -57,16 +57,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Checkout console (sparse)
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        uses: ./.github/actions/checkout-console-pin
         with:
-          repository: kubestellar/console
-          ref: 425902f6132e317a9c9611b3d6f21b21aca75012  # bump: see CONTRIBUTING.md § Bumping the console pin
           path: console
           sparse-checkout: |
             web/src/components/cards/**
             web/src/hooks/**
             web/src/locales/en/cards.json
-          sparse-checkout-cone-mode: false
 
       - name: Run cross-repo quality checks
         id: quality
