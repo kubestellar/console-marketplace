@@ -259,6 +259,29 @@ class TestPrivateRangesRejection:
         ok, _reason = _is_safe(url)
         assert ok, f"{url!r} should be allowed (172.{second_octet} is public)"
 
+    @pytest.mark.parametrize("url", [
+        "https://100.64.0.1/file",
+        "https://100.100.100.200/latest/meta-data/",  # Alibaba Cloud metadata IP
+        "https://100.127.255.254/file",
+    ])
+    def test_100_64_shared_address_space_rejected(self, url):
+        """100.64.0.0/10 (RFC 6598 CGNAT) is not classified as private or
+        reserved by CPython's ipaddress module but is used by several cloud
+        providers for internal-only and metadata-adjacent endpoints, so it
+        must be rejected explicitly."""
+        ok, reason = _is_safe(url)
+        assert not ok, f"{url!r} should be rejected (100.64.0.0/10)"
+        assert "shared address space" in reason
+
+    @pytest.mark.parametrize("url", [
+        "https://99.255.255.255/file",
+        "https://100.128.0.1/file",
+    ])
+    def test_100_64_boundary_addresses_allowed(self, url):
+        """Addresses just outside 100.64.0.0/10 are public and must stay allowed."""
+        ok, _reason = _is_safe(url)
+        assert ok, f"{url!r} should be allowed (outside 100.64.0.0/10)"
+
 
 class TestEdgeCases:
     def test_hostname_that_looks_like_10_dot_prefix(self):

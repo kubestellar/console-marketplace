@@ -98,6 +98,15 @@ def _classify_ip_literal(host):
         return False, f"host {host!r} is a loopback address"
     if ip.is_link_local:
         return False, f"host {host!r} is a link-local address"
+    # CPython's ipaddress module does NOT classify 100.64.0.0/10 (RFC 6598
+    # "Shared Address Space", used for carrier-grade NAT) as is_private,
+    # is_reserved, or is_link_local, so it falls through every branch below
+    # as a "public" address. Several cloud providers route internal-only
+    # services (including metadata-adjacent endpoints) through this block —
+    # e.g. Alibaba Cloud's metadata service listens on 100.100.100.200 — so
+    # leaving it unclassified is an SSRF guard bypass. Reject it explicitly.
+    if isinstance(ip, ipaddress.IPv4Address) and ip in ipaddress.ip_network("100.64.0.0/10"):
+        return False, f"host {host!r} is in the shared address space (100.64.0.0/10, RFC 6598)"
     if ip.is_private:
         return False, f"host {host!r} is a private address"
     if ip.is_reserved:
