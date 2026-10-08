@@ -43,8 +43,11 @@ merge to `main` and a user seeing the result. Use this runbook when any of the f
 > (`required_status_checks` naming `static-validation`, `card-quality-gate`, `validate`).
 > Until a repository administrator applies that policy to the live branch protection
 > settings — a separate, still-open action tracked in
-> [#866](https://github.com/kubestellar/console-marketplace/issues/866) — don't assume a
-> merge to `main` implies the checks passed — verify directly (see below).
+> [#932](https://github.com/kubestellar/console-marketplace/issues/932) (the prior
+> tracker, [#866](https://github.com/kubestellar/console-marketplace/issues/866), is
+> closed — it was auto-closed by its own doc-currency fix PR before the live setting
+> was applied) — don't assume a merge to `main` implies the checks passed — verify
+> directly (see below).
 
 ---
 
