@@ -92,6 +92,56 @@ describe('CardControlsRow', () => {
     expect(screen.getByTestId('a')).toBeInTheDocument()
     expect(screen.getByTestId('b')).toBeInTheDocument()
   })
+
+  // Regression pin: kubeflow_status/index.tsx and openkruise_status/index.tsx
+  // call `<CardControlsRow clusterFilter={...} cardControls={...} />` with no
+  // `children`, wiring an interactive cluster filter and a limit/sort control
+  // (including `onLimitChange`, the handler that can set itemsPerPage to
+  // 'unlimited'). The exported `CardControlsRowProps` type is `{ children?:
+  // ReactNode }`, so this real component silently drops both props and
+  // renders an empty row — every card test instead mocks this module with a
+  // richer fake that *does* honor `cardControls`/`clusterFilter`, which hides
+  // the divergence from the test suite. This test exercises the real,
+  // unmocked component with the exact prop shape the two cards pass, so a
+  // future reader has a failing assertion to update once the real controls
+  // UI is implemented, instead of the gap staying invisible. See
+  // kubestellar/console-marketplace issue for the tracking discussion.
+  it('silently drops clusterFilter/cardControls props today (no children passed)', () => {
+    const onLimitChange = vi.fn()
+    const { container } = render(
+      <CardControlsRow
+        // @ts-expect-error -- clusterFilter/cardControls are not part of
+        // CardControlsRowProps; this is the exact shape production callers
+        // pass, reproduced here to pin the current (unimplemented) behavior.
+        clusterFilter={{
+          availableClusters: ['cluster-a'],
+          selectedClusters: [],
+          onToggle: vi.fn(),
+          onClear: vi.fn(),
+          isOpen: false,
+          setIsOpen: vi.fn(),
+          containerRef: { current: null },
+          minClusters: 1,
+        }}
+        cardControls={{
+          limit: 'unlimited',
+          onLimitChange,
+          sortBy: 'name',
+          sortOptions: [{ value: 'name', label: 'Name' }],
+          onSortChange: vi.fn(),
+          sortDirection: 'asc',
+          onSortDirectionChange: vi.fn(),
+        }}
+      />,
+    )
+
+    // Renders the same empty <div> as the no-children case: no cluster
+    // filter button, no limit/sort control, and onLimitChange is never
+    // invoked, because the real component ignores both props entirely.
+    expect(container.querySelector('div')).not.toBeNull()
+    expect(container.querySelector('div')?.children.length).toBe(0)
+    expect(onLimitChange).not.toHaveBeenCalled()
+  })
 })
 
 describe('CardPaginationFooter', () => {
