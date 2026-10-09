@@ -3,13 +3,6 @@ name: Marketplace Quality Gate
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'registry.json'
-      - 'presets/**'
-      - 'card-presets/**'
-      - 'dashboards/**'
-      - 'themes/**'
-      - 'scripts/**'
   workflow_dispatch:
 
 concurrency:
