@@ -1,7 +1,7 @@
 # Auto-QA Pipeline Failure Runbook
 
 **Repository:** `kubestellar/console-marketplace`
-**Applies to:** `.github/workflows/marketplace-auto-qa.yml`, `scripts/validate-marketplace.py`
+**Applies to:** `.github/workflows/marketplace-auto-qa.yml`, `scripts/validate_marketplace.py`
 
 ---
 
@@ -51,7 +51,7 @@ and filed a legitimate `[Auto-QA]` finding, use `registry-incident-response.md` 
 ## Why This Can Happen Silently
 
 The `Run full quality scan` step in `marketplace-auto-qa.yml` is declared with
-`continue-on-error: true` so that a transient crash in `validate-marketplace.py` (or
+`continue-on-error: true` so that a transient crash in `validate_marketplace.py` (or
 the inline result-parsing script that computes `error_count`/`warn_count`) doesn't
 fail the whole scheduled run. Without an explicit check for that failure, a crash
 before valid JSON is produced means:
@@ -83,7 +83,7 @@ fails, so a crash is no longer silent. See [Current Status](#current-status) abo
    git clone https://github.com/kubestellar/console-marketplace
    git clone --depth 1 https://github.com/kubestellar/console ../console
    cd console-marketplace
-   python3 scripts/validate-marketplace.py --mode full --console-path ../console --json
+   python3 scripts/validate_marketplace.py --mode full --console-path ../console --json
    ```
 3. Common causes:
    - A schema/format change in `registry.json` or a card preset that the scanner
@@ -97,7 +97,7 @@ fails, so a crash is no longer silent. See [Current Status](#current-status) abo
 
 ## Recovery
 
-1. Fix `scripts/validate-marketplace.py` (or the affected registry/preset/dashboard/
+1. Fix `scripts/validate_marketplace.py` (or the affected registry/preset/dashboard/
    theme file) so the scan completes and produces valid JSON output.
 2. Re-run the workflow manually via `workflow_dispatch` (with
    `skip_issue_creation: true` first, if you want to confirm the scan completes

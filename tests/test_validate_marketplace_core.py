@@ -1,6 +1,6 @@
 """Core validator plumbing: ``Results`` aggregation and the JSON/file helpers.
 
-Covers ``scripts/validate-marketplace.py`` building blocks shared by every
+Covers ``scripts/validate_marketplace.py`` building blocks shared by every
 checker: the ``Results`` collector (exit codes, summary rendering, JSON
 records), ``load_json``, ``find_json_files``, ``get_registry_entries``,
 ``extract_object_block`` and ``check_json_syntax``.
@@ -32,7 +32,7 @@ def _load_validate_marketplace():
     scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
     spec = importlib.util.spec_from_file_location(
         "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
+        os.path.join(scripts_dir, "validate_marketplace.py"),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -53,7 +53,7 @@ Results_gaps = _mod_gaps.Results
 def _iter_all_findings(results):
     """Yield every finding on a Results_gaps instance as (severity, category, msg).
 
-    Results_gaps is defined at the top of validate-marketplace.py; we access
+    Results_gaps is defined at the top of validate_marketplace.py; we access
     its collections generically so this helper survives shape changes
     (e.g. renaming ``errors`` to ``failures``) without silently missing
     findings.

@@ -1,7 +1,7 @@
 """Whole-repo consistency checks for ``registry.json`` against the checked-in
 marketplace assets.
 
-The existing ``test_validate_*`` suites drive ``scripts/validate-marketplace.py``
+The existing ``test_validate_*`` suites drive ``scripts/validate_marketplace.py``
 against synthetic ``tmp_path`` fixtures, which is the right shape for unit
 tests but leaves the *actual* ``registry.json`` shipped in this repository
 completely unchecked.  When ``registry.json`` and the assets it points at

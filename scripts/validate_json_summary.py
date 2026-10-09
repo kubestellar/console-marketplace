@@ -5,7 +5,7 @@
 dashboard files", "Validate dashboard format") used to only print free-text
 `echo`/`print` lines, with no single bounded, machine-readable record of what
 was checked. That gap is now closed (see below), mirroring the same class of
-gap already closed for `scripts/validate-marketplace.py`
+gap already closed for `scripts/validate_marketplace.py`
 (`MARKETPLACE_QUALITY_SUMMARY:` line) and `fuzz.yml`
 (`runbooks/fuzz-yml-ci-summary-gap.md`). See tracking issue #621 (closed).
 
@@ -18,7 +18,7 @@ The underlying schema/consistency rules (dashboard `format`/`name`/`cards`
 fields, per-card `card_type`/`position`, per-type expected registry file
 paths, and the `downloadUrl` ref-path regex) are shared with
 `validate_marketplace_lib.checks_schema` -- the canonical implementation used
-by `validate-marketplace.py` -- instead of being re-derived here a third time
+by `validate_marketplace.py` -- instead of being re-derived here a third time
 (see issue #789). This script keeps its own message wording and
 `ValidationResult` shape so its output/tests are unaffected.
 

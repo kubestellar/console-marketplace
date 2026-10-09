@@ -1,6 +1,6 @@
 """Result tracking and CI-summary rendering for the marketplace quality gate.
 
-Extracted from scripts/validate-marketplace.py (see issue #670).
+Extracted from scripts/validate_marketplace.py (see issue #670).
 """
 import json
 

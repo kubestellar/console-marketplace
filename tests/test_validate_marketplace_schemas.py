@@ -1,4 +1,4 @@
-"""Schema checkers in ``scripts/validate-marketplace.py``.
+"""Schema checkers in ``scripts/validate_marketplace.py``.
 
 Covers ``check_preset_schema``, ``check_dashboard_schema``,
 ``check_theme_schema``, ``check_theme_consistency``,
@@ -51,7 +51,7 @@ def _rmtree(p: Path) -> None:
 def _iter_all_findings(results):
     """Yield every finding on a Results_gaps instance as (severity, category, msg).
 
-    Results_gaps is defined at the top of validate-marketplace.py; we access
+    Results_gaps is defined at the top of validate_marketplace.py; we access
     its collections generically so this helper survives shape changes
     (e.g. renaming ``errors`` to ``failures``) without silently missing
     findings.

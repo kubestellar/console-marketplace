@@ -48,7 +48,7 @@ Before opening a PR, validate that your `registry.json` change is well-formed an
 
 ```bash
 python3 -m json.tool registry.json > /dev/null
-python3 scripts/validate-marketplace.py --mode static
+python3 scripts/validate_marketplace.py --mode static
 ```
 
 ## Submitting a Card Preset
@@ -171,11 +171,11 @@ From the repository root:
 
 ```bash
 python3 -m json.tool registry.json > /dev/null
-python3 scripts/validate-marketplace.py --mode static
-python3 scripts/validate-marketplace.py --mode cross-repo --console-path /path/to/console
+python3 scripts/validate_marketplace.py --mode static
+python3 scripts/validate_marketplace.py --mode cross-repo --console-path /path/to/console
 ```
 
-**Important:** The CI Marketplace Quality Gate workflow runs `validate-marketplace.py --mode static` on every PR. Running it locally before you push will catch issues early and prevent surprising CI failures.
+**Important:** The CI Marketplace Quality Gate workflow runs `validate_marketplace.py --mode static` on every PR. Running it locally before you push will catch issues early and prevent surprising CI failures.
 
 What these checks catch:
 
@@ -215,7 +215,7 @@ PY
 A dashboard `card_type` is valid only when it matches a real Console card ID in `snake_case`. The authoritative list is in [README.md#available-card-types-153](README.md#available-card-types-153), and the safest verification is the cross-repo validator:
 
 ```bash
-python3 scripts/validate-marketplace.py --mode cross-repo --console-path /path/to/console
+python3 scripts/validate_marketplace.py --mode cross-repo --console-path /path/to/console
 ```
 
 #### Card presets
@@ -224,7 +224,7 @@ Make sure the preset uses `kc-card-preset-v1` and references a real Console card
 
 ```bash
 python3 -m json.tool card-presets/<id>.json > /dev/null
-python3 scripts/validate-marketplace.py --mode cross-repo --console-path /path/to/console
+python3 scripts/validate_marketplace.py --mode cross-repo --console-path /path/to/console
 ```
 
 If you already have a local Console running, you can test the preset without publishing it by pasting this into the browser DevTools console on a dashboard page:

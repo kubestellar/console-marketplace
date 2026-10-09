@@ -10,7 +10,7 @@ entry.
 
 Without this check, a contributor can add ``card-presets/foo.json`` (or a
 new ``dashboards/foo/dashboard.json``) and forget to add the matching
-registry entry.  The file ships, ``validate-marketplace.py`` never
+registry entry.  The file ships, ``validate_marketplace.py`` never
 notices (it walks the registry, not the filesystem), and the console UI
 has no way to surface the asset.  Symmetrically, an entry can be removed
 from ``registry.json`` while the backing file lingers on disk as dead

@@ -66,12 +66,12 @@ git clone https://github.com/kubestellar/console-marketplace
 cd console-marketplace
 
 # Fast structural check (schema, naming, registry consistency)
-python3 scripts/validate-marketplace.py --mode static
+python3 scripts/validate_marketplace.py --mode static
 
 # Full check, including downloadUrl reachability and drift/staleness
 # (requires a sparse checkout of console for card-type cross-reference)
 git clone --depth 1 https://github.com/kubestellar/console ../console
-python3 scripts/validate-marketplace.py --mode full --console-path ../console
+python3 scripts/validate_marketplace.py --mode full --console-path ../console
 ```
 
 A non-zero exit or `errors` in the output confirms a live problem, not just a warning.
@@ -81,7 +81,7 @@ A non-zero exit or `errors` in the output confirms a live problem, not just a wa
 ## Immediate Triage
 
 1. **Identify the offending entry.** Cross-reference the `id` in the Auto-QA issue or the failing
-   `validate-marketplace.py` output against `registry.json`.
+   `validate_marketplace.py` output against `registry.json`.
 2. **Identify the offending commit.** This repo squash-merges PRs (`tide.merge_method` in
    `.prow.yaml`), so each merge to `main` is a single commit:
    ```bash
@@ -126,7 +126,7 @@ After the rollback merges:
 
 ```bash
 git pull origin main
-python3 scripts/validate-marketplace.py --mode full --console-path ../console
+python3 scripts/validate_marketplace.py --mode full --console-path ../console
 ```
 
 Confirm the specific `id` that was broken now resolves correctly, and re-run (or wait for) the
@@ -165,5 +165,5 @@ Do not draft an ad-hoc postmortem — use the single source of truth,
 **Follow-up actions** section should reference, at minimum:
 - Whether `required_status_checks` should be enabled for `Validate JSON` /
   `Marketplace Quality Gate` (see `.github/branch-protection-policy.md`)
-- Any additional validation needed in `validate-marketplace.py` to catch this class of issue
+- Any additional validation needed in `validate_marketplace.py` to catch this class of issue
   earlier (static/cross-repo mode instead of relying on the nightly full scan)

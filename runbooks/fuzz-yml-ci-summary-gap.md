@@ -53,7 +53,7 @@ unit-tested script that already re-implements that logic (see
 writes a bounded markdown table to `$GITHUB_STEP_SUMMARY` and a single-line
 `FUZZ_SUMMARY: {...}` JSON record to stdout, mirroring the
 `MARKETPLACE_QUALITY_SUMMARY:` pattern already used by
-`scripts/validate-marketplace.py`. No exporter, metrics backend, or external
+`scripts/validate_marketplace.py`. No exporter, metrics backend, or external
 data flow: stdout/step-summary only, and all counts are bounded by this
 repo's own fixed corpus-file list and fixed edge-case list (never populated
 from user input).

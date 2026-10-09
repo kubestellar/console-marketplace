@@ -1,4 +1,4 @@
-"""SSRF defenses in ``scripts/validate-marketplace.py``.
+"""SSRF defenses in ``scripts/validate_marketplace.py``.
 
 Covers ``_is_safe_download_url`` URL vetting, ``_classify_ip_literal``
 address classification, ``_is_safe_resolved_host`` DNS vetting, the

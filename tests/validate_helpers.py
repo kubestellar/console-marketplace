@@ -1,6 +1,6 @@
 """Shared helpers for the ``check_*`` validator test modules.
 
-Loads ``scripts/validate-marketplace.py`` once and exposes the module plus
+Loads ``scripts/validate_marketplace.py`` once and exposes the module plus
 small fixture-writing helpers used across the function-named validator
 test modules (``test_validate_marketplace_*.py``; see issue #882 —
 consolidation of the coverage-pass-named test files).
@@ -14,7 +14,7 @@ def _load_module():
     scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
     spec = importlib.util.spec_from_file_location(
         "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
+        os.path.join(scripts_dir, "validate_marketplace.py"),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)

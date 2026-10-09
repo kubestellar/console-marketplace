@@ -31,7 +31,7 @@ jobs:
           python-version: "3.12"
 
       - name: Validate marketplace JSON
-        run: python3 scripts/validate-marketplace.py --mode full --console-path ./console || true
+        run: python3 scripts/validate_marketplace.py --mode full --console-path ./console || true
 
       - name: Verify registry.json is valid JSON
         run: python3 -m json.tool registry.json > /dev/null

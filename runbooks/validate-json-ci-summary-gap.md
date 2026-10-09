@@ -68,7 +68,7 @@ script write bounded counts to `$GITHUB_OUTPUT`, and adds a final "JSON validati
 observability summary" step that writes a markdown table to `$GITHUB_STEP_SUMMARY`
 and a single-line `VALIDATE_JSON_SUMMARY: {...}` JSON record to stdout — mirroring
 the `MARKETPLACE_QUALITY_SUMMARY:` pattern already used by
-`scripts/validate-marketplace.py`. Validated against
+`scripts/validate_marketplace.py`. Validated against
 `.github/workflows/validate-json.yml` at commit `212a551` (77 registry entries, 3
 dashboard files, 0 errors, dry-run tested locally). No exporter, metrics backend, or
 external data flow: stdout/step-summary only.

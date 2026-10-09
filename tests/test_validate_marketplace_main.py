@@ -1,4 +1,4 @@
-"""CLI entrypoint and report rendering for ``scripts/validate-marketplace.py``.
+"""CLI entrypoint and report rendering for ``scripts/validate_marketplace.py``.
 
 Covers ``main`` in static and full modes, the ``GITHUB_STEP_SUMMARY``
 output (including the empty-table path), ``generate_quality_table`` and
@@ -31,7 +31,7 @@ def _load_module():
     scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
     spec = importlib.util.spec_from_file_location(
         "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
+        os.path.join(scripts_dir, "validate_marketplace.py"),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -68,7 +68,7 @@ def _make_console_with_registry(tmp_path):
     return console
 
 def _run_main(monkeypatch, argv):
-    monkeypatch.setattr(sys, "argv", ["validate-marketplace.py", *argv])
+    monkeypatch.setattr(sys, "argv", ["validate_marketplace.py", *argv])
     with pytest.raises(SystemExit) as excinfo:
         _mod_empty.main()
     return excinfo.value.code
@@ -190,7 +190,7 @@ class TestScriptAsMain(unittest.TestCase):
 
     def test_run_path_executes_main_module(self):
         script = os.path.join(os.path.dirname(__file__), "..",
-                              "scripts", "validate-marketplace.py")
+                              "scripts", "validate_marketplace.py")
 
         import tempfile
         import pathlib
