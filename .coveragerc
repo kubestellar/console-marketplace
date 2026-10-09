@@ -4,7 +4,7 @@
 # .github/workflows/python-unit-tests.yml) accurately reflects the tested
 # surface. See tracking issue #631.
 #
-# The `if console_path:` guard at scripts/validate-marketplace.py:1235
+# The `if console_path:` guard at scripts/validate_marketplace.py:1235
 # sits inside the `if args.mode == "full":` block, but `full` mode already
 # calls `sys.exit(1)` at line 1197 when `--console-path` is missing —
 # so the false arm is defensive-in-depth and structurally unreachable

@@ -1,6 +1,6 @@
 """Quality table generation and theme/registry/CNCF drift reports.
 
-Extracted from scripts/validate-marketplace.py (see issue #670).
+Extracted from scripts/validate_marketplace.py (see issue #670).
 """
 import os
 from datetime import datetime, timezone, timedelta

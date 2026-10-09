@@ -1,6 +1,6 @@
 """Argparse-based CLI entry point for the marketplace quality gate.
 
-Extracted from ``scripts/validate-marketplace.py`` (see issue #670). This
+Extracted from ``scripts/validate_marketplace.py`` (see issue #670). This
 was the one piece of that monolith the earlier extraction never actually
 moved: ``validate_marketplace_lib/__init__.py``'s module list and the
 shim's own docstring both already claimed a ``cli`` module existed here,

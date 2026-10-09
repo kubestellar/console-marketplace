@@ -132,9 +132,9 @@ index 450a41d..140d716 100644
 +        id: coverage-check
 +        if: always()
          run: |
--          python -m coverage report --fail-under=100 --include='scripts/validate-marketplace.py'
+-          python -m coverage report --fail-under=100 --include='scripts/validate_marketplace.py'
 +          set +e
-+          python -m coverage report --fail-under=100 --include='scripts/validate-marketplace.py' | tee /tmp/coverage-output.log
++          python -m coverage report --fail-under=100 --include='scripts/validate_marketplace.py' | tee /tmp/coverage-output.log
 +          COVERAGE_EXIT=${PIPESTATUS[0]}
 +          set -e
 +          COVERAGE_PCT=$(grep TOTAL /tmp/coverage-output.log | awk '{print $NF}' | tr -d '%')
@@ -163,7 +163,7 @@ index 450a41d..140d716 100644
 +            echo "|---|---|"
 +            echo "| Tests passed | ${PASSED} |"
 +            echo "| Tests failed | ${FAILED} |"
-+            echo "| Coverage % (validate-marketplace.py) | ${COVERAGE_PCT} |"
++            echo "| Coverage % (validate_marketplace.py) | ${COVERAGE_PCT} |"
 +            echo "| Overall status | ${OVERALL_STATUS} |"
 +          } >> "$GITHUB_STEP_SUMMARY"
 +

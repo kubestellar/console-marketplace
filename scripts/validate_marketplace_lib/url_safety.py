@@ -1,6 +1,6 @@
 """SSRF-safe download URL validation for the marketplace quality gate.
 
-Extracted from scripts/validate-marketplace.py (see issue #670).
+Extracted from scripts/validate_marketplace.py (see issue #670).
 """
 import http.client
 import ipaddress

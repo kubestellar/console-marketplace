@@ -112,7 +112,7 @@ aspirational, already-healthy state:
 ## Reviewing These SLOs
 
 Re-check this table whenever:
-- `marketplace-auto-qa.yml` or its scan step (`scripts/validate-marketplace.py`) changes.
+- `marketplace-auto-qa.yml` or its scan step (`scripts/validate_marketplace.py`) changes.
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 

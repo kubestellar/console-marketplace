@@ -6,7 +6,7 @@ print free-text `echo`/`print` lines ("Fuzzing completed successfully - no
 crashes detected", "All edge case tests passed!"), with no bounded,
 machine-readable record of what actually ran. That gap is now closed (see
 below), mirroring the same class of gap already closed for
-`scripts/validate-marketplace.py` (`MARKETPLACE_QUALITY_SUMMARY:` line) and
+`scripts/validate_marketplace.py` (`MARKETPLACE_QUALITY_SUMMARY:` line) and
 `scripts/validate_json_summary.py` (`VALIDATE_JSON_SUMMARY:` line). See
 tracking issue #597 (closed) and `runbooks/fuzz-yml-ci-summary-gap.md` for
 the applied workflow diff.

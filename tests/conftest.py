@@ -1,4 +1,4 @@
-"""Shared loader for ``scripts/validate-marketplace.py`` (see issue #574).
+"""Shared loader for ``scripts/validate_marketplace.py`` (see issue #574).
 
 The script's filename contains a hyphen, so it cannot be imported with a
 normal ``import`` statement — it has to be loaded via ``importlib`` from
@@ -17,7 +17,7 @@ _MODULE_NAME = "validate_marketplace"
 
 
 def load_validate_marketplace():
-    """Load and return the ``validate-marketplace.py`` script as a module.
+    """Load and return the ``validate_marketplace.py`` script as a module.
 
     The module is cached in ``sys.modules`` under ``validate_marketplace``,
     so repeated calls (from different test files within the same pytest
@@ -28,7 +28,7 @@ def load_validate_marketplace():
     if cached is not None:
         return cached
 
-    script = os.path.join(os.path.dirname(__file__), "..", "scripts", "validate-marketplace.py")
+    script = os.path.join(os.path.dirname(__file__), "..", "scripts", "validate_marketplace.py")
     spec = importlib.util.spec_from_file_location(_MODULE_NAME, script)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[_MODULE_NAME] = mod

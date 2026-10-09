@@ -1,5 +1,5 @@
 """Branch-coverage tests + defensive regression guards for
-``scripts/validate-marketplace.py``: cards inside a dashboard's
+``scripts/validate_marketplace.py``: cards inside a dashboard's
 ``cards: [...]`` array that are missing the ``card_type`` key.
 
 Two functions iterate ``data.get("cards", [])`` and gate on

@@ -55,7 +55,7 @@ jobs:
         id: scan
         continue-on-error: true
         run: |
-          python3 scripts/validate-marketplace.py \
+          python3 scripts/validate_marketplace.py \
             --mode full \
             --console-path ./console \
             --json > /tmp/scan-results.json 2>/tmp/scan-log.txt || true
@@ -272,7 +272,7 @@ jobs:
                 '',
                 '### How to Fix',
                 ...fixes.map(f => `- ${f}`),
-                '- Run locally: `python3 scripts/validate-marketplace.py --mode cross-repo --console-path <path-to-console>`',
+                '- Run locally: `python3 scripts/validate_marketplace.py --mode cross-repo --console-path <path-to-console>`',
                 '',
                 '---',
                 `*This issue was automatically created by the [Marketplace Auto-QA workflow](${runUrl}).*`,

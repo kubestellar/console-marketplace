@@ -121,7 +121,7 @@ class TestMain:
 
 # ── Coverage-gap regression tests ──────────────────────────────────
 #
-# The tests below close small but real gaps in ``validate-marketplace.py``
+# The tests below close small but real gaps in ``validate_marketplace.py``
 # reported by ``coverage report -m``:
 #
 #   - parse_sub_registry_categories: nested-brace depth tracking, and the

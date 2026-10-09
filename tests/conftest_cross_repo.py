@@ -19,7 +19,7 @@ def _load_module():
     scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
     spec = importlib.util.spec_from_file_location(
         "validate_marketplace",
-        os.path.join(scripts_dir, "validate-marketplace.py"),
+        os.path.join(scripts_dir, "validate_marketplace.py"),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -143,7 +143,7 @@ def _make_marketplace(tmp_path, registry=None, presets=None, hooks=None,
 
 
 def _run_main(monkeypatch, argv):
-    monkeypatch.setattr(sys, "argv", ["validate-marketplace.py", *argv])
+    monkeypatch.setattr(sys, "argv", ["validate_marketplace.py", *argv])
     with pytest.raises(SystemExit) as excinfo:
         _mod.main()
     return excinfo.value.code

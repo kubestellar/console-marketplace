@@ -1,4 +1,4 @@
-"""Registry and card-descriptor parsing in ``scripts/validate-marketplace.py``.
+"""Registry and card-descriptor parsing in ``scripts/validate_marketplace.py``.
 
 Covers ``parse_card_descriptors``, ``parse_card_registry``,
 ``parse_raw_card_components``, ``parse_sub_registry_categories``,

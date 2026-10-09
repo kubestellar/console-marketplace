@@ -1,7 +1,7 @@
 """Marketplace quality gate — implementation package.
 
 This package holds the implementation split out of the historical
-``scripts/validate-marketplace.py`` monolith (see issue #670). The CLI
+``scripts/validate_marketplace.py`` monolith (see issue #670). The CLI
 script re-exports every public (and a few "private but test-covered")
 name from here so that its own module namespace is unchanged for
 callers and for the ~25 test modules that load it via

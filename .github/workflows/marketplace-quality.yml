@@ -26,7 +26,7 @@ jobs:
       - name: Run static checks
         id: static
         run: |
-          python3 scripts/validate-marketplace.py \
+          python3 scripts/validate_marketplace.py \
             --mode static \
             --github-summary "$GITHUB_STEP_SUMMARY" \
             2>&1 | tee /tmp/static-results.txt
@@ -61,7 +61,7 @@ jobs:
       - name: Run cross-repo quality checks
         id: quality
         run: |
-          python3 scripts/validate-marketplace.py \
+          python3 scripts/validate_marketplace.py \
             --mode cross-repo \
             --console-path ./console \
             --github-summary "$GITHUB_STEP_SUMMARY" \
