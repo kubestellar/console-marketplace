@@ -15,9 +15,9 @@ should be detected and resolved, not any request-latency/availability target.
 | # | SLI (what we measure) | SLO (target) | Detection mechanism | Runbook |
 |---|---|---|---|---|
 | 1 | Time from a broken `registry.json`/preset/dashboard/theme merge landing on `main` to a filed `[Auto-QA]` finding | ≤ 24h (one nightly scan cycle) | `marketplace-auto-qa.yml` nightly scan (`0 6 * * *`) | [`registry-incident-response.md`](./registry-incident-response.md) |
-| 2 | Time from a PR-time check failure (`Validate JSON` / `Marketplace Quality Gate`) to that PR being blocked from merging | 0 (should never merge with failing checks) | PR status checks | [`registry-incident-response.md`](./registry-incident-response.md) — **not yet met**: checks are not merge-blocking today (the documented recommendation was fixed in [issue #560](https://github.com/kubestellar/console-marketplace/issues/560) (closed), but applying it to the *live* branch protection settings is a separate, still-pending admin action — tracked in [issue #935](https://github.com/kubestellar/console-marketplace/issues/935); the prior trackers, #866 and #932, are both closed without the live setting ever being confirmed applied, so do not treat either's closed state as evidence) |
+| 2 | Time from a PR-time check failure (`Validate JSON` / `Marketplace Quality Gate`) to that PR being blocked from merging | 0 (should never merge with failing checks) | PR status checks | [`registry-incident-response.md`](./registry-incident-response.md) — **met**: a repository administrator applied `required_status_checks` (`static-validation`, `card-quality-gate`, `validate`) to the live branch protection settings on `main`, confirmed via `gh api repos/kubestellar/console-marketplace/branches/main/protection` ([issue #935](https://github.com/kubestellar/console-marketplace/issues/935), closed `/fixed` by a maintainer with verification, not auto-closed by an unrelated PR like the prior trackers #866/#932) |
 | 3 | Time from the nightly Auto-QA *pipeline itself* crashing (not a content finding) to an alert | ≤ 24h | `Alert on scan pipeline failure` step in `marketplace-auto-qa.yml`, merged in [PR #755](https://github.com/kubestellar/console-marketplace/pull/755) | [`auto-qa-pipeline-failure.md`](./auto-qa-pipeline-failure.md) — **met**: mechanism is live and closed [issue #545](https://github.com/kubestellar/console-marketplace/issues/545); files/updates an `auto-qa:pipeline-failure`-labeled issue whenever the scan step fails (see [Current Status](./auto-qa-pipeline-failure.md#current-status)); not yet observed firing on a real failure |
-| 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (maintainer-assisted merge, since checks aren't merge-blocking) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
+| 4 | Time from a rollback PR being opened to it merging, for a confirmed user-visible break | Same-day (hive agents never merge their own PRs, so this always needs a maintainer) | Manual, maintainer-driven | [`registry-incident-response.md`](./registry-incident-response.md#rolling-back) |
 | 5 | Time from `fuzz.yml`/`codeql.yml`/`scorecard.yml` (weekly scheduled scans) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | `.github/workflows/workflow-failure-issue.yml`'s `workflow_run` trigger, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md) — **met**: mechanism is live and closed [issue #573](https://github.com/kubestellar/console-marketplace/issues/573); not yet observed firing on a real failure (see [Current Status](./scheduled-scan-alert-gap.md#current-status)) |
 | 6 | Time from `stale.yml` (daily scheduled stale-issue/PR triage) failing to complete, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | Same `workflow-failure-issue.yml` mechanism as SLO 5, merged in [PR #758](https://github.com/kubestellar/console-marketplace/pull/758) | [`scheduled-scan-alert-gap.md`](./scheduled-scan-alert-gap.md#stale-issues-workflow) — **met**: closed [issue #607](https://github.com/kubestellar/console-marketplace/issues/607); not yet observed firing on a real failure |
 | 7 | Whether a completed `fuzz.yml` run left a bounded, machine-readable record of what it tested (corpus files fuzzed, edge cases tested, pass/fail) | Every run's Summary tab shows this record | `Fuzzing observability summary` step calling `scripts/fuzz_summary.py`, `if: always()` | [`fuzz-yml-ci-summary-gap.md`](./fuzz-yml-ci-summary-gap.md) — **met**: applied in commit `378cfdf`, closing [issue #597](https://github.com/kubestellar/console-marketplace/issues/597) |
@@ -26,19 +26,16 @@ should be detected and resolved, not any request-latency/availability target.
 | 10 | Time from a `push`-to-`main` CI failure on `python-unit-tests.yml` / `ts-unit-tests.yml` / `codeql.yml` / `scorecard.yml` to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | `workflow-failure-issue.yml`'s `workflows:` watch list now includes `Python Unit Tests` and `TypeScript Unit Tests`, and its `if:` guard allows `push` events on `head_branch == 'main'` (in addition to `schedule`/`workflow_dispatch`), merged in [PR #892](https://github.com/kubestellar/console-marketplace/pull/892) | [`main-push-ci-failure-gap.md`](./main-push-ci-failure-gap.md) — **met**: originally confirmed by a real undetected incident (commit `27b7773` broke `main` for ~2h40m on 2026-10-03, caught only by manual follow-up in [issue #884](https://github.com/kubestellar/console-marketplace/issues/884)); closed [issue #890](https://github.com/kubestellar/console-marketplace/issues/890) |
 | 11 | Time from `workflow-failure-issue.yml` (the alert mechanism for SLOs 5, 6, and 10) itself failing, to an alert | Within one `workflow_run` `completed` event of the failing run (near-immediate) | Not yet implemented: the workflow does not watch its own name | [`workflow-failure-issue-self-monitoring-gap.md`](./workflow-failure-issue-self-monitoring-gap.md) — **not yet met**: gap confirmed in [issue #941](https://github.com/kubestellar/console-marketplace/issues/941), which has the exact two-part YAML diff; cannot be applied by the `telemetry` agent (`.github/workflows/**` requires the `workflows` App permission) |
 
-## Why SLO 2 Is Reported as Unmet
+## SLO Status Notes
 
 This document intentionally states the current gaps rather than describing an
 aspirational, already-healthy state:
 
-- **SLO 2** depends on applying `required_status_checks` in the live branch protection
-  settings, which only a repository administrator can do (the setting itself is
-  documented in [`branch-protection-policy.md`](../.github/branch-protection-policy.md)).
-  [Issue #560](https://github.com/kubestellar/console-marketplace/issues/560) tracked —
-  and is now closed for — the earlier, narrower gap of the *documented recommendation*
-  itself defaulting to `required_status_checks: null`; it does not track, and was never
-  intended to track, whether that corrected recommendation has actually been applied to
-  the live settings on `main`. [Issue #866](https://github.com/kubestellar/console-marketplace/issues/866)
+- **SLO 2** is now met. [Issue #560](https://github.com/kubestellar/console-marketplace/issues/560)
+  tracked — and is now closed for — the earlier, narrower gap of the *documented
+  recommendation* itself defaulting to `required_status_checks: null`; it never tracked
+  whether that corrected recommendation had actually been applied to the live settings
+  on `main`. [Issue #866](https://github.com/kubestellar/console-marketplace/issues/866)
   was filed to replace #560 as that tracker, but was itself auto-closed by its own
   doc-currency fix PR (#867) using a `Fixes #866` closing keyword — before the live
   setting was ever applied or verified. [Issue #932](https://github.com/kubestellar/console-marketplace/issues/932)
@@ -46,10 +43,19 @@ aspirational, already-healthy state:
   closing keyword — but #932 was still closed when an unrelated PR (#934) merged,
   because #934 had been manually linked to #932 via GitHub's "Development" sidebar
   panel (confirmed via `closingIssuesReferences` on #934, whose body/commit text used
-  only `Refs #932`, no closing verb). That remaining, still-open admin action is now
-  tracked in [issue #935](https://github.com/kubestellar/console-marketplace/issues/935).
-  Do not treat #560's, #866's, or #932's closed state as evidence this SLO is met;
-  verify by re-reading the live branch protection settings on `main` directly.
+  only `Refs #932`, no closing verb). [Issue #935](https://github.com/kubestellar/console-marketplace/issues/935)
+  replaced #932 as tracker and was closed directly (not via a linked PR) by a repo
+  maintainer who applied the live setting and verified it with
+  `gh api repos/kubestellar/console-marketplace/branches/main/protection`, posting the
+  confirmation and `/fixed` on the issue. **Note:** required pull-request reviews were
+  deliberately left out of the live policy (unlike the original
+  `branch-protection-policy.json`'s `required_approving_review_count: 1`) because the
+  hive bot merges its own PRs with 0 approvals and has no admin access — enabling that
+  setting would have stalled the hive. See
+  [`branch-protection-policy.md`](../.github/branch-protection-policy.md) for the
+  reconciled policy. Re-verify by re-reading the live branch protection settings on
+  `main` directly if this is ever in doubt — don't rely solely on this note staying
+  current (see #560/#866/#932's history above for why).
 - **SLO 3** is met: the `Alert on scan pipeline failure` step landed in
   `.github/workflows/marketplace-auto-qa.yml` in
   [PR #755](https://github.com/kubestellar/console-marketplace/pull/755), closing
@@ -116,9 +122,11 @@ Re-check this table whenever:
 - Branch protection settings on `main` change.
 - A new scheduled workflow is added that can affect content reaching users.
 
-Do not mark SLO 2 as met until the corresponding gap above is actually
-closed — verify by re-reading the referenced workflow/settings, not by assuming a
-linked issue was resolved. SLO 3, SLO 5, SLO 6, SLO 7, SLO 8, and SLO 9 are marked met above
-because their mechanisms are merged and present on `main` today — re-verify the
-referenced workflow file(s) still contain the summary/alert step(s) before relying on
-this note.
+SLO 2 is marked met above because a maintainer applied and verified the live branch
+protection setting directly (see [issue #935](https://github.com/kubestellar/console-marketplace/issues/935)) —
+not merely because a tracking issue was closed; re-verify with
+`gh api repos/kubestellar/console-marketplace/branches/main/protection` before relying
+on this note, given this exact SLO's history of stale closures (#866, #932). SLO 3,
+SLO 5, SLO 6, SLO 7, SLO 8, and SLO 9 are marked met above because their mechanisms are
+merged and present on `main` today — re-verify the referenced workflow file(s) still
+contain the summary/alert step(s) before relying on this note.

@@ -38,16 +38,18 @@ merge to `main` and a user seeing the result. Use this runbook when any of the f
   see note below).
 
 > **Note:** As of [#560](https://github.com/kubestellar/console-marketplace/issues/560)
-> (closed — the documented recommendation itself was fixed),
-> `.github/branch-protection-policy.md` recommends making these checks merge-blocking
-> (`required_status_checks` naming `static-validation`, `card-quality-gate`, `validate`).
-> Until a repository administrator applies that policy to the live branch protection
-> settings — a separate, still-open action tracked in
-> [#935](https://github.com/kubestellar/console-marketplace/issues/935) (the prior
-> trackers, [#866](https://github.com/kubestellar/console-marketplace/issues/866) and
-> [#932](https://github.com/kubestellar/console-marketplace/issues/932), are both
-> closed without the live setting ever being confirmed applied) — don't assume a merge
-> to `main` implies the checks passed — verify directly (see below).
+> (closed — the documented recommendation itself was fixed) and
+> [#935](https://github.com/kubestellar/console-marketplace/issues/935) (closed — a
+> repository administrator applied and verified the live setting),
+> `required_status_checks` (`static-validation`, `card-quality-gate`, `validate`) is
+> now merge-blocking in the live branch protection settings on `main`. A merge to
+> `main` today implies those checks passed. See
+> [`branch-protection-policy.md`](../.github/branch-protection-policy.md) for the
+> reconciled policy (note: required PR reviews were deliberately left disabled so the
+> hive bot can keep auto-merging its own PRs). Re-verify directly with
+> `gh api repos/kubestellar/console-marketplace/branches/main/protection` if this is
+> ever in doubt — this SLO's tracking issue has a history of being closed without the
+> live setting being confirmed applied (#866, #932).
 
 ---
 
