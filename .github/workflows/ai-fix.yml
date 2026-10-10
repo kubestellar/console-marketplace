@@ -16,6 +16,8 @@ permissions: {}
 
 jobs:
   ai-fix:
+    # Only same-repo Copilot PRs may use the privileged pull_request_target path.
+    if: github.event_name != 'pull_request_target' || (github.event.pull_request.user.login == 'Copilot' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: write
       issues: write
