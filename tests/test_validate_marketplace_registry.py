@@ -538,7 +538,9 @@ class TestParseCardRegistryUnreadableCategoryFile(unittest.TestCase):
             try:
                 types = parse_card_registry(reg)
             finally:
-                os.chmod(bad_path, 0o644)
+                # Owner-only restore (not 0o644/world-readable) so cleanup
+                # doesn't trip CodeQL's overly-permissive-chmod check.
+                os.chmod(bad_path, 0o600)
             # Either the file was successfully read (root) or skipped — in
             # both cases the call must return without raising, and the
             # readable registry's own card type must still surface.
