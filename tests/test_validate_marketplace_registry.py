@@ -510,6 +510,76 @@ class TestParseCardRegistrySkipsTypesFile(unittest.TestCase):
             self.assertNotIn("bogus_type_should_not_be_picked_up", types)
 
 
+class TestParseCardRegistryUnreadableCategoryFile(unittest.TestCase):
+    """An unreadable ``cardRegistry.*.ts`` category file must not crash
+    ``parse_card_registry`` and must be reported when ``results`` is given.
+
+    ``get_all_console_card_types`` calls ``parse_card_registry`` *before*
+    ``parse_sub_registry_categories`` over the exact same
+    ``cardRegistry.*.ts`` glob (see issue #864's fix to the latter) — an
+    unhandled ``OSError`` here would abort the whole quality gate before
+    that fix's warning path ever runs.
+    """
+
+    def test_unreadable_category_file_is_skipped(self):
+        root = textwrap.dedent("""\
+            export const RAW_CARD_COMPONENTS = Object.assign({
+              real_card: ClusterHealth,
+            });
+        """)
+        with tempfile.TemporaryDirectory() as d:
+            reg = os.path.join(d, "cardRegistry.ts")
+            with open(reg, "w") as f:
+                f.write(root)
+            bad_path = os.path.join(d, "cardRegistry.badperm.ts")
+            with open(bad_path, "w") as f:
+                f.write("components: { should_be_ignored: X };\n")
+            os.chmod(bad_path, 0o000)
+            try:
+                types = parse_card_registry(reg)
+            finally:
+                # Owner-only restore (not 0o644/world-readable) so cleanup
+                # doesn't trip CodeQL's overly-permissive-chmod check.
+                os.chmod(bad_path, 0o600)
+            # Either the file was successfully read (root) or skipped — in
+            # both cases the call must return without raising, and the
+            # readable registry's own card type must still surface.
+            self.assertIsInstance(types, set)
+            self.assertIn("real_card", types)
+
+    def test_unreadable_category_file_is_reported_when_results_given(self):
+        import builtins
+        from unittest import mock
+
+        root = textwrap.dedent("""\
+            export const RAW_CARD_COMPONENTS = Object.assign({
+              real_card: ClusterHealth,
+            });
+        """)
+        with tempfile.TemporaryDirectory() as d:
+            reg = os.path.join(d, "cardRegistry.ts")
+            with open(reg, "w") as f:
+                f.write(root)
+            bad_path = os.path.join(d, "cardRegistry.badperm.ts")
+            with open(bad_path, "w") as f:
+                f.write("components: { should_be_ignored: X };\n")
+
+            real_open = builtins.open
+
+            def fake_open(p, *a, **kw):
+                if str(p) == bad_path:
+                    raise OSError("boom")
+                return real_open(p, *a, **kw)
+
+            results = Results()
+            with mock.patch("builtins.open", side_effect=fake_open):
+                types = parse_card_registry(reg, results=results)
+
+            self.assertIn("real_card", types)
+            self.assertNotIn("should_be_ignored", types)
+            self.assertTrue(any(cat == "card-type" for cat, _ in results.warnings))
+
+
 class TestParseSubRegistryCategoriesNoComponentsBlock(unittest.TestCase):
     """A ``cardRegistry.*.ts`` file without ``components: {`` yields no keys."""
 
