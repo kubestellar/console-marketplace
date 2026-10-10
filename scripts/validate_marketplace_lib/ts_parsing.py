@@ -50,8 +50,18 @@ def _extract_object_block(content, anchor):
     return ""
 
 
-def parse_card_registry(registry_ts_path):
-    """Extract card type keys from console card registry (main + category files)."""
+def parse_card_registry(registry_ts_path, results=None):
+    """Extract card type keys from console card registry (main + category files).
+
+    `results` is optional (callers that don't track findings can omit it),
+    but when given, an unreadable `cardRegistry.*.ts` category file is
+    recorded as a warning instead of raising — this walks the same
+    `cardRegistry.*.ts` glob that `parse_sub_registry_categories` also
+    protects (see issue #864), so a crash here would defeat that fix
+    before it ever runs: `get_all_console_card_types` calls this function
+    first, and an unhandled `OSError` would abort the whole quality gate
+    instead of degrading to a recorded warning.
+    """
     with open(registry_ts_path) as f:
         content = f.read()
 
@@ -73,8 +83,15 @@ def parse_card_registry(registry_ts_path):
         if os.path.basename(category_file) == "cardRegistry.types.ts":
             continue
 
-        with open(category_file) as f:
-            category_content = f.read()
+        try:
+            with open(category_file) as f:
+                category_content = f.read()
+        except OSError as e:
+            if results is not None:
+                results.warn("card-type",
+                            f"could not read category file `{os.path.basename(category_file)}`: "
+                            f"{e} — card types it defines may appear missing")
+            continue
 
         # Try "const components" first (handles `const components: Record<...> = {...}`)
         # then fall back to "components:" anchor for inline object patterns.
@@ -180,7 +197,7 @@ def get_all_console_card_types(cards_dir, results=None):
     descriptors_ts = os.path.join(cards_dir, "cardDescriptors.registry.ts")
     types = set()
     if os.path.isfile(registry_ts):
-        types |= parse_card_registry(registry_ts)
+        types |= parse_card_registry(registry_ts, results=results)
     if os.path.isfile(descriptors_ts):
         types |= parse_card_descriptors(descriptors_ts)
     types |= parse_sub_registry_categories(cards_dir, results=results)
