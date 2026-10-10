@@ -2,9 +2,6 @@
 
 The `main` branch of this repository must have the following protection rules enabled:
 
-- Require pull request review before merging
-  - Required approving reviews: **1**
-  - Dismiss stale approvals when new commits are pushed
 - Restrict who can push to matching branches: only maintainers via PR merge
 - Do not allow force pushes
 - Do not allow deletions
@@ -13,6 +10,13 @@ The `main` branch of this repository must have the following protection rules en
   the only automated check between a merge and a user-visible Marketplace incident,
   since this repo has no build/deploy step (see
   [`runbooks/registry-incident-response.md`](../runbooks/registry-incident-response.md)).
+
+**Deliberately not required: pull request review approvals.** The hive bot merges
+its own PRs with 0 approvals and has no admin access, so requiring an approving
+review would stall every hive-authored PR indefinitely. This is an intentional
+deviation from typical branch-protection guidance, applied when issue #935 (below)
+was resolved — do not "fix" this back to requiring reviews without first addressing
+how the hive would then get PRs merged.
 
 ## Applying
 
@@ -34,11 +38,7 @@ settings below (keep it in sync with this block). Verify the result afterwards w
     "contexts": ["static-validation", "card-quality-gate", "validate"]
   },
   "enforce_admins": false,
-  "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": true,
-    "require_code_owner_reviews": false
-  },
+  "required_pull_request_reviews": null,
   "restrictions": null,
   "required_linear_history": false,
   "allow_force_pushes": false,
@@ -69,8 +69,10 @@ validation that already exists binding.
 
 Addresses security findings tracked in issue #376 (branch protection) and #377 (mandatory code review),
 and the release-safeguard gap tracked in issue #560 (PR-time content gates were documented as
-non-blocking). Applying this document's `.github/branch-protection-policy.json` to the live branch protection settings
-on `main` is a separate, still-pending administrator action tracked in issue #935 (the
-prior trackers, #866 and #932, were both closed before the live setting was ever
-confirmed applied — see #935 for details) — closing
-#560 fixed only the recommendation documented here, not the live setting.
+non-blocking). Applying this document's `.github/branch-protection-policy.json` to the live branch
+protection settings on `main` was a separate administrator action, tracked across issues #560 (closed —
+documented recommendation only), #866 and #932 (both closed before the live setting was ever confirmed
+applied — see [issue #935](https://github.com/kubestellar/console-marketplace/issues/935) for that
+history), and finally **#935 (closed)**: a repository administrator applied the setting and verified it
+live with `gh api repos/kubestellar/console-marketplace/branches/main/protection`, intentionally omitting
+`required_pull_request_reviews` per the note above. `runbooks/SLO.md` SLO 2 reflects this as met.
