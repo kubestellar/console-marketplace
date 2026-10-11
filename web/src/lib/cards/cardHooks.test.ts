@@ -162,6 +162,38 @@ describe('useCardData', () => {
     expect(result.current.items).toEqual([{ id: 1, name: 'alpha', status: 'running' }])
   })
 
+  it('falls back to searching every object key when searchFields is an explicit empty array', () => {
+    // `searchFields: []` is truthy but has `length === 0`, distinct from the
+    // `undefined` case above: it exercises the false side of
+    // `searchFields && searchFields.length > 0` without the `&&` short-
+    // circuiting on `searchFields` itself being falsy.
+    const named: Item[] = [
+      { id: 1, name: 'alpha', status: 'running' },
+      { id: 2, name: 'beta', status: 'failed' },
+    ]
+    const { result } = renderHook(() =>
+      useCardData(named, { filter: { searchFields: [] } }),
+    )
+
+    act(() => result.current.filters.setSearch('running'))
+
+    expect(result.current.items).toEqual([{ id: 1, name: 'alpha', status: 'running' }])
+  })
+
+  it('yields no search fields (and no matches) for a non-object item', () => {
+    // Exercises the false side of `item !== null && typeof item === 'object'`
+    // in `matchesSearch`'s field-resolution fallback: a primitive item has
+    // no keys to fall back to, so `fields` is `[]` and the item never
+    // matches a non-empty query.
+    const primitiveItems = ['alpha', 'beta'] as unknown as Item[]
+    const { result } = renderHook(() => useCardData(primitiveItems))
+
+    act(() => result.current.filters.setSearch('alpha'))
+
+    expect(result.current.items).toEqual([])
+    expect(result.current.totalItems).toBe(0)
+  })
+
   it('setSearch is case-insensitive and resets to page 1', () => {
     const { result } = renderHook(() => useCardData(items, { defaultLimit: 4 }))
 

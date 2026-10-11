@@ -233,6 +233,18 @@ describe('kubeflow_status/mapToDisplayItems', () => {
       expect(item.secondaryDetail).toBe('localimg')
     })
 
+    it('falls back to the raw image when the trailing path segment is empty', () => {
+      // A trailing slash makes `.split('/').pop()` return `''` (falsy),
+      // exercising the `|| nb.image` fallback arm distinctly from the
+      // no-slashes case above, where `.pop()` already returns the whole
+      // (truthy) string.
+      const [item] = mapToDisplayItems(
+        makeData({ notebooks: [notebook({ image: 'gcr.io/kf/' })] }),
+        t,
+      )
+      expect(item.secondaryDetail).toBe('gcr.io/kf/')
+    })
+
     it('prefixes the id with "nb-"', () => {
       const [item] = mapToDisplayItems(
         makeData({ notebooks: [notebook({ name: 'analytics' })] }),
