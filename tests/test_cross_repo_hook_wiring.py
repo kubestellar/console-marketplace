@@ -186,6 +186,21 @@ class TestCheckIsDemoDataWiringCoverage:
                                        {"cluster_health"}, r)
         assert any(cat == "isDemoData" for cat, _ in r.warnings)
 
+    def test_missing_console_registry_warns_not_crashes(self, tmp_path):
+        # check_card_type_existence degrades a missing cardRegistry.ts to a
+        # recorded error (not a crash) and returns an empty known_types.
+        # check_is_demo_data_wiring used to re-open the same missing file
+        # unconditionally before ever looking at known_types, defeating
+        # that degrade-not-crash fix. It must now warn and return instead
+        # of raising FileNotFoundError.
+        console = tmp_path / "console"
+        console.mkdir()
+        base = _make_marketplace(tmp_path)
+        r = _mod.Results()
+        _mod.check_is_demo_data_wiring(str(base), str(console), set(), r)
+        assert any("could not read console card registry" in m
+                   for m in _messages(r.warnings))
+
 
 # ── Coverage-gap regression tests for consecutive failures ──────────────────
 
@@ -241,3 +256,15 @@ class TestCheckConsecutiveFailuresCoverage:
                                         {"cluster_health"}, r)
         # The unreadable file is now reported, not silently swallowed.
         assert any(cat == "consecutiveFailures" for cat, _ in r.warnings)
+
+    def test_missing_console_registry_warns_not_crashes(self, tmp_path):
+        # Same degrade-not-crash guard as check_demo_data/
+        # check_is_demo_data_wiring: a missing cardRegistry.ts must warn
+        # and return instead of raising FileNotFoundError.
+        console = tmp_path / "console"
+        console.mkdir()
+        base = _make_marketplace(tmp_path)
+        r = _mod.Results()
+        _mod.check_consecutive_failures(str(base), str(console), set(), r)
+        assert any("could not read console card registry" in m
+                   for m in _messages(r.warnings))

@@ -45,11 +45,42 @@ def check_card_type_existence(base, console_path, results):
     return known
 
 
+def _load_registry_maps(registry_ts, category, results):
+    """Load the component/import maps from cardRegistry.ts, guarded.
+
+    `check_card_type_existence` already degrades to a recorded error (not a
+    crash) when `cardRegistry.ts` is missing, but each of the three checks
+    below used to call `parse_card_type_to_component`/`parse_lazy_imports`
+    unconditionally — re-opening the very same file with no guard. With an
+    empty `known_types` (the result of that degraded path) the per-type
+    loop never runs, but the unguarded open above it still raised,
+    defeating the degrade-not-crash fix before the loop was ever reached.
+    Returns `(None, None)` when the file is missing or unreadable, after
+    recording a warning; callers should skip their check in that case.
+    `results` is required here — unlike the optional `results=None`
+    convention in `ts_parsing.py`, every caller of this helper already
+    has a `Results` instance in hand.
+    """
+    if not os.path.isfile(registry_ts):
+        results.warn(category,
+                    f"could not read console card registry at "
+                    f"`{registry_ts}` — skipping this check")
+        return None, None
+    try:
+        return parse_card_type_to_component(registry_ts), parse_lazy_imports(registry_ts)
+    except OSError as e:
+        results.warn(category,
+                    f"could not read console card registry at "
+                    f"`{registry_ts}`: {e} — skipping this check")
+        return None, None
+
+
 def check_demo_data(base, console_path, known_types, results):
     """Check that each known card_type has a demoData.ts file in console."""
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
-    type_to_comp = parse_card_type_to_component(registry_ts)
-    lazy_imports = parse_lazy_imports(registry_ts)
+    type_to_comp, lazy_imports = _load_registry_maps(registry_ts, "demo-data", results)
+    if type_to_comp is None:
+        return
     cards_dir = os.path.join(console_path, "web/src/components/cards")
 
     for ct in sorted(known_types):
@@ -81,8 +112,9 @@ def check_demo_data(base, console_path, known_types, results):
 def check_is_demo_data_wiring(base, console_path, known_types, results):
     """Check that card components wire isDemoData through useCardLoadingState."""
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
-    type_to_comp = parse_card_type_to_component(registry_ts)
-    lazy_imports = parse_lazy_imports(registry_ts)
+    type_to_comp, lazy_imports = _load_registry_maps(registry_ts, "isDemoData", results)
+    if type_to_comp is None:
+        return
     cards_dir = os.path.join(console_path, "web/src/components/cards")
 
     for ct in sorted(known_types):
@@ -136,8 +168,9 @@ def check_is_demo_data_wiring(base, console_path, known_types, results):
 def check_consecutive_failures(base, console_path, known_types, results):
     """Check that card components forward consecutiveFailures."""
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
-    type_to_comp = parse_card_type_to_component(registry_ts)
-    lazy_imports = parse_lazy_imports(registry_ts)
+    type_to_comp, lazy_imports = _load_registry_maps(registry_ts, "consecutiveFailures", results)
+    if type_to_comp is None:
+        return
     cards_dir = os.path.join(console_path, "web/src/components/cards")
 
     for ct in sorted(known_types):

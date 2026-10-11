@@ -75,3 +75,39 @@ class TestCheckDemoData:
         _mod.check_demo_data(str(base), str(console), {"ghost_card"}, r)
         assert not r.warnings
         assert not r.passes
+
+
+class TestCheckDemoDataMissingRegistryCoverage:
+    def test_missing_console_registry_warns_not_crashes(self, tmp_path):
+        # check_card_type_existence degrades a missing cardRegistry.ts to a
+        # recorded error (not a crash) and returns an empty known_types.
+        # check_demo_data used to re-open the same missing file
+        # unconditionally — with no guard — before ever looking at
+        # known_types, defeating that degrade-not-crash fix. It must now
+        # warn and return instead of raising FileNotFoundError.
+        console = tmp_path / "console"
+        console.mkdir()
+        base = _make_marketplace(tmp_path)
+        r = _mod.Results()
+        _mod.check_demo_data(str(base), str(console), set(), r)
+        assert any("could not read console card registry" in m
+                   for m in _messages(r.warnings))
+
+    def test_unreadable_console_registry_warns_not_crashes(self, tmp_path, monkeypatch):
+        console = _make_console(tmp_path, card_types=["cluster_health"])
+        base = _make_marketplace(tmp_path)
+        registry_ts = str(console / "web/src/components/cards/cardRegistry.ts")
+
+        import builtins
+        real_open = builtins.open
+
+        def fake_open(path, *a, **kw):
+            if str(path) == registry_ts:
+                raise OSError("boom")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        r = _mod.Results()
+        _mod.check_demo_data(str(base), str(console), {"cluster_health"}, r)
+        assert any("could not read console card registry" in m
+                   for m in _messages(r.warnings))
