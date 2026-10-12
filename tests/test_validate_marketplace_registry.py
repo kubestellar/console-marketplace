@@ -190,6 +190,31 @@ class TestParseCardDescriptors:
         f.write_text("// no descriptor entries yet\nexport const cardDescriptors = []\n")
         assert vm.parse_card_descriptors(str(f)) == set()
 
+    def test_unreadable_file_warns_not_crashes(self, tmp_path, monkeypatch):
+        # cardDescriptors.registry.ts passes the `os.path.isfile` guard (it
+        # exists) but is unreadable (permission error, or deleted/replaced
+        # between the `isfile` check and the open — a TOCTOU race). Before
+        # this fix parse_card_descriptors re-opened it with no guard at
+        # all, raising an unhandled OSError — the same bug class already
+        # fixed for the main registry read in parse_card_registry (#965).
+        f = tmp_path / "cardDescriptors.registry.ts"
+        f.write_text("export const cardDescriptors = [{ id: 'cluster_health' }]\n")
+
+        import builtins
+        real_open = builtins.open
+
+        def fake_open(path, *a, **kw):
+            if str(path) == str(f):
+                raise OSError("boom")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        r = Results_reg()
+        result = vm.parse_card_descriptors(str(f), results=r)
+        assert result == set()
+        assert any("could not read card descriptors registry" in m
+                   for m in _messages(r.warnings))
+
 
 class TestParseCardRegistryComponentsFallback:
     """Cover the `components:` fallback in parse_card_registry."""

@@ -27,6 +27,30 @@ def find_json_files(base, patterns):
     return sorted(set(files))
 
 
+def _read_text_or_warn(path, results, on_error):
+    """Read a file's full text, degrading to ``None`` instead of raising.
+
+    Centralizes the open/except-OSError guard that this module's console
+    TS parsers each need: a path can pass a caller's ``os.path.isfile``
+    check and still fail to open — deleted/replaced between the check and
+    the read (a TOCTOU race), or simply unreadable (permissions). That
+    exact bug class was hand-patched at individual call sites four times
+    (issues #956, #957, #962, #965) before this helper existed; use it for
+    every new console-file read instead of re-adding another try/except.
+
+    ``on_error(path, exc)`` is called to record a warning when the read
+    fails; callers control the exact message so existing warning text
+    (asserted on by name in tests) is unaffected by this refactor.
+    """
+    try:
+        with open(path) as f:
+            return f.read()
+    except OSError as e:
+        if results is not None:
+            on_error(path, e)
+        return None
+
+
 def _extract_object_block(content, anchor):
     """Return the object literal body following anchor, handling nested braces."""
     anchor_idx = content.find(anchor)
@@ -73,15 +97,14 @@ def parse_card_registry(registry_ts_path, results=None):
     degrade-not-crash gap `_load_registry_maps` closed for the *other*
     `cardRegistry.ts` reads in `checks_console.py` (see issue #962).
     """
-    try:
-        with open(registry_ts_path) as f:
-            content = f.read()
-    except OSError as e:
-        if results is not None:
-            results.warn("card-type",
-                        f"could not read console card registry at "
-                        f"`{registry_ts_path}`: {e} — card types it defines "
-                        f"may appear missing")
+    def _warn_main(path, e):
+        results.warn("card-type",
+                    f"could not read console card registry at "
+                    f"`{path}`: {e} — card types it defines "
+                    f"may appear missing")
+
+    content = _read_text_or_warn(registry_ts_path, results, _warn_main)
+    if content is None:
         return set()
 
     registry_dir = os.path.dirname(registry_ts_path)
@@ -102,14 +125,13 @@ def parse_card_registry(registry_ts_path, results=None):
         if os.path.basename(category_file) == "cardRegistry.types.ts":
             continue
 
-        try:
-            with open(category_file) as f:
-                category_content = f.read()
-        except OSError as e:
-            if results is not None:
-                results.warn("card-type",
-                            f"could not read category file `{os.path.basename(category_file)}`: "
-                            f"{e} — card types it defines may appear missing")
+        def _warn_category(path, e):
+            results.warn("card-type",
+                        f"could not read category file `{os.path.basename(path)}`: "
+                        f"{e} — card types it defines may appear missing")
+
+        category_content = _read_text_or_warn(category_file, results, _warn_category)
+        if category_content is None:
             continue
 
         # Try "const components" first (handles `const components: Record<...> = {...}`)
@@ -126,7 +148,7 @@ def parse_card_registry(registry_ts_path, results=None):
     return card_types
 
 
-def parse_card_descriptors(descriptors_ts_path):
+def parse_card_descriptors(descriptors_ts_path, results=None):
     """Extract card type ids from the unified cardDescriptors.registry.ts.
 
     The console has migrated some cards from the legacy RAW_CARD_COMPONENTS
@@ -134,11 +156,26 @@ def parse_card_descriptors(descriptors_ts_path):
     entry is an object literal with an `id: '<type>'` field. Without
     reading this file, cards migrated to the descriptor system appear
     "not found in console registry" even though they are present.
+
+    `results` is optional (callers that don't track findings can omit it),
+    but when given, an unreadable descriptors file is recorded as a
+    warning instead of raising: the `os.path.isfile` check below only
+    rules out a missing file, not one that exists but is unreadable or is
+    deleted/replaced between the check and the `open` (a TOCTOU race) —
+    the same gap closed for the main registry read in `parse_card_registry`
+    (see issue #965).
     """
     if not os.path.isfile(descriptors_ts_path):
         return set()
-    with open(descriptors_ts_path) as f:
-        content = f.read()
+
+    def _warn_descriptors(path, e):
+        results.warn("card-type",
+                    f"could not read card descriptors registry at "
+                    f"`{path}`: {e} — card types it defines may appear missing")
+
+    content = _read_text_or_warn(descriptors_ts_path, results, _warn_descriptors)
+    if content is None:
+        return set()
     # Match `id: 'card_type',` or `id: "card_type",` — the descriptor
     # registry uses single-quoted string ids on their own line.
     return set(re.findall(r"^\s*id:\s*['\"]([\w-]+)['\"]\s*,", content, re.MULTILINE))
@@ -163,14 +200,13 @@ def parse_sub_registry_categories(cards_dir, results=None):
     for path in glob.glob(os.path.join(cards_dir, "cardRegistry.*.ts")):
         if os.path.basename(path) == "cardRegistry.ts":
             continue  # Skip the root registry file
-        try:
-            with open(path) as f:
-                content = f.read()
-        except OSError as e:
-            if results is not None:
-                results.warn("card-type",
-                            f"could not read sub-registry `{os.path.basename(path)}`: "
-                            f"{e} — card types it defines may appear missing")
+        def _warn_subregistry(p, e):
+            results.warn("card-type",
+                        f"could not read sub-registry `{os.path.basename(p)}`: "
+                        f"{e} — card types it defines may appear missing")
+
+        content = _read_text_or_warn(path, results, _warn_subregistry)
+        if content is None:
             continue
 
         # Locate the `components: {` block and extract snake_case card type keys.
@@ -208,9 +244,9 @@ def get_all_console_card_types(cards_dir, results=None):
       2. CardDescriptor ids in cardDescriptors.registry.ts
       3. CardRegistryCategory components in cardRegistry.*.ts sub-files
 
-    `results` is forwarded to the sub-registry parser so an unreadable
-    sub-registry file is recorded as a warning rather than silently
-    dropped; omit it for callers that don't track findings.
+    `results` is forwarded to the descriptor and sub-registry parsers so an
+    unreadable file is recorded as a warning rather than silently dropped
+    or crashing; omit it for callers that don't track findings.
     """
     registry_ts = os.path.join(cards_dir, "cardRegistry.ts")
     descriptors_ts = os.path.join(cards_dir, "cardDescriptors.registry.ts")
@@ -218,7 +254,7 @@ def get_all_console_card_types(cards_dir, results=None):
     if os.path.isfile(registry_ts):
         types |= parse_card_registry(registry_ts, results=results)
     if os.path.isfile(descriptors_ts):
-        types |= parse_card_descriptors(descriptors_ts)
+        types |= parse_card_descriptors(descriptors_ts, results=results)
     types |= parse_sub_registry_categories(cards_dir, results=results)
     return types
 
