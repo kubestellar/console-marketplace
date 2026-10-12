@@ -1,0 +1,29 @@
+{
+  "//": "Self-contained copy of kubestellar/console's web/tsconfig.json compiler options (not an `extends`, so this works whether console is checked out at ../console, console-parent/, or anywhere else). See CONTRIBUTING.md 'Type-checking web/src/** locally' for the matching symlink setup and run command. Keep in sync with console's web/tsconfig.json if its compilerOptions change.",
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2021", "ES2022.Error", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "types": ["node"],
+    "typeRoots": ["./web/node_modules/@types"]
+  },
+  "include": ["web/src"],
+  "exclude": [
+    "web/src/**/*.test.ts",
+    "web/src/**/*.test.tsx",
+    "web/src/test"
+  ]
+}

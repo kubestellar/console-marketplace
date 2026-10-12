@@ -327,6 +327,25 @@ npx vitest run \
 
 Marketplace TypeScript unit tests live under `web/src/**` (including `web/src/**/__tests__/**`). Re-run the command above whenever you change marketplace TypeScript source or tests there.
 
+### Type-checking `web/src/**` locally
+
+CI does not run `tsc` — only `vitest` — so a prop-shape mismatch (a component
+silently ignoring a prop no test happens to assert on) can reach `main`
+undetected. `tsconfig.marketplace.json` lets you catch that class of bug
+locally before opening a PR. It reuses the same sibling Console checkout and
+symlink from the previous section:
+
+```bash
+# from the console-marketplace checkout, with the symlink from the
+# previous section already in place
+./web/node_modules/.bin/tsc --noEmit --project tsconfig.marketplace.json
+```
+
+Run this whenever you add or change a call site for a shared component
+(`Skeleton`, `ClusterBadge`, `CardControlsRow`, etc.) — see #963 for examples
+of production bugs this would have caught. Wiring this into CI requires a
+`.github/workflows/ts-unit-tests.yml` change; see #963 for the proposed step.
+
 ### 5. Manual verification checklist
 
 Before submitting, verify the following in a running Console:
