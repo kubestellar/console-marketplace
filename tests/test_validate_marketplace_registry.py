@@ -580,6 +580,64 @@ class TestParseCardRegistryUnreadableCategoryFile(unittest.TestCase):
             self.assertTrue(any(cat == "card-type" for cat, _ in results.warnings))
 
 
+class TestParseCardRegistryUnreadableMainFile(unittest.TestCase):
+    """An unreadable *main* ``cardRegistry.ts`` must not crash
+    ``parse_card_registry``.
+
+    Every caller only checks ``os.path.isfile(registry_ts)`` before calling
+    this function — that rules out a missing file but not one that exists
+    yet is unreadable (permission error, or deleted/replaced between the
+    ``isfile`` check and this function's own ``open`` — a TOCTOU race).
+    Without a guard, that case raised an unhandled ``OSError`` straight out
+    of ``get_all_console_card_types``, crashing ``check_card_type_existence``,
+    ``check_cncf_coverage``, and ``generate_quality_table``.
+    """
+
+    def test_unreadable_main_file_returns_empty_set_without_results(self):
+        import builtins
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d:
+            reg = os.path.join(d, "cardRegistry.ts")
+            with open(reg, "w") as f:
+                f.write("export const RAW_CARD_COMPONENTS = Object.assign({});\n")
+
+            real_open = builtins.open
+
+            def fake_open(p, *a, **kw):
+                if str(p) == reg:
+                    raise OSError("boom")
+                return real_open(p, *a, **kw)
+
+            with mock.patch("builtins.open", side_effect=fake_open):
+                types = parse_card_registry(reg)
+
+            self.assertEqual(types, set())
+
+    def test_unreadable_main_file_is_reported_when_results_given(self):
+        import builtins
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d:
+            reg = os.path.join(d, "cardRegistry.ts")
+            with open(reg, "w") as f:
+                f.write("export const RAW_CARD_COMPONENTS = Object.assign({});\n")
+
+            real_open = builtins.open
+
+            def fake_open(p, *a, **kw):
+                if str(p) == reg:
+                    raise OSError("boom")
+                return real_open(p, *a, **kw)
+
+            results = Results()
+            with mock.patch("builtins.open", side_effect=fake_open):
+                types = parse_card_registry(reg, results=results)
+
+            self.assertEqual(types, set())
+            self.assertTrue(any(cat == "card-type" for cat, _ in results.warnings))
+
+
 class TestParseSubRegistryCategoriesNoComponentsBlock(unittest.TestCase):
     """A ``cardRegistry.*.ts`` file without ``components: {`` yields no keys."""
 

@@ -42,6 +42,34 @@ class TestCheckCardTypeExistence:
         assert "trivy_status" in known
         assert any("CNCF dynamic card placeholder" in m for m in _messages(r.passes))
 
+    def test_unreadable_main_registry_warns_not_crashes(self, tmp_path, monkeypatch):
+        # cardRegistry.ts passes the `os.path.isfile` guard (it exists) but
+        # is unreadable (permission error, or deleted/replaced between the
+        # `isfile` check and the open — a TOCTOU race). parse_card_registry
+        # used to re-open it with no guard, raising an unhandled OSError
+        # straight out of check_card_type_existence instead of degrading to
+        # a recorded warning like the sibling checks already do.
+        console = _make_console(tmp_path, card_types=["cluster_health"])
+        base = _make_marketplace(tmp_path, presets={
+            "cluster_health": {"card_type": "cluster_health"},
+        })
+        registry_ts = str(console / "web/src/components/cards/cardRegistry.ts")
+
+        import builtins
+        real_open = builtins.open
+
+        def fake_open(path, *a, **kw):
+            if str(path) == registry_ts:
+                raise OSError("boom")
+            return real_open(path, *a, **kw)
+
+        monkeypatch.setattr(builtins, "open", fake_open)
+        r = _mod.Results()
+        known = _mod.check_card_type_existence(str(base), str(console), r)
+        assert known == set()
+        assert any("could not read console card registry" in m
+                   for m in _messages(r.warnings))
+
 
 class TestCheckDemoData:
     def test_demo_data_present_ok(self, tmp_path):

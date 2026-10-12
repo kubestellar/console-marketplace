@@ -61,9 +61,28 @@ def parse_card_registry(registry_ts_path, results=None):
     before it ever runs: `get_all_console_card_types` calls this function
     first, and an unhandled `OSError` would abort the whole quality gate
     instead of degrading to a recorded warning.
+
+    `registry_ts_path` itself is read the same guarded way: every caller
+    checks `os.path.isfile(registry_ts_path)` before calling this
+    function, but that only rules out a missing file, not one that
+    exists but is unreadable (permission error, or deleted/replaced
+    between the `isfile` check and this `open` — a TOCTOU race). Without
+    a guard here, that case raised an unhandled `OSError` straight out
+    of `get_all_console_card_types`, crashing `check_card_type_existence`,
+    `check_cncf_coverage`, and `generate_quality_table` — the same
+    degrade-not-crash gap `_load_registry_maps` closed for the *other*
+    `cardRegistry.ts` reads in `checks_console.py` (see issue #962).
     """
-    with open(registry_ts_path) as f:
-        content = f.read()
+    try:
+        with open(registry_ts_path) as f:
+            content = f.read()
+    except OSError as e:
+        if results is not None:
+            results.warn("card-type",
+                        f"could not read console card registry at "
+                        f"`{registry_ts_path}`: {e} — card types it defines "
+                        f"may appear missing")
+        return set()
 
     registry_dir = os.path.dirname(registry_ts_path)
     card_types = set()
