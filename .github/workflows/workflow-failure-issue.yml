@@ -18,6 +18,7 @@ on:
       - "Marketplace Auto-QA"
       - "Python Unit Tests"
       - "TypeScript Unit Tests"
+      - "Open Issue on Workflow Failure"
     types:
       - completed
 
@@ -34,7 +35,8 @@ jobs:
       (github.event.workflow_run.event == 'schedule' ||
        github.event.workflow_run.event == 'workflow_dispatch' ||
        (github.event.workflow_run.event == 'push' &&
-        github.event.workflow_run.head_branch == 'main'))
+        github.event.workflow_run.head_branch == 'main') ||
+       github.event.workflow_run.name == 'Open Issue on Workflow Failure')
     steps:
       - name: Check for existing open issue
         id: check
