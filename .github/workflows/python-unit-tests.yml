@@ -43,6 +43,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Run shell unit tests
+        run: bash scripts/test_apply-branch-protection.sh
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
