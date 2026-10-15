@@ -93,54 +93,72 @@ describe('CardControlsRow', () => {
     expect(screen.getByTestId('b')).toBeInTheDocument()
   })
 
-  // Regression pin: kubeflow_status/index.tsx and openkruise_status/index.tsx
-  // call `<CardControlsRow clusterFilter={...} cardControls={...} />` with no
-  // `children`, wiring an interactive cluster filter and a limit/sort control
-  // (including `onLimitChange`, the handler that can set itemsPerPage to
-  // 'unlimited'). The exported `CardControlsRowProps` type is `{ children?:
-  // ReactNode }`, so this real component silently drops both props and
-  // renders an empty row — every card test instead mocks this module with a
-  // richer fake that *does* honor `cardControls`/`clusterFilter`, which hides
-  // the divergence from the test suite. This test exercises the real,
-  // unmocked component with the exact prop shape the two cards pass, so a
-  // future reader has a failing assertion to update once the real controls
-  // UI is implemented, instead of the gap staying invisible. See
-  // kubestellar/console-marketplace issue for the tracking discussion.
-  it('silently drops clusterFilter/cardControls props today (no children passed)', () => {
-    const onLimitChange = vi.fn()
-    const { container } = render(
-      <CardControlsRow
-        // @ts-expect-error -- clusterFilter/cardControls are not part of
-        // CardControlsRowProps; this is the exact shape production callers
-        // pass, reproduced here to pin the current (unimplemented) behavior.
-        clusterFilter={{
-          availableClusters: ['cluster-a'],
-          selectedClusters: [],
-          onToggle: vi.fn(),
-          onClear: vi.fn(),
-          isOpen: false,
-          setIsOpen: vi.fn(),
-          containerRef: { current: null },
-          minClusters: 1,
-        }}
-        cardControls={{
-          limit: 'unlimited',
-          onLimitChange,
-          sortBy: 'name',
-          sortOptions: [{ value: 'name', label: 'Name' }],
-          onSortChange: vi.fn(),
-          sortDirection: 'asc',
-          onSortDirectionChange: vi.fn(),
-        }}
-      />,
-    )
+  const makeFilter = (over = {}) => ({
+    availableClusters: ['cluster-a', 'cluster-b'],
+    selectedClusters: [] as string[],
+    onToggle: vi.fn(),
+    onClear: vi.fn(),
+    isOpen: false,
+    setIsOpen: vi.fn(),
+    containerRef: { current: null },
+    minClusters: 1,
+    ...over,
+  })
+  const makeControls = (over = {}) => ({
+    limit: 'unlimited' as const,
+    onLimitChange: vi.fn(),
+    sortBy: 'name',
+    sortOptions: [
+      { value: 'name', label: 'Name' },
+      { value: 'status', label: 'Status' },
+    ],
+    onSortChange: vi.fn(),
+    sortDirection: 'asc' as const,
+    onSortDirectionChange: vi.fn(),
+    ...over,
+  })
 
-    // Renders the same empty <div> as the no-children case: no cluster
-    // filter button, no limit/sort control, and onLimitChange is never
-    // invoked, because the real component ignores both props entirely.
-    expect(container.querySelector('div')).not.toBeNull()
-    expect(container.querySelector('div')?.children.length).toBe(0)
-    expect(onLimitChange).not.toHaveBeenCalled()
+  it('renders the cluster filter button and toggles it open', () => {
+    const filter = makeFilter()
+    render(<CardControlsRow clusterFilter={filter} />)
+    fireEvent.click(screen.getByTestId('card-cluster-filter-button'))
+    expect(filter.setIsOpen).toHaveBeenCalledWith(true)
+    expect(screen.queryByTestId('card-cluster-filter-dropdown')).toBeNull()
+  })
+
+  it('hides the cluster filter when fewer than minClusters are available', () => {
+    render(<CardControlsRow clusterFilter={makeFilter({ minClusters: 3 })} />)
+    expect(screen.queryByTestId('card-cluster-filter-button')).toBeNull()
+  })
+
+  it('renders the cluster dropdown with toggle and clear handlers', () => {
+    const filter = makeFilter({ isOpen: true, selectedClusters: ['cluster-a'] })
+    render(<CardControlsRow clusterFilter={filter} />)
+    expect(screen.getByTestId('card-cluster-filter-dropdown')).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('cluster-b'))
+    expect(filter.onToggle).toHaveBeenCalledWith('cluster-b')
+    fireEvent.click(screen.getByTestId('card-cluster-filter-clear'))
+    expect(filter.onClear).toHaveBeenCalled()
+  })
+
+  it('calls onLimitChange with a number and with "unlimited"', () => {
+    const controls = makeControls({ limit: 10 })
+    render(<CardControlsRow cardControls={controls} />)
+    const select = screen.getByTestId('card-limit')
+    fireEvent.change(select, { target: { value: '25' } })
+    expect(controls.onLimitChange).toHaveBeenCalledWith(25)
+    fireEvent.change(select, { target: { value: 'unlimited' } })
+    expect(controls.onLimitChange).toHaveBeenLastCalledWith('unlimited')
+  })
+
+  it('renders sort options and fires sort handlers', () => {
+    const controls = makeControls()
+    render(<CardControlsRow cardControls={controls}><span data-testid="extra" /></CardControlsRow>)
+    fireEvent.change(screen.getByTestId('card-sort'), { target: { value: 'status' } })
+    expect(controls.onSortChange).toHaveBeenCalledWith('status')
+    fireEvent.click(screen.getByTestId('card-sort-direction'))
+    expect(controls.onSortDirectionChange).toHaveBeenCalledWith('desc')
+    expect(screen.getByTestId('extra')).toBeInTheDocument()
   })
 })
 
