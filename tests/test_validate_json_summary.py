@@ -163,6 +163,24 @@ class TestRegistryEntryConsistency:
         result = _mod.run_validation(root)
         assert any("no matching file" in e for e in result.errors)
 
+    def test_path_traversal_id_is_rejected(self, tmp_path):
+        # A registry id containing `../` must never be used to build a
+        # filesystem path (path traversal guard shared with
+        # `checks_schema.check_registry_consistency`, see issue #789).
+        # Before this guard was wired in here, a PR-authored registry.json
+        # id such as this could make `os.path.isfile` probe paths outside
+        # the repo root.
+        registry = {
+            "items": [{"id": "../../../../etc/passwd", "type": "theme"}],
+            "presets": [],
+        }
+        root = _make_repo(tmp_path, registry)
+        result = _mod.run_validation(root)
+        assert any(
+            "contains characters other than" in e for e in result.errors
+        )
+        assert not any("no matching file" in e for e in result.errors)
+
     def test_download_url_path_mismatch_records_error(self, tmp_path):
         registry = {
             "items": [

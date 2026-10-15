@@ -64,6 +64,7 @@ from validate_marketplace_lib.checks_schema import (
     card_field_issues,
     dashboard_field_issues,
     expected_registry_paths,
+    is_safe_registry_id,
     registry_download_url_path,
 )
 
@@ -139,6 +140,20 @@ def _validate_registry_entries(
         if item_id in seen_ids:
             result.errors.append(f"duplicate registry id '{item_id}'")
         seen_ids.add(item_id)
+
+        # Reject ids that aren't safe to embed in a filesystem path (path
+        # traversal / absolute-path guard) before any path is constructed
+        # from it below. Mirrors the guard in
+        # `checks_schema.check_registry_consistency`, the canonical
+        # implementation this function's expected-path mapping is shared
+        # with (see issue #789) -- this call site had fallen out of sync
+        # with that guard.
+        if not is_safe_registry_id(item_id):
+            result.errors.append(
+                f"registry entry id '{item_id}' contains characters other "
+                f"than letters, digits, '_' and '-'"
+            )
+            continue
 
         expected_paths = expected_registry_paths(item_id, item_type)
 
