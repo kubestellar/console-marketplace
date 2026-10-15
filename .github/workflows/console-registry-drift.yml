@@ -1,0 +1,70 @@
+name: Console Registry Drift Check
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # daily, 07:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  registry-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Checkout console (pinned)
+        uses: ./.github/actions/checkout-console-pin
+        with:
+          path: console-pinned
+          sparse-checkout: |
+            web/src/components/cards/**
+
+      - name: Checkout console (live main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: kubestellar/console
+          ref: main
+          path: console-main
+          sparse-checkout: |
+            web/src/components/cards/**
+          sparse-checkout-cone-mode: false
+
+      - name: Compare pinned vs. live registry parse results
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          from validate_marketplace_lib import ts_parsing as tp
+
+          def counts(cards_dir):
+              registry = cards_dir + "/cardRegistry.ts"
+              descriptors = cards_dir + "/cardDescriptors.registry.ts"
+              return {
+                  "parse_card_registry": len(tp.parse_card_registry(registry)),
+                  "parse_sub_registry_categories": len(tp.parse_sub_registry_categories(cards_dir)),
+                  "parse_card_descriptors": len(tp.parse_card_descriptors(descriptors)),
+              }
+
+          pinned = counts("console-pinned/web/src/components/cards")
+          live = counts("console-main/web/src/components/cards")
+
+          failed = False
+          for key in pinned:
+              print(f"{key}: pinned={pinned[key]} live={live[key]}")
+              if live[key] == 0 or live[key] < pinned[key]:
+                  print(f"::error::{key} shrank or went empty on console main "
+                        f"(pinned={pinned[key]}, live={live[key]}) — "
+                        f"ts_parsing.py regex may be out of sync with console's "
+                        f"current cardRegistry/cardDescriptors source")
+                  failed = True
+
+          sys.exit(1 if failed else 0)
+          PY
