@@ -109,10 +109,22 @@ def check_demo_data(base, console_path, known_types, results):
                             f"in {os.path.relpath(comp_dir, console_path)}")
 
 
-def check_is_demo_data_wiring(base, console_path, known_types, results):
-    """Check that card components wire isDemoData through useCardLoadingState."""
+def _check_component_wiring(base, console_path, known_types, results, *,
+                            category, trigger, satisfies, message):
+    """Shared skeleton for "does this card component wire hook output X
+    through to prop Y" checks.
+
+    `check_is_demo_data_wiring` and `check_consecutive_failures` used to
+    each re-implement this file-scanning loop independently (jscpd flagged
+    a 17-line exact clone between them). Both now delegate here, supplying
+    only what differs: the warning `category`, a `trigger(content) -> bool`
+    predicate for "this file uses the hook at all", a
+    `satisfies(content) -> bool` predicate for "the required wiring is
+    present", and a `message(card_type, comp_name) -> str` builder for the
+    warning text emitted when `trigger` is true and `satisfies` is false.
+    """
     registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
-    type_to_comp, lazy_imports = _load_registry_maps(registry_ts, "isDemoData", results)
+    type_to_comp, lazy_imports = _load_registry_maps(registry_ts, category, results)
     if type_to_comp is None:
         return
     cards_dir = os.path.join(console_path, "web/src/components/cards")
@@ -134,8 +146,8 @@ def check_is_demo_data_wiring(base, console_path, known_types, results):
         main_files = glob.glob(os.path.join(comp_dir, "*.tsx")) + \
                      glob.glob(os.path.join(comp_dir, "*.ts"))
 
-        found_loading_state = False
-        has_is_demo_data = False
+        triggered = False
+        satisfied = False
 
         for mf in main_files:
             if mf.endswith(".test.tsx") or mf.endswith(".test.ts"):
@@ -146,74 +158,50 @@ def check_is_demo_data_wiring(base, console_path, known_types, results):
                 with open(mf) as f:
                     content = f.read()
             except Exception as e:
-                results.warn("isDemoData",
+                results.warn(category,
                             f"could not read `{os.path.relpath(mf, console_path)}`: {e}")
                 continue
 
-            if "useCardLoadingState" in content:
-                found_loading_state = True
-                # Check if isDemoData is passed
-                if re.search(r"useCardLoadingState\([^)]*isDemoData", content):
-                    has_is_demo_data = True
-                # Also check useReportCardDataState pattern
-                if re.search(r"useReportCardDataState\([^)]*isDemoData", content):
-                    has_is_demo_data = True
+            if trigger(content):
+                triggered = True
+            if satisfies(content):
+                satisfied = True
 
-        if found_loading_state and not has_is_demo_data:
-            results.warn("isDemoData",
-                        f"`{ct}` ({comp_name}) calls useCardLoadingState but "
-                        f"does not pass isDemoData")
+        if triggered and not satisfied:
+            results.warn(category, message(ct, comp_name))
+
+
+def check_is_demo_data_wiring(base, console_path, known_types, results):
+    """Check that card components wire isDemoData through useCardLoadingState."""
+    _check_component_wiring(
+        base, console_path, known_types, results,
+        category="isDemoData",
+        trigger=lambda content: "useCardLoadingState" in content,
+        # Check if isDemoData is passed to useCardLoadingState, or to the
+        # useReportCardDataState pattern.
+        satisfies=lambda content: bool(
+            re.search(r"useCardLoadingState\([^)]*isDemoData", content) or
+            re.search(r"useReportCardDataState\([^)]*isDemoData", content)
+        ),
+        message=lambda ct, comp_name: (
+            f"`{ct}` ({comp_name}) calls useCardLoadingState but "
+            f"does not pass isDemoData"
+        ),
+    )
 
 
 def check_consecutive_failures(base, console_path, known_types, results):
     """Check that card components forward consecutiveFailures."""
-    registry_ts = os.path.join(console_path, "web/src/components/cards/cardRegistry.ts")
-    type_to_comp, lazy_imports = _load_registry_maps(registry_ts, "consecutiveFailures", results)
-    if type_to_comp is None:
-        return
-    cards_dir = os.path.join(console_path, "web/src/components/cards")
-
-    for ct in sorted(known_types):
-        comp_name = type_to_comp.get(ct)
-        if not comp_name:
-            continue
-
-        import_path = lazy_imports.get(comp_name)
-        if not import_path:
-            continue
-
-        comp_dir = os.path.join(cards_dir, import_path)
-        if not os.path.isdir(comp_dir):
-            continue
-
-        main_files = glob.glob(os.path.join(comp_dir, "*.tsx")) + \
-                     glob.glob(os.path.join(comp_dir, "*.ts"))
-
-        uses_cached = False
-        has_failures = False
-
-        for mf in main_files:
-            if mf.endswith(".test.tsx") or mf.endswith(".test.ts"):
-                continue
-            if "demoData" in os.path.basename(mf):
-                continue
-            try:
-                with open(mf) as f:
-                    content = f.read()
-            except Exception as e:
-                results.warn("consecutiveFailures",
-                            f"could not read `{os.path.relpath(mf, console_path)}`: {e}")
-                continue
-
-            if re.search(r"useCached\w+", content):
-                uses_cached = True
-            if "consecutiveFailures" in content:
-                has_failures = True
-
-        if uses_cached and not has_failures:
-            results.warn("consecutiveFailures",
-                        f"`{ct}` ({comp_name}) uses useCached* hook but does not "
-                        f"reference consecutiveFailures")
+    _check_component_wiring(
+        base, console_path, known_types, results,
+        category="consecutiveFailures",
+        trigger=lambda content: bool(re.search(r"useCached\w+", content)),
+        satisfies=lambda content: "consecutiveFailures" in content,
+        message=lambda ct, comp_name: (
+            f"`{ct}` ({comp_name}) uses useCached* hook but does not "
+            f"reference consecutiveFailures"
+        ),
+    )
 
 
 def check_i18n_keys(base, console_path, known_types, results):
