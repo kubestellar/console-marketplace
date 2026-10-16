@@ -160,6 +160,25 @@ describe('CardControlsRow', () => {
     expect(controls.onSortDirectionChange).toHaveBeenCalledWith('desc')
     expect(screen.getByTestId('extra')).toBeInTheDocument()
   })
+
+  it('toggles sort direction from desc back to asc', () => {
+    const controls = makeControls({ sortDirection: 'desc' as const })
+    render(<CardControlsRow cardControls={controls} />)
+    fireEvent.click(screen.getByTestId('card-sort-direction'))
+    expect(controls.onSortDirectionChange).toHaveBeenCalledWith('asc')
+  })
+
+  it('defaults minClusters to 1 when omitted, hiding the filter when no clusters are available', () => {
+    const { minClusters: _minClusters, ...withoutMinClusters } = makeFilter({ availableClusters: [] })
+    render(<CardControlsRow clusterFilter={withoutMinClusters} />)
+    expect(screen.queryByTestId('card-cluster-filter-button')).toBeNull()
+  })
+
+  it('defaults minClusters to 1 when omitted, showing the filter when at least one cluster is available', () => {
+    const { minClusters: _minClusters, ...withoutMinClusters } = makeFilter()
+    render(<CardControlsRow clusterFilter={withoutMinClusters} />)
+    expect(screen.getByTestId('card-cluster-filter-button')).toBeInTheDocument()
+  })
 })
 
 describe('CardPaginationFooter', () => {
