@@ -66,6 +66,7 @@ from validate_marketplace_lib.checks_schema import (
     expected_registry_paths,
     is_safe_registry_id,
     registry_download_url_path,
+    safe_repo_relative_path,
 )
 
 
@@ -166,11 +167,18 @@ def _validate_registry_entries(
             )
 
         url_path = registry_download_url_path(item.get("downloadUrl", ""))
-        if url_path and not os.path.isfile(os.path.join(repo_root, url_path)):
-            result.errors.append(
-                f"registry entry '{item_id}' downloadUrl path "
-                f"'{url_path}' does not match any file"
-            )
+        if url_path:
+            safe_path = safe_repo_relative_path(repo_root, url_path)
+            if safe_path is None:
+                result.errors.append(
+                    f"registry entry '{item_id}' downloadUrl path "
+                    f"'{url_path}' escapes the repository root"
+                )
+            elif not os.path.isfile(safe_path):
+                result.errors.append(
+                    f"registry entry '{item_id}' downloadUrl path "
+                    f"'{url_path}' does not match any file"
+                )
 
 
 def run_validation(repo_root: str) -> ValidationResult:

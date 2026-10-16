@@ -232,6 +232,26 @@ def is_safe_registry_id(item_id):
     return bool(_SAFE_ID_RE.match(item_id))
 
 
+def safe_repo_relative_path(base, rel_path):
+    """Join `rel_path` onto `base` and return the result, or None if it
+    escapes `base` (absolute path, '..' traversal, or symlink escape).
+
+    Unlike `item_id` (validated by :func:`is_safe_registry_id`),
+    `rel_path` here is the path extracted from a registry entry's
+    `downloadUrl` by :func:`registry_download_url_path` — it is not
+    restricted to a safe charset, so `os.path.join(base, rel_path)` alone
+    is not enough: a leading '/' makes `os.path.join` discard `base`
+    entirely, and a leading '../' walks out of it. Resolve both sides and
+    require the result to stay under `base` before any `os.path.isfile`
+    probe is allowed to run on it.
+    """
+    base_real = os.path.realpath(base)
+    candidate = os.path.realpath(os.path.join(base, rel_path))
+    if candidate != base_real and not candidate.startswith(base_real + os.sep):
+        return None
+    return candidate
+
+
 def expected_registry_paths(item_id, item_type):
     """Return candidate relative file paths a registry entry of `item_type`
     is expected to have on disk (relative to the marketplace repo root).
@@ -324,10 +344,16 @@ def check_registry_consistency(base, results):
 
         # downloadUrl path check
         url_path = registry_download_url_path(item.get("downloadUrl", ""))
-        if url_path and not os.path.isfile(os.path.join(base, url_path)):
-            results.error("registry",
-                         f"Registry '{item_id}': downloadUrl path '{url_path}' "
-                         f"does not match any file")
+        if url_path:
+            safe_path = safe_repo_relative_path(base, url_path)
+            if safe_path is None:
+                results.error("registry",
+                             f"Registry '{item_id}': downloadUrl path '{url_path}' "
+                             f"escapes the repository root")
+            elif not os.path.isfile(safe_path):
+                results.error("registry",
+                             f"Registry '{item_id}': downloadUrl path '{url_path}' "
+                             f"does not match any file")
 
     results.ok("registry", f"Checked {len(entries)} registry entries, {len(seen_ids)} unique IDs")
 

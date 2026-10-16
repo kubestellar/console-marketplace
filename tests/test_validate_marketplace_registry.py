@@ -1005,6 +1005,55 @@ class TestRegistryConsistency:
         _mod_reg.check_registry_consistency(str(tmp_path), r)
         assert any("downloadUrl" in m and "themes/ghost.json" in m for m in _messages(r.errors))
 
+    def test_download_url_path_traversal_rejected(self, tmp_path):
+        # A downloadUrl whose extracted path walks out of the repo root
+        # (or is absolute) must be rejected as "escapes the repository
+        # root" rather than probed with os.path.isfile — which would turn
+        # the check into an arbitrary-file-existence oracle on the runner.
+        _write(
+            tmp_path / "registry.json",
+            {
+                "items": [
+                    {
+                        "id": "dark",
+                        "type": "theme",
+                        "downloadUrl": (
+                            "https://raw.githubusercontent.com/o/r/main/"
+                            "../../../../etc/passwd"
+                        ),
+                    }
+                ]
+            },
+        )
+        _write(tmp_path / "themes" / "dark.json", {})
+        r = Results_reg()
+        _mod_reg.check_registry_consistency(str(tmp_path), r)
+        assert any(
+            "downloadUrl" in m and "escapes the repository root" in m
+            for m in _messages(r.errors)
+        )
+
+    def test_download_url_absolute_path_rejected(self, tmp_path):
+        _write(
+            tmp_path / "registry.json",
+            {
+                "items": [
+                    {
+                        "id": "dark",
+                        "type": "theme",
+                        "downloadUrl": "https://raw.githubusercontent.com/o/r/main//etc/passwd",
+                    }
+                ]
+            },
+        )
+        _write(tmp_path / "themes" / "dark.json", {})
+        r = Results_reg()
+        _mod_reg.check_registry_consistency(str(tmp_path), r)
+        assert any(
+            "downloadUrl" in m and "escapes the repository root" in m
+            for m in _messages(r.errors)
+        )
+
     def test_download_url_path_present(self, tmp_path):
         _write(
             tmp_path / "registry.json",

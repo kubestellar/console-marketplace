@@ -196,6 +196,50 @@ class TestRegistryEntryConsistency:
         result = _mod.run_validation(root)
         assert any("downloadUrl path" in e for e in result.errors)
 
+    def test_download_url_path_traversal_rejected(self, tmp_path):
+        # A downloadUrl path that walks out of the repo root (e.g. via
+        # '../' segments) must be rejected as escaping the repository
+        # root rather than handed to os.path.isfile, which would turn
+        # this check into an arbitrary-file-existence oracle on the
+        # CI runner.
+        registry = {
+            "items": [
+                {
+                    "id": "x",
+                    "type": "unknown",
+                    "downloadUrl": (
+                        "https://raw.githubusercontent.com/o/r/main/"
+                        "../../../../etc/passwd"
+                    ),
+                }
+            ],
+            "presets": [],
+        }
+        root = _make_repo(tmp_path, registry)
+        result = _mod.run_validation(root)
+        assert any(
+            "downloadUrl path" in e and "escapes the repository root" in e
+            for e in result.errors
+        )
+
+    def test_download_url_absolute_path_rejected(self, tmp_path):
+        registry = {
+            "items": [
+                {
+                    "id": "x",
+                    "type": "unknown",
+                    "downloadUrl": "https://raw.githubusercontent.com/o/r/main//etc/passwd",
+                }
+            ],
+            "presets": [],
+        }
+        root = _make_repo(tmp_path, registry)
+        result = _mod.run_validation(root)
+        assert any(
+            "downloadUrl path" in e and "escapes the repository root" in e
+            for e in result.errors
+        )
+
     def test_download_url_matching_existing_file_is_accepted(self, tmp_path):
         # Registry entry with a downloadUrl whose "/main/<path>" tail points to
         # a file that actually exists in the repo. Hits the previously
