@@ -75,6 +75,13 @@ describe('lib/cache module store', () => {
       vi.setSystemTime(new Date('2036-01-01T00:00:00Z'))
       expect(getCacheValue<string>('forever')).toBe('value')
     })
+
+    it('treats a ttlMs of 0 as immediately expired', () => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+      setCacheValue<string>('zero-ttl', 'value', 0)
+      expect(getCacheValue<string>('zero-ttl')).toBeUndefined()
+    })
   })
 
   describe('clearCacheValue', () => {
