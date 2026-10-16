@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { ExternalLink, Layers, Server } from 'lucide-react'
-import { Skeleton } from '../../ui/Skeleton'
 import { Select } from '../../ui/Select'
 import { ClusterBadge } from '../../ui/ClusterBadge'
 import {
@@ -9,6 +8,7 @@ import {
   CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'
 import { useCardShell } from '../../../lib/cards/useCardShell'
+import { CategorySummarySkeleton } from '../shared/CategorySummarySkeleton'
 import {
   useOpenKruiseStatus,
   type OpenKruiseStatus as OpenKruiseStatusData,
@@ -108,25 +108,7 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
 
   // --- Skeleton state ----------------------------------------------
   if (showSkeleton) {
-    return (
-      <div className="h-full flex flex-col min-h-card">
-        <div className="flex items-center justify-between mb-4">
-          <Skeleton variant="text" width={140} height={20} />
-          <Skeleton variant="rounded" width={80} height={28} />
-        </div>
-        <Skeleton variant="rounded" height={32} className="mb-4" />
-        <div className="flex gap-2 mb-4">
-          <Skeleton variant="rounded" height={52} className="flex-1" />
-          <Skeleton variant="rounded" height={52} className="flex-1" />
-          <Skeleton variant="rounded" height={52} className="flex-1" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton variant="rounded" height={60} />
-          <Skeleton variant="rounded" height={60} />
-          <Skeleton variant="rounded" height={60} />
-        </div>
-      </div>
-    )
+    return <CategorySummarySkeleton />
   }
 
   // --- Empty state -------------------------------------------------
