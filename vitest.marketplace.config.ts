@@ -20,6 +20,13 @@ export default {
         `${MARKETPLACE_ROOT}/src/**/*.{test,spec}.{ts,tsx}`,
         `${MARKETPLACE_ROOT}/src/**/__tests__/**`,
         `${MARKETPLACE_ROOT}/src/**/*.d.ts`,
+        // These two files have zero instrumentable runtime statements, so the
+        // v8 coverage provider reports a misleading flat 0% (0/0) for both —
+        // not an actual testing gap. See kubestellar/console-marketplace#993.
+        // Scoped to exact paths (not a wildcard) so adding real runtime logic
+        // to either file in the future isn't silently exempted from coverage.
+        `${MARKETPLACE_ROOT}/src/components/cards/ui/Skeleton.tsx`, // bare re-export barrel, covered behaviorally by Skeleton.test.tsx
+        `${MARKETPLACE_ROOT}/src/components/cards/shared/CardDisplayItem.ts`, // type-only interface, erased at compile time
       ],
       thresholds: {
         lines: COVERAGE_THRESHOLD,
