@@ -223,8 +223,26 @@ export function CardPaginationFooter({
 
 /**
  * PLACEHOLDER — renders an empty `<div>`. Not part of the search/pagination
- * stub tracked in issue #778; left as-is.
+ * stub tracked in issue #778; left as-is. Props mirror the real `console`
+ * `CardAIActions` (lib/cards/CardAIActions.tsx there) so cards can pass the
+ * same props in both environments — see kubestellar/console-marketplace#991.
  */
-export function CardAIActions() {
+export interface CardAIActionsResource {
+  kind: string
+  name: string
+  namespace?: string
+  cluster?: string
+  status?: string
+}
+
+export interface CardAIActionsProps {
+  resource: CardAIActionsResource
+  issues?: Array<{ name: string; message: string }>
+  additionalContext?: Record<string, unknown>
+  className?: string
+  showRepair?: boolean
+}
+
+export function CardAIActions(_props: CardAIActionsProps) {
   return <div data-testid="card-ai-actions" />
 }
