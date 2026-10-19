@@ -183,13 +183,16 @@ test.describe('Marketplace registry entries render in Console', () => {
       }, preset)
 
       await expectCardsRendered(page, [card.card_type])
-      if (preset.title) {
-        const rendered = page.locator(`[data-card-type="${card.card_type}"]`).first()
-        await rendered.scrollIntoViewIfNeeded()
-        await expect(rendered, `card-preset "${id}" title not shown`).toContainText(preset.title, {
-          timeout: RENDER_TIMEOUT_MS,
-        })
-      }
+      // Assert the seeded preset card itself rendered (by its data-card-id).
+      // Do NOT assert the preset's custom `title` text: console resolves card
+      // titles as `builtin card_type title || custom title || card_type`
+      // (web/src/components/cards/useCardWrapperState.ts), so a preset title
+      // like "Pod Health Monitor" is never displayed for a known card_type.
+      const rendered = page.locator(`[data-card-id="${card.id}"]`)
+      await rendered.scrollIntoViewIfNeeded()
+      await expect(rendered, `card-preset "${id}" card did not render`).toBeVisible({
+        timeout: RENDER_TIMEOUT_MS,
+      })
       expect(errors, `console errors while rendering card-preset "${id}"`).toEqual([])
     })
   }
