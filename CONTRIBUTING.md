@@ -287,10 +287,16 @@ await fetch('/api/dashboards/import', {
 })
 ```
 
+#### Automated render smoke-test
+
+The **Console Render Smoke Test** workflow (`.github/workflows/console-render-smoke.yml`) automates a slice of the steps above. It builds the pinned Console frontend, serves it with `vite preview` in demo mode, and runs `e2e/console-render-smoke/marketplace-render.spec.ts` with headless Playwright. For each sampled entry it loads the asset from your checkout, installs it the same way Console's marketplace does (dashboard/card-preset cards are served as the default dashboard and `kc-add-card-from-marketplace` is dispatched; themes go into `kc-custom-themes` followed by `kc-custom-themes-changed`), then asserts the cards or theme render without console errors.
+
+The sampled ids live in `e2e/console-render-smoke/smoke-sample.json`. Add a `dashboard`, `card-preset`, or `theme` id there to include it in the smoke-test.
+
 ### Bumping the console pin
 
-`ts-unit-tests.yml`, `marketplace-quality.yml`, and `marketplace-auto-qa.yml` each
-sparse-checkout a small slice of `kubestellar/console` and pin it to an explicit
+`ts-unit-tests.yml`, `marketplace-quality.yml`, `marketplace-auto-qa.yml`, and
+`console-render-smoke.yml` each sparse-checkout a small slice of `kubestellar/console` and pin it to an explicit
 commit SHA via `ref:` on the `actions/checkout` step, so CI is reproducible and
 doesn't silently break when console's default branch moves.
 

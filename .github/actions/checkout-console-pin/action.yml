@@ -1,8 +1,8 @@
 name: Checkout console pin
 description: >
   Sparse-checkout a slice of kubestellar/console at the shared pinned commit
-  used by marketplace-quality.yml, marketplace-auto-qa.yml, and
-  ts-unit-tests.yml. Centralizes the pin SHA in one file so bumping it only
+  used by marketplace-quality.yml, marketplace-auto-qa.yml,
+  ts-unit-tests.yml, and console-render-smoke.yml. Centralizes the pin SHA in one file so bumping it only
   requires one edit instead of three (see CONTRIBUTING.md § Bumping the
   console pin).
 inputs:

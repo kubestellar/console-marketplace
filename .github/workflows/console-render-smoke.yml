@@ -1,0 +1,114 @@
+name: Console Render Smoke Test
+
+# Boots the pinned kubestellar/console frontend (vite preview, demo mode) and
+# uses Playwright to install + render a sample of registry.json entries (one
+# dashboard, card-preset and theme by default). The sample is data-driven:
+# add ids to e2e/console-render-smoke/smoke-sample.json to extend coverage.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'registry.json'
+      - 'dashboards/**'
+      - 'card-presets/**'
+      - 'themes/**'
+      - 'e2e/console-render-smoke/**'
+      - '.github/actions/checkout-console-pin/**'
+      - '.github/workflows/console-render-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'registry.json'
+      - 'dashboards/**'
+      - 'card-presets/**'
+      - 'themes/**'
+      - 'e2e/console-render-smoke/**'
+      - '.github/actions/checkout-console-pin/**'
+      - '.github/workflows/console-render-smoke.yml'
+  schedule:
+    - cron: '0 8 * * *'  # daily, 08:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  render-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Checkout console (pinned)
+        uses: ./.github/actions/checkout-console-pin
+        with:
+          path: console-pinned
+          sparse-checkout: |
+            web
+          sparse-checkout-cone-mode: 'true'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: console-pinned/web/package-lock.json
+
+      - name: Install console dependencies
+        working-directory: console-pinned/web
+        run: npm ci
+
+      - name: Build console frontend
+        working-directory: console-pinned/web
+        run: npm run build
+
+      - name: Remove broken Microsoft apt source (workaround for NOSPLIT GPG error)
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/microsoft-edge.list
+
+      - name: Install Playwright Chromium
+        working-directory: console-pinned/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Stage marketplace smoke spec into console e2e tree
+        run: |
+          mkdir -p console-pinned/web/e2e/marketplace-smoke
+          cp e2e/console-render-smoke/*.spec.ts console-pinned/web/e2e/marketplace-smoke/
+
+      - name: Start console preview server
+        working-directory: console-pinned/web
+        run: |
+          npm run preview > "${RUNNER_TEMP}/console-preview.log" 2>&1 &
+          npx wait-on http://localhost:4173 --timeout 120000
+
+      - name: Run render smoke-test
+        working-directory: console-pinned/web
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:4173
+          MARKETPLACE_ROOT: ${{ github.workspace }}
+        run: npx playwright test e2e/marketplace-smoke --project=chromium
+
+      - name: Show preview server log
+        if: failure()
+        run: tail -n 200 "${RUNNER_TEMP}/console-preview.log" || true
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: console-render-smoke-report-${{ github.run_id }}
+          path: |
+            console-pinned/web/playwright-report/
+            console-pinned/web/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
