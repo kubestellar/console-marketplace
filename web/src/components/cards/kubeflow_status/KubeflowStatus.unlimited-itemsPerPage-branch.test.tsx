@@ -21,16 +21,11 @@ interface AnyItem extends Record<string, unknown> {
   cluster: string
 }
 
-const mockUseClusters = vi.fn()
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 const mockUseKubeflowStatus = vi.fn()
-
-vi.mock('../../../hooks/useMCP', () => ({
-  useClusters: () => mockUseClusters(),
-}))
 
 vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
@@ -109,7 +104,6 @@ describe('KubeflowStatus unlimited itemsPerPage branch', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseClusters.mockReturnValue({ isLoading: false })
     mockUseDemoMode.mockReturnValue({ isDemoMode: true })
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
     mockUseKubeflowStatus.mockReturnValue({

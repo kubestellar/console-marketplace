@@ -25,16 +25,11 @@ interface AnyItem extends Record<string, unknown> {
   cluster: string
 }
 
-const mockUseClusters = vi.fn()
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 const mockUseOpenKruiseStatus = vi.fn()
-
-vi.mock('../../../hooks/useMCP', () => ({
-  useClusters: () => mockUseClusters(),
-}))
 
 vi.mock('../../ui/Skeleton', () => mockSkeletonModule('openkruise-skeleton'))
 
@@ -140,7 +135,6 @@ describe('OpenKruiseStatus — skeleton / cluster-filter / formatTime branches',
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseClusters.mockReturnValue({ isLoading: false })
     mockUseDemoMode.mockReturnValue({ isDemoMode: true })
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
     mockUseOpenKruiseStatus.mockReturnValue({

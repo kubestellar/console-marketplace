@@ -4,16 +4,11 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
 import { KUBEFLOW_DEMO_DATA } from './demoData'
 
-const mockUseClusters = vi.fn()
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 const mockUseKubeflowStatus = vi.fn()
-
-vi.mock('../../../hooks/useMCP', () => ({
-  useClusters: () => mockUseClusters(),
-}))
 
 vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
@@ -94,7 +89,6 @@ describe('KubeflowStatus — real CardControlsRow', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseClusters.mockReturnValue({ isLoading: false })
     mockUseDemoMode.mockReturnValue({ isDemoMode: true })
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
     mockUseKubeflowStatus.mockReturnValue({

@@ -9,16 +9,11 @@ interface DisplayItem extends Record<string, unknown> {
   cluster: string
 }
 
-const mockUseClusters = vi.fn()
 const mockUseDemoMode = vi.fn()
 const mockUseGlobalFilters = vi.fn()
 const mockUseCardLoadingState = vi.fn()
 const mockUseCardData = vi.fn()
 const mockUseOpenKruiseStatus = vi.fn()
-
-vi.mock('../../../hooks/useMCP', () => ({
-  useClusters: () => mockUseClusters(),
-}))
 
 vi.mock('../../ui/Skeleton', () => mockSkeletonModule('openkruise-skeleton'))
 
@@ -221,7 +216,6 @@ function useInteractiveCardData<T extends DisplayItem>(
 describe('OpenKruiseStatus', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseClusters.mockReturnValue({ isLoading: false })
     mockUseDemoMode.mockReturnValue({ isDemoMode: false })
     mockUseGlobalFilters.mockReturnValue({ selectedClusters: [] })
     mockUseOpenKruiseStatus.mockReturnValue({
