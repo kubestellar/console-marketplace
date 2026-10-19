@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   CardAIActions,
+  CardControlsHeader,
   CardControlsRow,
   CardPaginationFooter,
+  CardScopeBadge,
   CardSearchInput,
 } from './CardComponents'
 
@@ -240,5 +242,73 @@ describe('CardAIActions', () => {
   it('renders a container with the card-ai-actions testid', () => {
     render(<CardAIActions />)
     expect(screen.getByTestId('card-ai-actions')).toBeInTheDocument()
+  })
+})
+
+const baseClusterFilter = {
+  availableClusters: ['a', 'b'],
+  selectedClusters: [] as string[],
+  onToggle: () => {},
+  onClear: () => {},
+  isOpen: false,
+  setIsOpen: () => {},
+}
+
+const baseCardControls = {
+  limit: 10 as const,
+  onLimitChange: () => {},
+  sortBy: 'name',
+  sortOptions: [{ value: 'name', label: 'Name' }],
+  onSortChange: () => {},
+  sortDirection: 'asc' as const,
+  onSortDirectionChange: () => {},
+}
+
+describe('CardControlsHeader', () => {
+  it('omits the selection-count badge when selectedClusterCount is 0', () => {
+    render(
+      <CardControlsHeader
+        selectedClusterCount={0}
+        totalClusterCount={2}
+        clusterFilter={baseClusterFilter}
+        cardControls={baseCardControls}
+      />,
+    )
+    expect(screen.queryByText('0/2')).not.toBeInTheDocument()
+  })
+
+  it('renders the "selected/total clusters" badge when selectedClusterCount > 0', () => {
+    render(
+      <CardControlsHeader
+        selectedClusterCount={1}
+        totalClusterCount={2}
+        clusterFilter={baseClusterFilter}
+        cardControls={baseCardControls}
+      />,
+    )
+    expect(
+      screen.getByText(
+        (_, element) => element?.tagName === 'SPAN' && element.textContent === '1/2',
+      ),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('CardScopeBadge', () => {
+  const t = (key: string) => key
+
+  it('renders an "all clusters" pill when no clusters are selected', () => {
+    render(<CardScopeBadge selectedClusters={[]} t={t} />)
+    expect(screen.getByText('common:common.allClusters')).toBeInTheDocument()
+  })
+
+  it('renders a single ClusterBadge when exactly one cluster is selected', () => {
+    render(<CardScopeBadge selectedClusters={['edge-1']} t={t} />)
+    expect(screen.getByText('edge-1')).toBeInTheDocument()
+  })
+
+  it('renders an "N clusters" pill when more than one cluster is selected', () => {
+    render(<CardScopeBadge selectedClusters={['edge-1', 'edge-2']} t={t} />)
+    expect(screen.getByText('common:common.nClusters')).toBeInTheDocument()
   })
 })
