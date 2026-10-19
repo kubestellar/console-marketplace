@@ -16,7 +16,6 @@
  * a fresh timestamp on the sole card-data item.
  */
 
-import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { OPENKRUISE_DEMO_DATA } from './demoData'
@@ -48,8 +47,7 @@ vi.mock('../../ui/Select', () => ({
 vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule('openkruise-cluster-badge'))
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
-  ...mockCardComponents('openkruise'),
-  CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  ...mockCardComponents('openkruise', { clusterBadgeTestId: 'openkruise-cluster-badge' }),
   CardAIActions: () => <div data-testid="openkruise-ai-actions" />,
 }))
 

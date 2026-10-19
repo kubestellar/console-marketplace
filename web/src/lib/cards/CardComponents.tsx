@@ -1,5 +1,6 @@
 import type { ReactNode, Ref } from 'react'
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Filter, Server } from 'lucide-react'
+import { ClusterBadge } from '../../components/ui/ClusterBadge'
 
 /**
  * Minimal controlled search input primitive. Wire `value` / `onChange` to
@@ -153,6 +154,68 @@ export function CardControlsRow({ children, clusterFilter, cardControls }: CardC
         </>
       )}
       {children}
+    </div>
+  )
+}
+
+export interface CardControlsHeaderProps {
+  selectedClusterCount: number
+  totalClusterCount: number
+  clusterFilter: CardClusterFilterProps
+  cardControls: CardControlsProps
+}
+
+/**
+ * Header row pairing a "N/M clusters" count badge with {@link CardControlsRow}.
+ * Extracted from kubeflow_status/openkruise_status, which had copy-pasted
+ * this exact wrapper (see console-marketplace architecture sweep).
+ */
+export function CardControlsHeader({
+  selectedClusterCount,
+  totalClusterCount,
+  clusterFilter,
+  cardControls,
+}: CardControlsHeaderProps) {
+  return (
+    <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="flex items-center gap-2">
+        {selectedClusterCount > 0 && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
+            <Server className="w-3 h-3" />
+            {selectedClusterCount}/{totalClusterCount}
+          </span>
+        )}
+      </div>
+      <CardControlsRow clusterFilter={clusterFilter} cardControls={cardControls} />
+    </div>
+  )
+}
+
+export interface CardScopeBadgeProps {
+  selectedClusters: string[]
+  t: (key: string, options?: Record<string, unknown>) => string
+}
+
+/**
+ * "Scope" indicator beneath the controls row: a single {@link ClusterBadge}
+ * when exactly one cluster is selected, an "N clusters" pill when several
+ * are, or "all clusters" when none are. Extracted from
+ * kubeflow_status/openkruise_status, which had copy-pasted this exact block.
+ */
+export function CardScopeBadge({ selectedClusters, t }: CardScopeBadgeProps) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      {selectedClusters.length === 1 ? (
+        <ClusterBadge cluster={selectedClusters[0]} />
+      ) : selectedClusters.length > 1 ? (
+        <span className="text-xs px-2 py-1 rounded bg-secondary text-muted-foreground">
+          {t('common:common.nClusters', { count: selectedClusters.length })}
+        </span>
+      ) : (
+        <span className="text-xs px-2 py-1 rounded bg-secondary text-muted-foreground">
+          {t('common:common.allClusters')}
+        </span>
+      )}
     </div>
   )
 }

@@ -19,7 +19,6 @@
  * on `React.createElement(undefined)`.
  */
 
-import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
@@ -42,7 +41,6 @@ vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('kubeflow'),
-  CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,
 }))
 

@@ -26,7 +26,6 @@
  * status badge picks up the `orange` fallback classes.
  */
 
-import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { OPENKRUISE_DEMO_DATA } from './demoData'
@@ -55,7 +54,6 @@ vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('openkruise'),
-  CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   CardAIActions: () => <div data-testid="openkruise-ai-actions" />,
 }))
 

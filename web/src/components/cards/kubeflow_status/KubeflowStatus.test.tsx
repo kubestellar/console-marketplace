@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
@@ -26,12 +25,14 @@ vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule('kubeflow-cluster-badge'))
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
-  ...mockCardComponents('kubeflow'),
-  CardControlsRow: ({
-    children,
+  ...mockCardComponents('kubeflow', { clusterBadgeTestId: 'kubeflow-cluster-badge' }),
+  CardControlsHeader: ({
+    selectedClusterCount,
+    totalClusterCount,
     cardControls,
   }: {
-    children?: ReactNode
+    selectedClusterCount?: number
+    totalClusterCount?: number
     cardControls?: {
       sortBy: string
       sortDirection: 'asc' | 'desc'
@@ -41,6 +42,9 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
     }
   }) => (
     <div>
+      {selectedClusterCount !== undefined && selectedClusterCount > 0 && (
+        <span>{selectedClusterCount}/{totalClusterCount}</span>
+      )}
       {cardControls && (
         <>
           <select
@@ -67,7 +71,6 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
           </button>
         </>
       )}
-      {children}
     </div>
   ),
   CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,

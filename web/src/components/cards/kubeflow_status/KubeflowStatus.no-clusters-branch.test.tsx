@@ -9,7 +9,6 @@
  * shows the `kubeflowStatus.noClusters` message instead of the resource
  * list.
  */
-import type { ReactNode } from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../../test/cardTestHelpers'
@@ -32,7 +31,6 @@ vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('kubeflow'),
-  CardControlsRow: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   CardAIActions: () => <div data-testid="kubeflow-ai-actions" />,
 }))
 

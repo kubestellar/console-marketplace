@@ -52,7 +52,8 @@ export function mockClusterBadgeModule(testId?: string) {
  * Callers with extra exports (e.g. `CardControlsRow`, `CardAIActions`)
  * can spread this into a larger factory object.
  */
-export function mockCardComponents(prefix: string) {
+export function mockCardComponents(prefix: string, options: { clusterBadgeTestId?: string } = {}) {
+  const { clusterBadgeTestId } = options
   return {
     CardSearchInput: ({ value, onChange, placeholder }: {
       value: string
@@ -65,6 +66,48 @@ export function mockCardComponents(prefix: string) {
         placeholder={placeholder}
         onChange={event => onChange(event.target.value)}
       />
+    ),
+    /**
+     * Renders only the "N/total" cluster-count chip (the part of
+     * `CardControlsHeader` every suite using this factory has historically
+     * exercised). Suites asserting on `cardControls` (sort select/direction)
+     * override this key locally with their own richer stub, same as they
+     * used to override `CardControlsRow`.
+     */
+    CardControlsHeader: ({ selectedClusterCount, totalClusterCount }: {
+      selectedClusterCount?: number
+      totalClusterCount?: number
+    }) => (
+      <div>
+        {selectedClusterCount !== undefined && selectedClusterCount > 0 && (
+          <span>{selectedClusterCount}/{totalClusterCount}</span>
+        )}
+      </div>
+    ),
+    /**
+     * Mirrors the real `CardScopeBadge`'s three branches (one cluster ->
+     * a `ClusterBadge`-shaped span, several -> `t('common:common.nClusters')`,
+     * none -> `t('common:common.allClusters')`). The single-cluster span
+     * is rendered inline — matching `mockClusterBadgeModule`'s own markup —
+     * rather than importing the real/mocked `ClusterBadge` component,
+     * since importing it here hits a vi.mock hoisting cycle with the
+     * calling suite's own `vi.mock('.../ui/ClusterBadge', ...)`. Pass
+     * `clusterBadgeTestId` matching whatever `testId` the suite gave
+     * `mockClusterBadgeModule(testId)` if it asserts on this badge.
+     */
+    CardScopeBadge: ({ selectedClusters, t }: {
+      selectedClusters: string[]
+      t: (key: string, options?: Record<string, unknown>) => string
+    }) => (
+      <div>
+        {selectedClusters.length === 1 ? (
+          <span data-testid={clusterBadgeTestId}>{selectedClusters[0]}</span>
+        ) : selectedClusters.length > 1 ? (
+          <span>{t('common:common.nClusters', { count: selectedClusters.length })}</span>
+        ) : (
+          <span>{t('common:common.allClusters')}</span>
+        )}
+      </div>
     ),
     CardPaginationFooter: ({
       currentPage,

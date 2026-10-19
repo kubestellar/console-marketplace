@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react'
 import { ExternalLink, Layers, Server } from 'lucide-react'
 import { Select } from '../../ui/Select'
-import { ClusterBadge } from '../../ui/ClusterBadge'
 import {
   CardSearchInput,
-  CardControlsRow,
+  CardControlsHeader,
+  CardScopeBadge,
   CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'
 import { useCardShell } from '../../../lib/cards/useCardShell'
@@ -135,37 +135,29 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
   return (
     <div className="h-full flex flex-col min-h-card content-loaded overflow-hidden">
       {/* Controls row */}
-      <div className="flex items-center justify-between gap-2 mb-4">
-        <div className="flex items-center gap-2">
-          {localClusterFilter.length > 0 && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
-              <Server className="w-3 h-3" />
-              {localClusterFilter.length}/{availableClusters.length}
-            </span>
-          )}
-        </div>
-        <CardControlsRow
-          clusterFilter={{
-            availableClusters,
-            selectedClusters: localClusterFilter,
-            onToggle: toggleClusterFilter,
-            onClear: clearClusterFilter,
-            isOpen: showClusterFilter,
-            setIsOpen: setShowClusterFilter,
-            containerRef: clusterFilterRef,
-            minClusters: 1,
-          }}
-          cardControls={{
-            limit: itemsPerPage,
-            onLimitChange: setItemsPerPage,
-            sortBy,
-            sortOptions: SORT_OPTIONS,
-            onSortChange: v => setSortBy(v as SortByOption),
-            sortDirection,
-            onSortDirectionChange: setSortDirection,
-          }}
-        />
-      </div>
+      <CardControlsHeader
+        selectedClusterCount={localClusterFilter.length}
+        totalClusterCount={availableClusters.length}
+        clusterFilter={{
+          availableClusters,
+          selectedClusters: localClusterFilter,
+          onToggle: toggleClusterFilter,
+          onClear: clearClusterFilter,
+          isOpen: showClusterFilter,
+          setIsOpen: setShowClusterFilter,
+          containerRef: clusterFilterRef,
+          minClusters: 1,
+        }}
+        cardControls={{
+          limit: itemsPerPage,
+          onLimitChange: setItemsPerPage,
+          sortBy,
+          sortOptions: SORT_OPTIONS,
+          onSortChange: v => setSortBy(v as SortByOption),
+          sortDirection,
+          onSortDirectionChange: setSortDirection,
+        }}
+      />
 
       {/* Resource type selector */}
       <div className="mb-4">
@@ -207,21 +199,7 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
       ) : (
         <>
           {/* Scope badge */}
-          <div className="flex items-center gap-2 mb-4">
-            {localClusterFilter.length === 1 ? (
-              <ClusterBadge cluster={localClusterFilter[0]} />
-            ) : localClusterFilter.length > 1 ? (
-              <span className="text-xs px-2 py-1 rounded bg-secondary text-muted-foreground">
-                {t('common:common.nClusters', {
-                  count: localClusterFilter.length,
-                })}
-              </span>
-            ) : (
-              <span className="text-xs px-2 py-1 rounded bg-secondary text-muted-foreground">
-                {t('common:common.allClusters')}
-              </span>
-            )}
-          </div>
+          <CardScopeBadge selectedClusters={localClusterFilter} t={t} />
 
           {/* Search */}
           <CardSearchInput

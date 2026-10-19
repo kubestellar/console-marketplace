@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
@@ -33,11 +32,13 @@ vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('openkruise'),
-  CardControlsRow: ({
-    children,
+  CardControlsHeader: ({
+    selectedClusterCount,
+    totalClusterCount,
     cardControls,
   }: {
-    children?: ReactNode
+    selectedClusterCount?: number
+    totalClusterCount?: number
     cardControls?: {
       sortBy: string
       sortDirection: 'asc' | 'desc'
@@ -47,6 +48,9 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
     }
   }) => (
     <div>
+      {selectedClusterCount !== undefined && selectedClusterCount > 0 && (
+        <span>{selectedClusterCount}/{totalClusterCount}</span>
+      )}
       {cardControls && (
         <>
           <select
@@ -73,7 +77,6 @@ vi.mock('../../../lib/cards/CardComponents', () => ({
           </button>
         </>
       )}
-      {children}
     </div>
   ),
   CardAIActions: () => <div data-testid="openkruise-ai-actions" />,
