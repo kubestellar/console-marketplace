@@ -3,12 +3,12 @@ import { ExternalLink, Layers, Server } from 'lucide-react'
 import { Select } from '../../ui/Select'
 import {
   CardSearchInput,
-  CardControlsHeader,
   CardScopeBadge,
-  CardPaginationFooter,
 } from '../../../lib/cards/CardComponents'
 import { useCardShell } from '../../../lib/cards/useCardShell'
 import { CategorySummarySkeleton } from '../shared/CategorySummarySkeleton'
+import { ResourceControlsHeader } from '../shared/ResourceControlsHeader'
+import { ResourceListWithPagination } from '../shared/ResourceListWithPagination'
 import {
   useOpenKruiseStatus,
   type OpenKruiseStatus as OpenKruiseStatusData,
@@ -135,28 +135,21 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
   return (
     <div className="h-full flex flex-col min-h-card content-loaded overflow-hidden">
       {/* Controls row */}
-      <CardControlsHeader
-        selectedClusterCount={localClusterFilter.length}
-        totalClusterCount={availableClusters.length}
-        clusterFilter={{
-          availableClusters,
-          selectedClusters: localClusterFilter,
-          onToggle: toggleClusterFilter,
-          onClear: clearClusterFilter,
-          isOpen: showClusterFilter,
-          setIsOpen: setShowClusterFilter,
-          containerRef: clusterFilterRef,
-          minClusters: 1,
-        }}
-        cardControls={{
-          limit: itemsPerPage,
-          onLimitChange: setItemsPerPage,
-          sortBy,
-          sortOptions: SORT_OPTIONS,
-          onSortChange: v => setSortBy(v as SortByOption),
-          sortDirection,
-          onSortDirectionChange: setSortDirection,
-        }}
+      <ResourceControlsHeader
+        localClusterFilter={localClusterFilter}
+        availableClusters={availableClusters}
+        toggleClusterFilter={toggleClusterFilter}
+        clearClusterFilter={clearClusterFilter}
+        showClusterFilter={showClusterFilter}
+        setShowClusterFilter={setShowClusterFilter}
+        clusterFilterRef={clusterFilterRef}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+        sortBy={sortBy}
+        sortOptions={SORT_OPTIONS}
+        onSortChange={v => setSortBy(v as SortByOption)}
+        sortDirection={sortDirection}
+        setSortDirection={setSortDirection}
       />
 
       {/* Resource type selector */}
@@ -249,28 +242,17 @@ export function OpenKruiseStatus({ config: _config }: OpenKruiseStatusProps) {
           </div>
 
           {/* Resource list */}
-          <div
-            ref={containerRef}
-            className="flex-1 space-y-2 overflow-y-auto"
-            style={containerStyle}
-          >
-            {displayItems.map(item => (
-              <ItemRow key={item.id} item={item} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <CardPaginationFooter
+          <ResourceListWithPagination
+            containerRef={containerRef}
+            containerStyle={containerStyle}
+            items={displayItems}
+            renderItem={item => <ItemRow key={item.id} item={item} />}
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={totalItems}
-            itemsPerPage={
-              typeof itemsPerPage === 'number' ? itemsPerPage : 10
-            }
-            onPageChange={goToPage}
-            needsPagination={
-              needsPagination && itemsPerPage !== 'unlimited'
-            }
+            itemsPerPage={itemsPerPage}
+            goToPage={goToPage}
+            needsPagination={needsPagination}
           />
 
           {/* Footer */}
