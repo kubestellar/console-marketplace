@@ -1,6 +1,6 @@
 {
   "//": "Registry entries (by id) that console-render-smoke.yml installs and renders in a live kubestellar/console build. Add ids to grow coverage; each must exist in registry.json under the matching type.",
   "dashboard": ["sre-overview"],
-  "card-preset": ["pod-health-monitor"],
+  "card-preset": ["pod-health-monitor", "cluster-overview", "warning-event-stream"],
   "theme": ["midnight-blue"]
 }
