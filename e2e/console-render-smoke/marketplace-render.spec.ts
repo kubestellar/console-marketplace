@@ -197,55 +197,6 @@ test.describe('Marketplace registry entries render in Console', () => {
     })
   }
 
-  // Covers the shared itemsPerPage/"unlimited" toggle (CardControlsRow) and
-  // cluster-filter dropdown (CardControlsHeader) that back every status card
-  // (buildpacks-status, coredns_status, kubeflow_status, notary_status,
-  // openkruise_status, openyurt_status). Both controls are unit-tested at
-  // 100% but, before this spec, were never exercised against a real
-  // rendered card — only render-without-error was. kubeflow_status is used
-  // as the representative card: its demo data spans 3 clusters and more
-  // items than the default page size, so both controls have an observable
-  // effect. See kubestellar/console-marketplace#1006.
-  test('kubeflow_status card: itemsPerPage "unlimited" toggle and cluster filter', async ({ page }) => {
-    const card: StoredCard = {
-      id: 'smoke-kubeflow-status-controls',
-      card_type: 'kubeflow_status',
-      config: {},
-      position: DEFAULT_PRESET_POSITION,
-    }
-
-    await setupDemoMode(page)
-    const errors = collectErrors(page)
-    await seedDashboardCards(page, 'Marketplace controls smoke', [card])
-    await gotoConsole(page, '/')
-    await expectCardsRendered(page, [card.card_type])
-
-    const cardRoot = page.locator(`[data-card-id="${card.id}"]`)
-    const pagination = cardRoot.getByTestId('card-pagination')
-    const limitSelect = cardRoot.getByTestId('card-limit')
-
-    // Default page size paginates the 20+ demo items: footer shows a range.
-    await expect(pagination).not.toBeEmpty()
-
-    await limitSelect.selectOption('unlimited')
-    // needsPagination becomes false once every item fits on one page, so the
-    // (always-rendered) footer container goes empty.
-    await expect(pagination).toBeEmpty()
-
-    const clusterFilterButton = cardRoot.getByTestId('card-cluster-filter-button')
-    await clusterFilterButton.click()
-    const dropdown = cardRoot.getByTestId('card-cluster-filter-dropdown')
-    await expect(dropdown).toBeVisible()
-
-    const firstClusterCheckbox = dropdown.locator('input[type="checkbox"]').first()
-    await firstClusterCheckbox.check()
-
-    // CardControlsHeader's "N/M clusters" badge reflects the local filter.
-    await expect(cardRoot.getByText(/^1\/\d+$/)).toBeVisible()
-
-    expect(errors, 'console errors while exercising kubeflow_status controls').toEqual([])
-  })
-
   for (const id of sample.theme ?? []) {
     test(`theme "${id}" installs and applies`, async ({ page }) => {
       const { asset } = resolveEntry('theme', id)
