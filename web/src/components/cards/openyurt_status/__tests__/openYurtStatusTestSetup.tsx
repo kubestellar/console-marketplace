@@ -57,7 +57,6 @@ export function mockReactI18nextModule() {
 
 export function mockCardDataContextModule(useCardLoadingState: () => unknown) {
   return {
-    useReportCardDataState: vi.fn(),
     useCardLoadingState,
   }
 }
