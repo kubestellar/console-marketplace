@@ -24,7 +24,3 @@ export function useCardLoadingState(opts?: CardLoadingStateOptions) {
 
   return { showSkeleton, showEmptyState, hasData: hasAnyData, isRefreshing }
 }
-
-export function useReportCardDataState() {
-  return undefined
-}
