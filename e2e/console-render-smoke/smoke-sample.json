@@ -1,6 +1,22 @@
 {
   "//": "Registry entries (by id) that console-render-smoke.yml installs and renders in a live kubestellar/console build. Add ids to grow coverage; each must exist in registry.json under the matching type.",
-  "dashboard": ["sre-overview"],
-  "card-preset": ["pod-health-monitor", "cluster-overview", "warning-event-stream"],
-  "theme": ["midnight-blue"]
+  "//dashboard": "All three dashboard presets; every card_type they reference is registered in console's pinned cardRegistry/card-registry-manifest.json.",
+  "dashboard": ["sre-overview", "security-audit", "gitops-pipeline"],
+  "//card-preset": "Every card-preset whose card_type is NOT a `*_status` marketplace-local placeholder (see #1008's revert: those placeholders are never registered in console and cannot attach a [data-card-type] node, so they can only be covered by marketplace's own vitest suite, not here). These ids' card_types were confirmed present in console's pinned card-registry-manifest.json.",
+  "card-preset": [
+    "pod-health-monitor",
+    "cluster-overview",
+    "warning-event-stream",
+    "cncf-argo",
+    "cncf-prometheus",
+    "cncf-opa",
+    "cncf-falco",
+    "cncf-cert-manager",
+    "cncf-istio",
+    "cncf-kyverno",
+    "cncf-kubescape",
+    "cncf-opencost",
+    "cncf-in-toto"
+  ],
+  "theme": ["midnight-blue", "amber-glow"]
 }
