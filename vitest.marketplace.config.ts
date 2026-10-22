@@ -3,7 +3,11 @@ import { fileURLToPath } from 'node:url'
 const REPO_ROOT = fileURLToPath(new URL('.', import.meta.url))
 const MARKETPLACE_ROOT = 'web'
 const SHARED_TEST_SETUP = './web/src/test/setup.ts'
-const COVERAGE_THRESHOLD = 70
+// Ratcheted to the suite's actual (100%) coverage, mirroring the hard
+// fail-under=100 gate in .github/workflows/python-unit-tests.yml. A lower
+// floor here let a PR delete/skip a meaningful chunk of web/src/** tests, or
+// add substantial untested code, without failing CI. See console-marketplace#963.
+const COVERAGE_THRESHOLD = 100
 
 export default {
   root: REPO_ROOT,
