@@ -78,6 +78,22 @@ class Results:
             lines.append("")
         return "\n".join(lines)
 
+    def _counts(self):
+        """Bounded counts/status shared by print_summary()'s inline JSON
+        record and summary_line(). Only fixed counts/enums go here (no
+        free-text error/warning messages), so callers that add fields
+        (e.g. summary_line()'s "mode") can spread this dict and still get a
+        fixed-size record regardless of registry size or failure volume.
+        """
+        return {
+            "error_count": len(self.errors),
+            "warning_count": len(self.warnings),
+            "info_count": len(self.info),
+            "pass_count": len(self.passes),
+            "total_duration_seconds": round(self.total_duration, 3),
+            "exit_code": self.exit_code,
+        }
+
     def print_summary(self):
         for cat, msg in self.errors:
             print(f"  ERROR [{cat}] {msg}")
@@ -97,15 +113,7 @@ class Results:
         # bounded counts/status go here (never raw error/warning messages,
         # which are free-text and unbounded) so this stays a fixed-size
         # record regardless of registry size or failure volume.
-        summary_record = {
-            "error_count": len(self.errors),
-            "warning_count": len(self.warnings),
-            "info_count": len(self.info),
-            "pass_count": len(self.passes),
-            "total_duration_seconds": round(self.total_duration, 3),
-            "exit_code": self.exit_code,
-        }
-        print(f"MARKETPLACE_QUALITY_SUMMARY: {json.dumps(summary_record)}")
+        print(f"MARKETPLACE_QUALITY_SUMMARY: {json.dumps(self._counts())}")
 
     def to_json(self):
         return {
@@ -124,13 +132,5 @@ class Results:
         messages), so the line stays grep-able and constant-size regardless
         of registry size. Stdout-only — no exporter, no external data flow.
         """
-        summary = {
-            "mode": mode,
-            "error_count": len(self.errors),
-            "warning_count": len(self.warnings),
-            "info_count": len(self.info),
-            "pass_count": len(self.passes),
-            "total_duration_seconds": round(self.total_duration, 3),
-            "exit_code": self.exit_code,
-        }
+        summary = {"mode": mode, **self._counts()}
         return f"{SUMMARY_PREFIX} {json.dumps(summary, sort_keys=True)}"
