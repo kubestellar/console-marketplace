@@ -1,10 +1,11 @@
-import type { HTMLAttributes } from 'react'
+import type { CSSProperties, HTMLAttributes } from 'react'
 
 /**
  * Props mirror the real `console` `Skeleton` (web/src/components/ui/Skeleton.tsx
  * there) so cards can pass the same props in both environments. This stub
- * ignores the non-DOM ones (no visual styling here) and only forwards actual
- * HTML attributes to the rendered div — see kubestellar/console-marketplace#991.
+ * maps `variant`/`animation` to the same class names console uses and
+ * `width`/`height` to inline style, so tests can assert the rendered DOM
+ * carries them — see kubestellar/console-marketplace#991 and #963.
  */
 interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'text' | 'circular' | 'rectangular' | 'rounded'
@@ -14,15 +15,42 @@ interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   showRefresh?: boolean
 }
 
+const VARIANT_CLASS: Record<NonNullable<SkeletonProps['variant']>, string> = {
+  text: 'rounded',
+  circular: 'rounded-full',
+  rectangular: 'rounded-none',
+  rounded: 'rounded-lg',
+}
+
+const ANIMATION_CLASS: Record<NonNullable<SkeletonProps['animation']>, string> = {
+  pulse: 'animate-pulse',
+  wave: 'animate-shimmer',
+  none: '',
+}
+
 export function Skeleton({
-  variant: _variant,
-  width: _width,
-  height: _height,
-  animation: _animation,
+  variant = 'text',
+  width,
+  height,
+  animation = 'pulse',
   showRefresh: _showRefresh,
+  className,
+  style,
   ...props
 }: SkeletonProps) {
-  return <div data-testid="skeleton" {...props} />
+  const classes = ['bg-secondary/60', ANIMATION_CLASS[animation], VARIANT_CLASS[variant], className]
+    .filter(Boolean)
+    .join(' ')
+  const sizeStyle: CSSProperties = { ...style, width, height }
+  return (
+    <div
+      data-testid="skeleton"
+      data-variant={variant}
+      className={classes}
+      style={sizeStyle}
+      {...props}
+    />
+  )
 }
 
 export function SkeletonStats(props: HTMLAttributes<HTMLDivElement>) {
@@ -30,8 +58,8 @@ export function SkeletonStats(props: HTMLAttributes<HTMLDivElement>) {
 }
 
 export function SkeletonList({
-  items: _items,
+  items = 3,
   ...props
 }: HTMLAttributes<HTMLDivElement> & { items?: number }) {
-  return <div data-testid="skeleton-list" {...props} />
+  return <div data-testid="skeleton-list" data-items={items} {...props} />
 }
