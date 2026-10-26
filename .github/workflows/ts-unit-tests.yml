@@ -5,12 +5,14 @@ on:
     paths:
       - 'web/src/**'
       - 'vitest.marketplace.config.ts'
+      - 'tsconfig.marketplace.json'
       - '.github/workflows/ts-unit-tests.yml'
   push:
     branches: [main]
     paths:
       - 'web/src/**'
       - 'vitest.marketplace.config.ts'
+      - 'tsconfig.marketplace.json'
       - '.github/workflows/ts-unit-tests.yml'
 
 concurrency:
@@ -147,3 +149,42 @@ jobs:
           path: coverage/
           retention-days: 14
           if-no-files-found: warn
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout marketplace
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Checkout console (shared deps)
+        uses: ./.github/actions/checkout-console-pin
+        with:
+          path: console-parent
+          sparse-checkout: |
+            web/package.json
+            web/package-lock.json
+            web/tsconfig.json
+            web/tsconfig.node.json
+          sparse-checkout-cone-mode: 'true'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: console-parent/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: console-parent/web
+        run: npm ci
+
+      - name: Link console node_modules for marketplace type resolution
+        run: ln -s "${GITHUB_WORKSPACE}/console-parent/web/node_modules" "${GITHUB_WORKSPACE}/web/node_modules"
+
+      # Same command CONTRIBUTING.md § "Type-checking web/src/** locally"
+      # documents; blocks on any TS error (see #963).
+      - name: TypeScript type check (tsc --noEmit)
+        run: ./web/node_modules/.bin/tsc --noEmit --project tsconfig.marketplace.json

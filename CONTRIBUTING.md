@@ -335,9 +335,10 @@ Marketplace TypeScript unit tests live under `web/src/**` (including `web/src/**
 
 ### Type-checking `web/src/**` locally
 
-CI does not run `tsc` — only `vitest` — so a prop-shape mismatch (a component
-silently ignoring a prop no test happens to assert on) can reach `main`
-undetected. `tsconfig.marketplace.json` lets you catch that class of bug
+CI runs this same check as the `typecheck` job in
+`.github/workflows/ts-unit-tests.yml` (alongside `vitest`), so a prop-shape
+mismatch (a component silently ignoring a prop no test happens to assert on)
+blocks the PR. `tsconfig.marketplace.json` lets you catch that class of bug
 locally before opening a PR. It reuses the same sibling Console checkout and
 symlink from the previous section:
 
