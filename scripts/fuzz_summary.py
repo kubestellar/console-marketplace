@@ -225,6 +225,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # argparse only applies `choices` validation to values supplied on the
+    # command line — a default sourced from the FUZZER_STATUS environment
+    # variable bypasses it entirely. Without this check, a typo'd env value
+    # such as FUZZER_STATUS=failed flows straight into the summary and the
+    # overall status reports "pass" (status only compares against the exact
+    # string "fail"), silently masking a failed fuzzer run. Reject it the
+    # same way argparse rejects an invalid CLI value.
+    if args.fuzzer_status not in ("pass", "fail", "unknown"):
+        parser.error(
+            f"argument --fuzzer-status: invalid choice: {args.fuzzer_status!r} "
+            "(from FUZZER_STATUS; choose from 'pass', 'fail', 'unknown')")
+
     result = FuzzResult(fuzzer_status=args.fuzzer_status)
     run_corpus_fuzzing(args.repo_root, result)
     run_edge_cases(result)

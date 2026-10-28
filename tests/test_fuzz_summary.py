@@ -216,3 +216,21 @@ class TestMain:
         root = _make_repo(tmp_path, {"registry.json": json.dumps({"items": []})})
         with pytest.raises(SystemExit):
             _mod.main(["--repo-root", root, "--fuzzer-status", "bogus"])
+
+    def test_main_rejects_invalid_fuzzer_status_from_env(self, tmp_path, monkeypatch):
+        # argparse `choices` does not validate defaults, so a bad
+        # FUZZER_STATUS env value used to flow through unchecked — and a
+        # typo like "failed" made the overall status report "pass".
+        root = _make_repo(tmp_path, {"registry.json": json.dumps({"items": []})})
+        monkeypatch.setenv("FUZZER_STATUS", "failed")
+        with pytest.raises(SystemExit) as excinfo:
+            _mod.main(["--repo-root", root])
+        assert excinfo.value.code == 2
+
+    def test_main_accepts_valid_fuzzer_status_from_env(self, tmp_path, capsys):
+        root = _make_repo(tmp_path, {"registry.json": json.dumps({"items": []})})
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setenv("FUZZER_STATUS", "fail")
+            rc = _mod.main(["--repo-root", root])
+        assert rc == 1
+        assert '"fuzzer_status": "fail"' in capsys.readouterr().out
