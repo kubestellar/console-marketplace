@@ -1,6 +1,6 @@
 // Shared mock-module factories for the OpenYurtStatus render/relativeTime
 // test suites (see issue #571). Both suites need the same demoMode /
-// useDemoMode / react-i18next / CardDataContext / Skeleton / CardComponents
+// useDemoMode / react-i18next / cardLoadingState / Skeleton / CardComponents
 // / useOpenYurtStatus module shape; `vi.mock` factories are hoisted, so
 // each test file still calls `vi.mock(...)` itself, but delegates the
 // factory body to these helpers instead of repeating the same ~95 lines.
@@ -55,7 +55,7 @@ export function mockReactI18nextModule() {
   }
 }
 
-export function mockCardDataContextModule(useCardLoadingState: () => unknown) {
+export function mockCardLoadingStateModule(useCardLoadingState: () => unknown) {
   return {
     useCardLoadingState,
   }

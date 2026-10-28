@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import {
-  mockCardDataContextModule,
+  mockCardLoadingStateModule,
   mockCardSearchInputModule,
   mockDemoModeLibModule,
   mockGlobalFiltersModule,
@@ -25,7 +25,7 @@ vi.mock('react-i18next', () => mockReactI18nextModule())
 
 const mockUseCardLoadingState = vi.fn()
 const mockUseGlobalFilters = vi.fn()
-vi.mock('../../CardDataContext', () => mockCardDataContextModule(() => mockUseCardLoadingState()))
+vi.mock('../../../../lib/cards/cardLoadingState', () => mockCardLoadingStateModule(() => mockUseCardLoadingState()))
 
 vi.mock('../../../../hooks/useGlobalFilters', () => mockGlobalFiltersModule(() => mockUseGlobalFilters()))
 

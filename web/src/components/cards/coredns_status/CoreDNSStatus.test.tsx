@@ -24,7 +24,7 @@ vi.mock('../../../lib/cards/cardHooks', () => ({
   useCardData: (items: unknown) => mockUseCardData(items),
 }))
 
-vi.mock('../CardDataContext', () => ({
+vi.mock('../../../lib/cards/cardLoadingState', () => ({
   useCardLoadingState: () => mockUseCardLoadingState(),
 }))
 

@@ -1,9 +1,9 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { useCardLoadingState } from './CardDataContext'
+import { useCardLoadingState } from './cardLoadingState'
 
-describe('CardDataContext hooks', () => {
+describe('cardLoadingState hooks', () => {
   it('returns the default card loading state', () => {
     const { result } = renderHook(() => useCardLoadingState())
 
