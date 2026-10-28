@@ -1,12 +1,12 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { useCardLoadingState } from './CardDataContext'
+import { useCardLoadingState } from './cardLoadingState'
 
 /**
  * Branch-coverage tests for useCardLoadingState.
  *
- * The existing CardDataContext.test.tsx only asserts the default-argument
+ * The existing cardLoadingState.test.ts only asserts the default-argument
  * case. Every card component under web/src/components/cards/<name>/index.tsx
  * relies on this hook to decide skeleton vs. empty-state vs. content
  * rendering, so a template regression that inverted one of the boolean-AND
