@@ -22,7 +22,7 @@ const mockUseCardData = vi.fn()
 
 vi.mock('../ui/Skeleton', () => mockSkeletonModule('coredns-skeleton'))
 
-vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
+vi.mock('../../../lib/ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
 
