@@ -1,6 +1,6 @@
 import type { ReactNode, Ref } from 'react'
 import { ChevronLeft, ChevronRight, Filter, Server } from 'lucide-react'
-import { ClusterBadge } from '../../components/ui/ClusterBadge'
+import { ClusterBadge } from '../ui/ClusterBadge'
 
 /**
  * Minimal controlled search input primitive. Wire `value` / `onChange` to

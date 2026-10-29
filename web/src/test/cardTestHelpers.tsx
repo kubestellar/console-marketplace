@@ -10,7 +10,7 @@
  *   import { mockCardComponents, mockClusterBadgeModule, mockSkeletonModule } from '../../test/cardTestHelpers'
  *
  *   vi.mock('../ui/Skeleton', () => mockSkeletonModule('coredns-skeleton'))
- *   vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
+ *   vi.mock('../../../lib/ui/ClusterBadge', () => mockClusterBadgeModule())
  *   vi.mock('../../../lib/cards/CardComponents', () => mockCardComponents('coredns'))
  */
 
@@ -34,7 +34,7 @@ export function mockSkeletonModule(testId: string) {
 }
 
 /**
- * Module factory for `vi.mock('.../ui/ClusterBadge', ...)`.
+ * Module factory for `vi.mock('.../lib/ui/ClusterBadge', ...)`.
  * Pass a `testId` for suites that assert on the badge element directly.
  */
 export function mockClusterBadgeModule(testId?: string) {
@@ -91,7 +91,7 @@ export function mockCardComponents(prefix: string, options: { clusterBadgeTestId
      * is rendered inline — matching `mockClusterBadgeModule`'s own markup —
      * rather than importing the real/mocked `ClusterBadge` component,
      * since importing it here hits a vi.mock hoisting cycle with the
-     * calling suite's own `vi.mock('.../ui/ClusterBadge', ...)`. Pass
+     * calling suite's own `vi.mock('.../lib/ui/ClusterBadge', ...)`. Pass
      * `clusterBadgeTestId` matching whatever `testId` the suite gave
      * `mockClusterBadgeModule(testId)` if it asserts on this badge.
      */

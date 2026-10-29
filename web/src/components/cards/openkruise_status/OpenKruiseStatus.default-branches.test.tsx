@@ -45,7 +45,7 @@ vi.mock('../../ui/Select', () => ({
   ),
 }))
 
-vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
+vi.mock('../../../lib/ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('openkruise'),

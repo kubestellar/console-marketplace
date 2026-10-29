@@ -29,7 +29,7 @@ const mockUseKubeflowStatus = vi.fn()
 
 vi.mock('../ui/Skeleton', () => mockSkeletonModule('kubeflow-skeleton'))
 
-vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule())
+vi.mock('../../../lib/ui/ClusterBadge', () => mockClusterBadgeModule())
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('kubeflow'),

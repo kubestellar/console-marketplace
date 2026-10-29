@@ -39,7 +39,7 @@ vi.mock('../../ui/Select', () => ({
   ),
 }))
 
-vi.mock('../../ui/ClusterBadge', () => mockClusterBadgeModule('openkruise-cluster-badge'))
+vi.mock('../../../lib/ui/ClusterBadge', () => mockClusterBadgeModule('openkruise-cluster-badge'))
 
 vi.mock('../../../lib/cards/CardComponents', () => ({
   ...mockCardComponents('openkruise', { clusterBadgeTestId: 'openkruise-cluster-badge' }),
