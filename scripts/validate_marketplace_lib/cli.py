@@ -41,6 +41,7 @@ from .checks_console import (
     check_cors_proxy as _check_cors_proxy,
 )
 from .url_safety import check_download_urls as _check_download_urls
+from .checks_duplication import check_duplication as _check_duplication
 from .report import (
     check_registry_staleness as _check_registry_staleness,
     check_theme_consistency as _check_theme_consistency,
@@ -79,6 +80,7 @@ def main(
     check_i18n_keys=_check_i18n_keys,
     check_cors_proxy=_check_cors_proxy,
     check_download_urls=_check_download_urls,
+    check_duplication=_check_duplication,
     check_registry_staleness=_check_registry_staleness,
     check_theme_consistency=_check_theme_consistency,
     check_cncf_coverage=_check_cncf_coverage,
@@ -118,6 +120,7 @@ def main(
     check_theme_schema(base, results)
     check_naming_conventions(base, results)
     check_registry_consistency(base, results)
+    check_duplication(base, results)
     results.record_timing("static", time.perf_counter() - _t0)
 
     # ── Cross-repo checks ──

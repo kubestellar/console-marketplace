@@ -89,6 +89,7 @@ from validate_marketplace_lib.url_safety import (
     DisallowedAddressError,
     check_download_urls,
 )
+from validate_marketplace_lib.checks_duplication import check_duplication
 from validate_marketplace_lib.report import (
     check_registry_staleness,
     check_theme_consistency,
@@ -118,6 +119,7 @@ def main():
         check_i18n_keys=check_i18n_keys,
         check_cors_proxy=check_cors_proxy,
         check_download_urls=check_download_urls,
+        check_duplication=check_duplication,
         check_registry_staleness=check_registry_staleness,
         check_theme_consistency=check_theme_consistency,
         check_cncf_coverage=check_cncf_coverage,
