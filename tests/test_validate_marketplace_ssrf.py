@@ -800,7 +800,9 @@ class TestPinnedConnection(unittest.TestCase):
             conn.connect()
         good_sock.connect.assert_called_once_with((PUBLIC_IP, 443))
 
-    def test_no_timeout_and_source_address_are_honoured(self):
+    def test_blocking_timeout_and_source_address_are_honoured(self):
+        # timeout=None means blocking mode: settimeout(None) must be passed
+        # through (only the _GLOBAL_DEFAULT_TIMEOUT sentinel is skipped).
         conn = _PinnedHTTPSConnection(HOST, 443, timeout=None,
                                       source_address=("0.0.0.0", 0))
         conn._context = MagicMock()
@@ -810,7 +812,7 @@ class TestPinnedConnection(unittest.TestCase):
             patch("socket.socket", return_value=raw_sock),
         ):
             conn.connect()
-        raw_sock.settimeout.assert_not_called()
+        raw_sock.settimeout.assert_called_once_with(None)
         raw_sock.bind.assert_called_once_with(("0.0.0.0", 0))
 
     def test_proxy_tunnel_pins_proxy_and_uses_origin_for_sni(self):
