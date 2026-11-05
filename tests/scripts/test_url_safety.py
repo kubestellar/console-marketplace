@@ -43,8 +43,8 @@ class TestPinnedHTTPSConnectionDefaultTimeout:
         stub_sock.settimeout = stub_settimeout
 
         # Monkeypatch getaddrinfo to return a single valid address.
-        public_addr = ("203.0.113.1", 443)  # TEST-NET-3 (not private)
-        fake_infos = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (public_addr, 443))]
+        public_addr = ("8.8.8.8", 443)  # genuinely public (TEST-NET ranges are is_private on Python >=3.12)
+        fake_infos = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", public_addr)]
 
         with mock.patch("socket.getaddrinfo", return_value=fake_infos):
             with mock.patch("socket.socket", return_value=stub_sock):
@@ -72,8 +72,8 @@ class TestPinnedHTTPSConnectionDefaultTimeout:
         stub_sock = mock.MagicMock()
         stub_sock.settimeout = stub_settimeout
 
-        public_addr = ("203.0.113.1", 443)
-        fake_infos = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (public_addr, 443))]
+        public_addr = ("8.8.8.8", 443)
+        fake_infos = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", public_addr)]
 
         with mock.patch("socket.getaddrinfo", return_value=fake_infos):
             with mock.patch("socket.socket", return_value=stub_sock):
@@ -101,8 +101,8 @@ class TestPinnedHTTPSConnectionDefaultTimeout:
         stub_sock = mock.MagicMock()
         stub_sock.settimeout = stub_settimeout
 
-        public_addr = ("203.0.113.1", 443)
-        fake_infos = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (public_addr, 443))]
+        public_addr = ("8.8.8.8", 443)
+        fake_infos = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", public_addr)]
 
         with mock.patch("socket.getaddrinfo", return_value=fake_infos):
             with mock.patch("socket.socket", return_value=stub_sock):
