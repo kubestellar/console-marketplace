@@ -196,7 +196,7 @@ class _PinnedHTTPSConnection(http.client.HTTPSConnection):
         for family, socktype, proto, _canon, sockaddr in infos:
             try:
                 sock = socket.socket(family, socktype, proto)
-                if self.timeout is not None:
+                if self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
                     sock.settimeout(self.timeout)
                 if self.source_address:
                     sock.bind(self.source_address)
