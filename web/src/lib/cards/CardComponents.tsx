@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import type { MutableRefObject, ReactNode, Ref } from 'react'
 import { ChevronLeft, ChevronRight, Filter, Server } from 'lucide-react'
 import { ClusterBadge } from '../ui/ClusterBadge'
@@ -89,15 +89,18 @@ export function CardControlsRow({ children, clusterFilter, cardControls }: CardC
     }
   }, [isFilterOpen, setFilterOpen])
 
-  const setFilterWrapperRef = (node: HTMLDivElement | null) => {
-    filterWrapperRef.current = node
-    const external = clusterFilter?.containerRef
-    if (typeof external === 'function') {
-      external(node)
-    } else if (external) {
-      (external as MutableRefObject<HTMLDivElement | null>).current = node
-    }
-  }
+  const externalContainerRef = clusterFilter?.containerRef
+  const setFilterWrapperRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      filterWrapperRef.current = node
+      if (typeof externalContainerRef === 'function') {
+        externalContainerRef(node)
+      } else if (externalContainerRef) {
+        (externalContainerRef as MutableRefObject<HTMLDivElement | null>).current = node
+      }
+    },
+    [externalContainerRef],
+  )
 
   return (
     <div className="flex items-center gap-2 flex-wrap">

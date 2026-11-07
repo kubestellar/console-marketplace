@@ -151,6 +151,13 @@ describe('CardControlsRow', () => {
     expect(filter.setIsOpen).toHaveBeenCalledWith(false)
   })
 
+  it('ignores non-Escape keydowns while the dropdown is open', () => {
+    const filter = makeFilter({ isOpen: true })
+    render(<CardControlsRow clusterFilter={filter} />)
+    fireEvent.keyDown(document, { key: 'Enter' })
+    expect(filter.setIsOpen).not.toHaveBeenCalled()
+  })
+
   it('closes the cluster dropdown on a mousedown outside the filter container', () => {
     const filter = makeFilter({ isOpen: true })
     render(
@@ -182,6 +189,12 @@ describe('CardControlsRow', () => {
     const containerRef = { current: null as HTMLDivElement | null }
     render(<CardControlsRow clusterFilter={makeFilter({ containerRef })} />)
     expect(containerRef.current).toBeInstanceOf(HTMLDivElement)
+  })
+
+  it('invokes a caller-provided callback containerRef with the wrapper node', () => {
+    const containerRef = vi.fn()
+    render(<CardControlsRow clusterFilter={makeFilter({ containerRef })} />)
+    expect(containerRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
   })
 
   it('calls onLimitChange with a number and with "unlimited"', () => {
