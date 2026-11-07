@@ -1,4 +1,5 @@
-import type { ReactNode, Ref } from 'react'
+import { useEffect, useRef } from 'react'
+import type { MutableRefObject, ReactNode, Ref } from 'react'
 import { ChevronLeft, ChevronRight, Filter, Server } from 'lucide-react'
 import { ClusterBadge } from '../ui/ClusterBadge'
 
@@ -57,10 +58,51 @@ export function CardControlsRow({ children, clusterFilter, cardControls }: CardC
     clusterFilter !== undefined &&
     clusterFilter.availableClusters.length >= (clusterFilter.minClusters ?? 1)
 
+  // Dismissal wiring for the cluster-filter dropdown: close on a mousedown
+  // outside the filter container or on Escape. The local ref tracks the
+  // wrapper for the outside-click check; the caller's `containerRef` is
+  // still populated via the merged callback ref below.
+  const filterWrapperRef = useRef<HTMLDivElement | null>(null)
+  const isFilterOpen = clusterFilter?.isOpen ?? false
+  const setFilterOpen = clusterFilter?.setIsOpen
+
+  useEffect(() => {
+    if (!isFilterOpen || !setFilterOpen) {
+      return
+    }
+    const onMouseDown = (event: MouseEvent) => {
+      const wrapper = filterWrapperRef.current
+      if (wrapper && !wrapper.contains(event.target as Node)) {
+        setFilterOpen(false)
+      }
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setFilterOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isFilterOpen, setFilterOpen])
+
+  const setFilterWrapperRef = (node: HTMLDivElement | null) => {
+    filterWrapperRef.current = node
+    const external = clusterFilter?.containerRef
+    if (typeof external === 'function') {
+      external(node)
+    } else if (external) {
+      (external as MutableRefObject<HTMLDivElement | null>).current = node
+    }
+  }
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {showClusterFilter && clusterFilter && (
-        <div className="relative" ref={clusterFilter.containerRef}>
+        <div className="relative" ref={setFilterWrapperRef}>
           <button
             type="button"
             data-testid="card-cluster-filter-button"

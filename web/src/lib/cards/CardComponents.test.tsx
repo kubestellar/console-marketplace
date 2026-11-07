@@ -143,6 +143,47 @@ describe('CardControlsRow', () => {
     expect(filter.onClear).toHaveBeenCalled()
   })
 
+  it('closes the cluster dropdown on Escape', () => {
+    const filter = makeFilter({ isOpen: true })
+    render(<CardControlsRow clusterFilter={filter} />)
+    expect(screen.getByTestId('card-cluster-filter-dropdown')).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(filter.setIsOpen).toHaveBeenCalledWith(false)
+  })
+
+  it('closes the cluster dropdown on a mousedown outside the filter container', () => {
+    const filter = makeFilter({ isOpen: true })
+    render(
+      <>
+        <CardControlsRow clusterFilter={filter} />
+        <button type="button" data-testid="outside-target">outside</button>
+      </>,
+    )
+    fireEvent.mouseDown(screen.getByTestId('outside-target'))
+    expect(filter.setIsOpen).toHaveBeenCalledWith(false)
+  })
+
+  it('keeps the cluster dropdown open on a mousedown inside it', () => {
+    const filter = makeFilter({ isOpen: true })
+    render(<CardControlsRow clusterFilter={filter} />)
+    fireEvent.mouseDown(screen.getByTestId('card-cluster-filter-dropdown'))
+    expect(filter.setIsOpen).not.toHaveBeenCalled()
+  })
+
+  it('does not listen for dismissal while the dropdown is closed', () => {
+    const filter = makeFilter({ isOpen: false })
+    render(<CardControlsRow clusterFilter={filter} />)
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.mouseDown(document.body)
+    expect(filter.setIsOpen).not.toHaveBeenCalled()
+  })
+
+  it('still populates the caller-provided containerRef', () => {
+    const containerRef = { current: null as HTMLDivElement | null }
+    render(<CardControlsRow clusterFilter={makeFilter({ containerRef })} />)
+    expect(containerRef.current).toBeInstanceOf(HTMLDivElement)
+  })
+
   it('calls onLimitChange with a number and with "unlimited"', () => {
     const controls = makeControls({ limit: 10 })
     render(<CardControlsRow cardControls={controls} />)
