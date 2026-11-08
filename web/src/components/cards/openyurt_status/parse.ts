@@ -73,7 +73,8 @@ export function parseNodePool(item: CRItem): OpenYurtNodePool {
   const annotations = item.annotations ?? {}
 
   const rawType = (spec.type as string) ?? annotations['apps.openyurt.io/pool-type'] ?? 'edge'
-  const poolType: NodePoolType = KNOWN_POOL_TYPES.has(rawType) ? (rawType as NodePoolType) : 'edge'
+  const normalized = String(rawType).toLowerCase()
+  const poolType: NodePoolType = KNOWN_POOL_TYPES.has(normalized) ? (normalized as NodePoolType) : 'edge'
 
   const nodeCount = typeof status.readyNodeNum === 'number' && typeof status.unreadyNodeNum === 'number'
     ? status.readyNodeNum + status.unreadyNodeNum

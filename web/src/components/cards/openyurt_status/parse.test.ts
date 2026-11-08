@@ -191,6 +191,28 @@ describe('parseNodePool', () => {
     expect(np.type).toBe('edge')
   })
 
+  it('normalizes capitalized spec.type=Cloud to type cloud (OpenYurt API enum)', () => {
+    const np = parseNodePool(
+      base({
+        spec: { type: 'Cloud' },
+        status: { readyNodeNum: 2, unreadyNodeNum: 0 },
+      }),
+    )
+    expect(np.type).toBe('cloud')
+    expect(np.autonomyEnabled).toBe(false)
+  })
+
+  it('normalizes capitalized spec.type=Edge to type edge', () => {
+    const np = parseNodePool(
+      base({
+        spec: { type: 'Edge' },
+        status: { readyNodeNum: 2, unreadyNodeNum: 0 },
+      }),
+    )
+    expect(np.type).toBe('edge')
+    expect(np.autonomyEnabled).toBe(true)
+  })
+
   it('reads pool type from apps.openyurt.io/pool-type annotation when spec.type is absent', () => {
     const np = parseNodePool(
       base({ annotations: { 'apps.openyurt.io/pool-type': 'cloud' } }),
