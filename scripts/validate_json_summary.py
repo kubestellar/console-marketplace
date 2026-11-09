@@ -138,6 +138,15 @@ def _validate_registry_entries(
         item_id = item.get("id")
         item_type = item.get("type")
 
+        # A missing, `null` or non-string id would crash the regex guard
+        # below (and lists/objects are unhashable for `seen_ids`); report it
+        # as a registry error instead.
+        if not isinstance(item_id, str):
+            result.errors.append(
+                f"registry entry id must be a string, got {json.dumps(item_id)}"
+            )
+            continue
+
         if item_id in seen_ids:
             result.errors.append(f"duplicate registry id '{item_id}'")
         seen_ids.add(item_id)

@@ -2,6 +2,7 @@
 
 Extracted from scripts/validate_marketplace.py (see issue #670).
 """
+import json
 import os
 import re
 
@@ -254,8 +255,11 @@ _SAFE_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
 def is_safe_registry_id(item_id):
-    """Return True if `item_id` is safe to embed in a filesystem path."""
-    return bool(_SAFE_ID_RE.match(item_id))
+    """Return True if `item_id` is safe to embed in a filesystem path.
+
+    Non-string ids (JSON `null`, numbers, arrays, objects) are never safe.
+    """
+    return isinstance(item_id, str) and bool(_SAFE_ID_RE.match(item_id))
 
 
 def safe_repo_relative_path(base, rel_path):
@@ -335,6 +339,15 @@ def check_registry_consistency(base, results):
     for item in entries:
         item_id = item.get("id", "<no-id>")
         item_type = item.get("type", "<no-type>")
+
+        # An explicit JSON `null` or a non-string id bypasses the "<no-id>"
+        # default above; reject it before the duplicate check (lists/objects
+        # are unhashable) and before any path is built from it.
+        if not isinstance(item_id, str):
+            results.error("registry",
+                         f"Registry entry id must be a string, got "
+                         f"{json.dumps(item_id)}")
+            continue
 
         # Duplicate ID check
         if item_id in seen_ids:

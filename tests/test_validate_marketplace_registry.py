@@ -987,6 +987,37 @@ class TestRegistryConsistency:
         _mod_reg.check_registry_consistency(str(tmp_path), r)
         assert any("Duplicate id" in m for m in _messages(r.errors))
 
+    @pytest.mark.parametrize("bad_id", [None, 123, ["a"], {"k": "v"}])
+    def test_non_string_id_reported_not_crash(self, tmp_path, bad_id):
+        # `.get("id", "<no-id>")` only covers a missing key; an explicit JSON
+        # null / number used to reach `_SAFE_ID_RE.match` and raise
+        # TypeError (and a list/object id is unhashable for the dup check).
+        _write(
+            tmp_path / "registry.json",
+            {
+                "items": [
+                    {"id": bad_id, "type": "theme"},
+                    {"id": bad_id, "type": "theme"},
+                    {"id": "dark", "type": "theme"},
+                ]
+            },
+        )
+        _write(tmp_path / "themes" / "dark.json", {})
+        r = Results_reg()
+        _mod_reg.check_registry_consistency(str(tmp_path), r)
+        id_errors = [m for m in _messages(r.errors) if "id must be a string" in m]
+        assert len(id_errors) == 2
+        assert json.dumps(bad_id) in id_errors[0]
+        # The valid entry after the bad ones is still checked.
+        assert not any("dark" in m for m in _messages(r.errors))
+        assert any("Checked 3 registry entries" in m for m in _messages(r.passes))
+
+    @pytest.mark.parametrize("bad_id", [None, 123, ["a"], {"k": "v"}])
+    def test_is_safe_registry_id_rejects_non_string(self, bad_id):
+        from scripts.validate_marketplace_lib.checks_schema import is_safe_registry_id
+
+        assert is_safe_registry_id(bad_id) is False
+
     def test_download_url_path_missing(self, tmp_path):
         _write(
             tmp_path / "registry.json",
