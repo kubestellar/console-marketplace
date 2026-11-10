@@ -46,6 +46,18 @@ jobs:
       - name: Run shell unit tests
         run: bash scripts/test_apply-branch-protection.sh
 
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: Run node unit tests
+        # pytest does not collect tests/*.test.mjs, so this is the only CI job
+        # that runs them. The pattern is quoted so node's own --test glob
+        # expands it; a bare directory argument (`node --test tests/`) is
+        # resolved as a module path and fails.
+        run: node --test 'tests/**/*.test.mjs'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
