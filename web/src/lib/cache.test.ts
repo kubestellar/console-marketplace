@@ -1,3 +1,4 @@
+import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
@@ -113,7 +114,7 @@ describe('lib/cache module store', () => {
   })
 })
 
-describe('useCache (stub hook)', () => {
+describe('useCache ', () => {
   const baseOptions = {
     key: 'demo-key',
     fetcher: async () => 'live',
@@ -128,19 +129,19 @@ describe('useCache (stub hook)', () => {
   })
 
   it('returns initialData when no cached value exists for the key', () => {
-    const result = useCache<string>({ ...baseOptions })
-    expect(result.data).toBe('initial')
+    const { result } = renderHook(() => useCache<string>({ ...baseOptions }))
+    expect(result.current.data).toBe('initial')
   })
 
   it('returns the cached value when one is present under the key', () => {
     setCacheValue<string>(baseOptions.key, 'cached')
-    const result = useCache<string>({ ...baseOptions })
-    expect(result.data).toBe('cached')
+    const { result } = renderHook(() => useCache<string>({ ...baseOptions }))
+    expect(result.current.data).toBe('cached')
   })
 
   it('returns the fixed-shape stub flags expected by consumers', () => {
-    const result = useCache<string>({ ...baseOptions })
-    expect(result).toMatchObject({
+    const { result } = renderHook(() => useCache<string>({ ...baseOptions }))
+    expect(result.current).toMatchObject({
       isLoading: false,
       isRefreshing: false,
       isFailed: false,
@@ -148,11 +149,36 @@ describe('useCache (stub hook)', () => {
       consecutiveFailures: 0,
       lastRefresh: null,
     })
-    expect(typeof result.refetch).toBe('function')
+    expect(typeof result.current.refetch).toBe('function')
   })
 
-  it('refetch resolves without throwing (stub is a no-op)', async () => {
-    const result = useCache<string>({ ...baseOptions })
-    await expect(result.refetch()).resolves.toBeUndefined()
+  it('refetch resolves without throwing (live off is a no-op)', async () => {
+    const { result } = renderHook(() => useCache<string>({ ...baseOptions }))
+    await expect(result.current.refetch()).resolves.toBeUndefined()
+  })
+
+  it('does not call fetcher when live is off', () => {
+    const fetcher = vi.fn(async () => 'live')
+    renderHook(() => useCache<string>({ ...baseOptions, fetcher }))
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+
+  it('invokes fetcher and surfaces its data when live is on', async () => {
+    const fetcher = vi.fn(async () => 'live')
+    const { result } = renderHook(() => useCache<string>({ ...baseOptions, fetcher, live: true }))
+    await waitFor(() => expect(result.current.data).toBe('live'))
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(result.current.lastRefresh).not.toBeNull()
+
+    fetcher.mockResolvedValueOnce('refreshed')
+    await result.current.refetch()
+    await waitFor(() => expect(result.current.data).toBe('refreshed'))
+  })
+
+  it('counts failures when the live fetcher rejects', async () => {
+    const fetcher = vi.fn(async () => { throw new Error('boom') })
+    const { result } = renderHook(() => useCache<string>({ ...baseOptions, fetcher, live: true }))
+    await waitFor(() => expect(result.current.isFailed).toBe(true))
+    expect(result.current.data).toBe('initial')
   })
 })

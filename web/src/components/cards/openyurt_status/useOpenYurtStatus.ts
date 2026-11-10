@@ -7,6 +7,9 @@ export type { OpenYurtStatus, OpenYurtFetchError }
 
 const CACHE_KEY = 'openyurt-status'
 
+// Live fetching is opt-in; when off the card keeps its initialData/demo behaviour.
+const LIVE_FETCH_ENABLED = import.meta.env.VITE_OPENYURT_LIVE_FETCH === 'true'
+
 export type UseOpenYurtStatusResult = UseCacheResult<OpenYurtStatus>
 
 export function useOpenYurtStatus(cluster?: string): UseOpenYurtStatusResult {
@@ -26,6 +29,7 @@ export function useOpenYurtStatus(cluster?: string): UseOpenYurtStatusResult {
     initialData: INITIAL_DATA,
     category: 'default',
     persist: true,
+    live: LIVE_FETCH_ENABLED,
     demoWhenEmpty: true,
   })
 
