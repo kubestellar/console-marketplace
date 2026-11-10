@@ -181,4 +181,58 @@ describe('useCache ', () => {
     await waitFor(() => expect(result.current.isFailed).toBe(true))
     expect(result.current.data).toBe('initial')
   })
+
+  it('skips cache and state updates when unmounted before the fetcher resolves', async () => {
+    let resolveFetch: (value: string) => void = () => {}
+    const fetcher = vi.fn(
+      () => new Promise<string>(resolve => { resolveFetch = resolve }),
+    )
+    const { unmount } = renderHook(() =>
+      useCache<string>({ ...baseOptions, fetcher, live: true }),
+    )
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    unmount()
+    resolveFetch('late')
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    // The unmounted guard returns before setCacheValue, so nothing is cached.
+    expect(getCacheValue<string>(baseOptions.key)).toBeUndefined()
+  })
+
+  it('skips failure bookkeeping when unmounted before the fetcher rejects', async () => {
+    let rejectFetch: (error: Error) => void = () => {}
+    const fetcher = vi.fn(
+      () => new Promise<string>((_resolve, reject) => { rejectFetch = reject }),
+    )
+    const { unmount } = renderHook(() =>
+      useCache<string>({ ...baseOptions, fetcher, live: true }),
+    )
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    unmount()
+    rejectFetch(new Error('late failure'))
+    // Settling after unmount must not throw or leak a state update; this
+    // exercises the unmounted arms of the catch/finally guards.
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores a live value fetched under a previous key after the key changes', async () => {
+    const fetcher = vi.fn(async () => 'live')
+    const { result, rerender } = renderHook(
+      ({ key }: { key: string }) => useCache<string>({ ...baseOptions, key, fetcher, live: true }),
+      { initialProps: { key: 'first-key' } },
+    )
+    await waitFor(() => expect(result.current.data).toBe('live'))
+
+    rerender({ key: 'second-key' })
+
+    // fetched.key ('first-key') !== 'second-key', so the stale live value is
+    // ignored and data falls back to cache/initialData for the new key.
+    expect(result.current.data).toBe('initial')
+
+    // Let the refetch for the new key settle to avoid act() warnings.
+    await waitFor(() => expect(result.current.data).toBe('live'))
+  })
 })
