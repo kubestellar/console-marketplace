@@ -181,6 +181,24 @@ class TestRegistryEntryConsistency:
         )
         assert not any("no matching file" in e for e in result.errors)
 
+    @pytest.mark.parametrize("bad_id", [None, 123, ["a"], {"k": "v"}])
+    def test_non_string_id_records_error_not_crash(self, tmp_path, bad_id):
+        # A missing/null/non-string id used to raise TypeError from the
+        # `is_safe_registry_id` regex (or from the unhashable `seen_ids`
+        # lookup) instead of being reported as a registry error.
+        registry = {
+            "items": [
+                {"id": bad_id, "type": "theme"},
+                {"id": bad_id, "type": "theme"},
+            ],
+            "presets": [],
+        }
+        root = _make_repo(tmp_path, registry)
+        result = _mod.run_validation(root)
+        id_errors = [e for e in result.errors if "id must be a string" in e]
+        assert len(id_errors) == 2
+        assert json.dumps(bad_id) in id_errors[0]
+
     def test_download_url_path_mismatch_records_error(self, tmp_path):
         registry = {
             "items": [

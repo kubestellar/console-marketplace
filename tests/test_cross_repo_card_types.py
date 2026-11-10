@@ -4,6 +4,10 @@ Covers the following validators:
 - check_card_type_existence: validates that referenced card types exist in console
 - check_demo_data: ensures demo data is present for known card types
 """
+import shutil
+
+import pytest
+
 from .conftest_cross_repo import _make_console, _make_marketplace, _messages, _mod
 
 
@@ -103,6 +107,25 @@ class TestCheckDemoData:
         _mod.check_demo_data(str(base), str(console), {"ghost_card"}, r)
         assert not r.warnings
         assert not r.passes
+
+    @pytest.mark.parametrize("ext", [".tsx", ".ts"])
+    def test_single_file_component_gets_explicit_skip(self, tmp_path, ext):
+        # `./PodIssues` resolving to a single `PodIssues.tsx` (no component
+        # directory) used to produce neither ok nor warn — invisible.
+        console = _make_console(tmp_path, card_types=["pod_issues"])
+        cards_dir = console / "web/src/components/cards"
+        shutil.rmtree(cards_dir / "PodIssues")
+        (cards_dir / f"PodIssues{ext}").write_text("// single-file card\n")
+        base = _make_marketplace(tmp_path)
+        r = _mod.Results()
+        _mod.check_demo_data(str(base), str(console), {"pod_issues"}, r)
+        notes = [m for c, m in r.info if c == "demo-data"]
+        assert len(notes) == 1
+        assert "pod_issues" in notes[0] and "single-file" in notes[0]
+        assert f"PodIssues{ext}" in notes[0]
+        # Non-gating: a single-file card must not flip the exit code.
+        assert not r.warnings
+        assert not r.errors
 
 
 class TestCheckDemoDataMissingRegistryCoverage:

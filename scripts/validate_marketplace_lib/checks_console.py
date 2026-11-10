@@ -100,13 +100,25 @@ def check_demo_data(base, console_path, known_types, results):
             os.path.join(comp_dir, "demoData.tsx"),
         ]
 
-        # Also check if it's a single file (not directory)
         if os.path.isdir(comp_dir):
             if any(os.path.isfile(df) for df in demo_files):
                 results.ok("demo-data", f"`{ct}` has demoData.ts")
             else:
                 results.warn("demo-data", f"`{ct}` ({comp_name}) missing demoData.ts "
                             f"in {os.path.relpath(comp_dir, console_path)}")
+            continue
+
+        # Single-file component (e.g. "./PodIssues" -> PodIssues.tsx): there
+        # is no component directory to hold a demoData.ts sidecar, so record
+        # an explicit non-gating skip instead of emitting nothing.
+        single_file = next(
+            (comp_dir + ext for ext in (".tsx", ".ts") if os.path.isfile(comp_dir + ext)),
+            None,
+        )
+        if single_file:
+            results.note("demo-data", f"`{ct}` ({comp_name}) is a single-file component "
+                        f"({os.path.relpath(single_file, console_path)}); no demoData.ts "
+                        f"sidecar to check — skipped")
 
 
 def _check_component_wiring(base, console_path, known_types, results, *,
