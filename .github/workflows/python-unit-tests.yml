@@ -51,12 +51,16 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run node unit tests
+      - name: Run node unit tests with coverage
         # pytest does not collect tests/*.test.mjs, so this is the only CI job
         # that runs them. The pattern is quoted so node's own --test glob
         # expands it; a bare directory argument (`node --test tests/`) is
         # resolved as a module path and fails.
-        run: node --test 'tests/**/*.test.mjs'
+        #
+        # Informational-only (no --fail-under gate): jscpd-ratchet.mjs's main()
+        # CLI wiring is deliberately untested per #1057, so a 100% threshold
+        # would permanently fail. The report still surfaces new untested code.
+        run: node --experimental-test-coverage --test 'tests/**/*.test.mjs'
 
       - name: Install dependencies
         run: |
