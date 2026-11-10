@@ -30,33 +30,46 @@ export function evaluateRatchet(clones, baselineClones) {
   return { exitCode: 0, lines };
 }
 
-function main() {
-  const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
-  const outDir = mkdtempSync(join(tmpdir(), 'jscpd-'));
+// Runs jscpd and returns the same {exitCode, lines} shape as evaluateRatchet,
+// with fs/child_process calls injectable so the file I/O, subprocess, and
+// temp-dir cleanup glue (previously untested anywhere - see #1044) can be
+// unit-tested without shelling out to npx/jscpd.
+export function runRatchet({
+  spawnSync: spawnSyncFn = spawnSync,
+  readFileSync: readFileSyncFn = readFileSync,
+  mkdtempSync: mkdtempSyncFn = mkdtempSync,
+  rmSync: rmSyncFn = rmSync,
+} = {}) {
+  const baseline = JSON.parse(readFileSyncFn(baselinePath, 'utf8'));
+  const outDir = mkdtempSyncFn(join(tmpdir(), 'jscpd-'));
 
   try {
-    const run = spawnSync(
+    const run = spawnSyncFn(
       'npx',
       ['--yes', 'jscpd', '--config', '.jscpd.json', '--reporters', 'console,json', '--output', outDir],
       { stdio: 'inherit' },
     );
     if (run.error) throw run.error;
 
-    const report = JSON.parse(readFileSync(join(outDir, 'jscpd-report.json'), 'utf8'));
+    const report = JSON.parse(readFileSyncFn(join(outDir, 'jscpd-report.json'), 'utf8'));
     const clones = report.statistics.total.clones;
 
-    const { exitCode, lines } = evaluateRatchet(clones, baseline.clones);
-    for (const line of lines) {
-      if (exitCode !== 0 && line.startsWith('::error::')) {
-        console.error(line);
-      } else {
-        console.log(line);
-      }
-    }
-    if (exitCode !== 0) process.exit(exitCode);
+    return evaluateRatchet(clones, baseline.clones);
   } finally {
-    rmSync(outDir, { recursive: true, force: true });
+    rmSyncFn(outDir, { recursive: true, force: true });
   }
+}
+
+function main() {
+  const { exitCode, lines } = runRatchet();
+  for (const line of lines) {
+    if (exitCode !== 0 && line.startsWith('::error::')) {
+      console.error(line);
+    } else {
+      console.log(line);
+    }
+  }
+  if (exitCode !== 0) process.exit(exitCode);
 }
 
 // Only run the CLI when executed directly (`node scripts/jscpd-ratchet.mjs`),
